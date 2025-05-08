@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calistenia PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* bg-gray-900 Tailwind equivalent */
+            color: #e2e8f0; /* text-gray-200 Tailwind equivalent */
+        }
+        .font-archivo-black { font-family: 'Archivo Black', sans-serif; }
+        .force-hidden { display: none !important; }
+        /* Styles for the circular SVG timer */
+        .progress-ring__circle--background {
+            stroke: #4a5568; /* Tailwind text-gray-600 */
+        }
+        .progress-ring__circle--progress {
+            stroke: #63b3ed; /* Tailwind text-blue-400 */
+            stroke-linecap: round;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.3s linear;
+        }
+        /* Custom scrollbar for specific containers */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #2d3748; /* Tailwind bg-gray-800 */
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #4a5568; /* Tailwind bg-gray-600 */
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #718096; /* Tailwind bg-gray-500 */
+        }
+        /* Toast notification styles */
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2d3748; /* Tailwind bg-gray-800 */
+            color: #e2e8f0; /* Tailwind text-gray-200 */
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out, bottom 0.3s ease-in-out;
+            font-size: 0.9rem;
+            pointer-events: none; /* So it doesn't interfere with clicks */
+        }
+        #toast.show {
+            opacity: 1;
+            bottom: 30px;
+        }
+        .star-rating .star {
+            color: #4a5568; /* text-gray-600 for empty star */
+            cursor: default;
+            font-size: 1.5rem; /* Adjust star size */
+            margin: 0 1px;
+        }
+        .star-rating .star.filled {
+            color: #facc15; /* text-yellow-400 for filled star (Tailwind yellow-400) */
+        }
+        .star-rating .star.bonus { /* For the 4th star if you implement it as visually distinct */
+            color: #4ade80; /* text-green-400 for bonus star (Tailwind green-400) */
+        }
+    </style>
+    <script>
+        // Tailwind config (optional, as direct classes are used)
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'archivo-black': ['Archivo Black', 'sans-serif'],
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="text-gray-200 bg-custom-gray-dark min-h-screen flex flex-col items-center">
+
+    <div id="appContainer" class="w-full max-w-lg mx-auto flex-grow flex flex-col">
+
+        <div id="homeScreen" class="flex-grow flex flex-col">
+            <header class="sticky top-0 z-50 bg-black w-full py-4 px-6 shadow-md">
+                <h1 class="font-archivo-black text-3xl text-center">
+                    <span style="color: #7b8080;">CALISTENIA</span><span style="color: #ffffff;">PRO</span>
+                </h1>
+            </header>
+            <main class="flex-grow flex flex-col items-center justify-center p-6 space-y-8">
+                <h2 class="text-2xl font-inter font-bold text-gray-200">Escolha seu nível</h2>
+                <div class="w-full space-y-4">
+                    <button id="levelAvancado" data-level="avancado" class="level-btn w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition-colors duration-150 text-xl">
+                        Avançado
+                        <span class="block text-sm font-normal text-red-200">(10+ barras e 15+ dips)</span>
+                    </button>
+                    <button id="levelIntermediario" data-level="intermediario" class="level-btn w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition-colors duration-150 text-xl">
+                        Intermediário
+                        <span class="block text-sm font-normal text-blue-200">(3 pull ups e 3 dips)</span>
+                    </button>
+                    <button id="levelIniciante" data-level="iniciante" class="level-btn w-full bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition-colors duration-150 text-xl">
+                        Iniciante
+                        <span class="block text-sm font-normal text-green-200">(0 pull ups e 0 push ups)</span>
+                    </button>
+                </div>
+            </main>
+        </div>
+
+        <div id="workoutListScreen" class="hidden flex-grow flex flex-col">
+            <header class="sticky top-0 z-50 bg-gray-800 w-full py-4 px-6 shadow-md flex items-center">
+                <button id="backToHomeFromList" class="text-gray-300 hover:text-white mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h1 id="workoutListTitle" class="font-inter text-xl font-bold text-gray-200"></h1>
+            </header>
+            <main id="workoutListContainer" class="flex-grow p-6 space-y-3 overflow-y-auto custom-scrollbar">
+                </main>
+        </div>
+
+        <div id="workoutExecutionScreen" class="hidden flex-grow flex flex-col">
+            <header class="sticky top-0 z-50 bg-gray-800 w-full py-4 px-6 shadow-md flex items-center">
+                <button id="backToListFromExecution" class="text-gray-300 hover:text-white mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h1 id="workoutExecutionTitle" class="font-inter text-lg font-bold text-gray-200 truncate"></h1>
+            </header>
+            <main id="exerciseContainer" class="flex-grow p-4 md:p-6 flex flex-col items-center space-y-4 overflow-y-auto custom-scrollbar">
+                <div class="exercise-card bg-gray-700 p-4 rounded-lg shadow-lg w-full max-w-md">
+                    <h2 id="exerciseName" class="text-xl font-bold text-center text-gray-100 mb-2">Nome do Exercício</h2>
+                    <p id="seriesProgress" class="text-sm text-gray-400 text-center mb-3">Série 1 de 4</p>
+
+                    <div id="mediaDisplayArea" class="aspect-w-16 aspect-h-9 bg-gray-700 mb-3 rounded overflow-hidden relative">
+                        <div id="videoPlayerContainer" class="w-full h-full">
+                            <iframe id="exerciseVideo" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+                            <div id="videoPlaceholder" class="w-full h-full flex items-center justify-center bg-gray-600 text-gray-400 hidden">Vídeo indisponível</div>
+                        </div>
+                        <div id="circularTimerWrapper" class="force-hidden absolute inset-0 w-full h-full flex flex-col items-center justify-center p-4 bg-gray-700">
+                            <svg id="circularTimerSVG" class="w-32 h-32 md:w-40 md:h-40 mb-2" viewBox="0 0 100 100">
+                                <circle class="progress-ring__circle--background" stroke-width="8" fill="transparent" r="45" cx="50" cy="50"/>
+                                <circle id="progressRing" class="progress-ring__circle--progress" stroke-width="8" fill="transparent" r="45" cx="50" cy="50"/>
+                            </svg>
+                            <div id="timerText" class="text-3xl md:text-4xl font-bold text-gray-100 mb-3">00:00</div>
+                            <div class="flex space-x-3">
+                                <button id="pauseTimerBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded text-sm">Pausar</button>
+                                <button id="skipRestBtn" class="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded text-sm">Pular</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exercise-details-info bg-gray-800 p-3 rounded mb-4 text-center">
+                        <p id="targetRepsInfo" class="text-gray-300">Repetições Alvo: </p>
+                    </div>
+
+                    <div id="seriesInputArea" class="mb-4 space-y-2">
+                        <label for="repsInput" class="block text-sm font-medium text-gray-300">Quantas reps/tempo você fez nesta série? (Opcional)</label>
+                        <input type="text" id="repsInput" class="bg-gray-800 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Ex: 10, 30s, etc.">
+                    </div>
+
+                    <div class="flex flex-col items-center space-y-2">
+                        <button id="completeSeriesBtn" class="w-full max-w-xs bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-150">Concluir Série</button>
+                        <button id="skipExerciseBtn" class="w-full max-w-xs bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-150">Pular Exercício Atual</button>
+                        <button id="finishWorkoutBtn" class="hidden w-full max-w-xs bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-150 mt-3">Finalizar Treino</button>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div id="summaryScreen" class="hidden flex-grow flex flex-col">
+            <header class="sticky top-0 z-50 bg-gray-800 w-full py-4 px-6 shadow-md flex items-center">
+                 <button id="backToHomeFromSummary" class="text-gray-300 hover:text-white mr-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+                <h1 id="summaryScreenTitle" class="font-inter text-xl font-bold text-gray-200">Resumo do Treino</h1>
+            </header>
+            <main class="flex-grow p-4 md:p-6 space-y-6 overflow-y-auto custom-scrollbar">
+                <div id="workoutSummaryContentContainer" class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <h2 class="text-lg font-bold text-gray-100 mb-1">Detalhes do Treino</h2>
+                    <p class="text-sm text-gray-300"><strong>Aluno:</strong> Usuário PRO</p>
+                    <p id="summaryDate" class="text-sm text-gray-300"><strong>Data:</strong> </p>
+                    <p id="summaryLevel" class="text-sm text-gray-300"><strong>Nível:</strong> </p>
+                    <p id="summaryWorkoutName" class="text-sm text-gray-300 mb-3"><strong>Treino:</strong> </p>
+                    <hr class="border-gray-600 my-3">
+                    <div id="summaryExercisesList" class="space-y-4">
+                        </div>
+                </div>
+
+                <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-lg">
+                    <h2 class="text-lg font-bold text-gray-100 mb-2">Estatísticas Gerais</h2>
+                    <p id="totalRepsStat" class="text-sm text-gray-300"><strong>Total de Repetições (numéricas):</strong> 0</p>
+                    <p id="exercisesTrackedStat" class="text-sm text-gray-300"><strong>Exercícios Registrados:</strong> 0 de 0</p>
+                    <p class="text-sm text-gray-300"><strong>Progresso Total:</strong> <span class="text-yellow-400">Em breve!</span></p>
+                </div>
+
+                <div class="text-center mt-4">
+                    <p class="text-gray-400 italic">"A dor que você sente hoje será a força que você sentirá amanhã."</p>
+                </div>
+                 <button id="backToHomeFromSummaryBottom" class="w-full max-w-xs mx-auto mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-150">Voltar para o Início</button>
+            </main>
+        </div>
+    </div>
+
+    <div id="toast" class=""></div>
+
+    <script src="script.js"></script> </body>
+</html>
