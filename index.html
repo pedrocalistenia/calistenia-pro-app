@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Estilos CSS (Modo Escuro, Timer, etc. - Mantidos da v14) */
+        /* Estilos CSS (Modo Escuro, Timer, etc. - Mantidos) */
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior-y: contain;
@@ -370,6 +370,7 @@
         let restTimerSeconds = 0;
         let totalRestDuration = 0; 
         let restTimerRunning = false;
+        let workoutStartTime = null; 
 
         const Screens = {
             HOME: 'homeScreen',
@@ -459,12 +460,23 @@
                 fixedHeaderElement.classList.remove('hidden');
                 let headerTitleText = `CALISTENIA <span class="pro-text-header">PRO</span>`; 
                 
+                let displayLevelName = selectedLevel;
+                if (selectedLevel === 'avancado') {
+                    displayLevelName = 'Avançado';
+                } else if (selectedLevel === 'intermediario') {
+                     displayLevelName = 'Intermediário';
+                } else if (selectedLevel === 'iniciante') {
+                     displayLevelName = 'Iniciante';
+                } else {
+                     displayLevelName = selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1); 
+                }
+
                 if (screenId === Screens.WORKOUT_EXECUTION || screenId === Screens.SUMMARY) {
                     if (selectedWorkoutName && selectedLevel) {
-                        headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">${selectedWorkoutName} <span class="text-lg font-normal">(${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)})</span></span>`;
+                        headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">${selectedWorkoutName} <span class="text-lg font-normal">(${displayLevelName})</span></span>`;
                     }
                 } else if (screenId === Screens.WORKOUT_LIST && selectedLevel) {
-                     headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">Nível ${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)}</span>`;
+                     headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">Nível ${displayLevelName}</span>`;
                 }
                 
                 let h1InHeader = fixedHeaderElement.querySelector('h1');
@@ -485,6 +497,7 @@
             currentExerciseIndex = 0;
             currentSeriesNumber = 1;
             performanceData = [];
+            workoutStartTime = null; 
 
             if (completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
             if (circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden'); 
@@ -539,6 +552,7 @@
             currentSeriesNumber = 1;
             performanceData = [];
             selectedWorkoutName = ''; 
+            workoutStartTime = null; 
             if (completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
             if (circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden'); 
             if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
@@ -552,16 +566,14 @@
         async function loadWorkout(workoutName) { 
             console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel}`); 
             selectedWorkoutName = workoutName;
+            workoutStartTime = Date.now(); 
             
-            // #############################################################
-            // # URL DO SCRIPT INSERIDA                                    #
-            // #############################################################
             const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec"; 
-            // #############################################################
 
             if (SCRIPT_URL === "COLE_A_URL_DO_SEU_SCRIPT_IMPLANTADO_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
                 showToast("Erro: URL do Script inválida ou não configurada.", 5000);
                 console.error("URL do Script inválida ou não configurada:", SCRIPT_URL);
+                workoutStartTime = null; 
                 return; 
             }
             
@@ -593,8 +605,8 @@
                     exerciseId: ex.exercise_id, 
                     exerciseName: ex.exercise_name,
                     seriesTargetCount: parseInt(ex.series) || 0, 
-                    repsTargetString: ex.reps, 
-                    restTimeString: ex.rest, 
+                    repsTargetString: String(ex.reps), 
+                    restTimeString: String(ex.rest), 
                     embedUrl: ex.embed_url, 
                     loadInfo: ex.load, 
                     seriesDone: [] 
@@ -608,12 +620,14 @@
                     if(finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden'); 
                 } else {
                     showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}).`);
+                    workoutStartTime = null; 
                 }
 
             } catch (error) {
                 hideLoadingIndicator(); 
                 console.error("Erro ao carregar treino:", error);
                 showToast(`Erro ao carregar: ${error.message}`, 5000);
+                workoutStartTime = null; 
             }
         }
         
@@ -695,7 +709,7 @@
             if(seriesInputAreaElement) seriesInputAreaElement.classList.add('hidden'); 
 
             const restTimeString = currentExercisePerformance.restTimeString; 
-            totalRestDuration = parseInt(restTimeString) || 60; 
+            totalRestDuration = parseRestTime(restTimeString); 
             
             startRestTimer(totalRestDuration); 
         }
@@ -754,7 +768,7 @@
             }
         }
 
-        // --- LÓGICA DE PONTUAÇÃO DE ESTRELAS ---
+        // --- LÓGICA DE PONTUAÇÃO DE ESTRELAS (NOVA LÓGICA v19) ---
         function parseRepsTarget(repsString) {
             if (!repsString || typeof repsString !== 'string') return { type: 'invalid' };
 
@@ -785,7 +799,7 @@
             const parsedTarget = parseRepsTarget(targetStr);
 
             if (parsedTarget.type !== 'range' && parsedTarget.type !== 'fixed') {
-                return 0; 
+                return 0; // Não calcula para AMRAP, Hold, etc.
             }
 
             let totalRepsDoneNum = 0;
@@ -804,25 +818,24 @@
                  return 0; 
             }
 
-
             if (numericSeriesCount === 0) return 0; 
 
             const avgRepsDonePerSeries = totalRepsDoneNum / numericSeriesCount;
 
             if (parsedTarget.type === 'range') {
                 const { min, max } = parsedTarget;
-                const avgTarget = (min + max) / 2;
-                if (avgRepsDonePerSeries > max) return 4; 
-                if (avgRepsDonePerSeries >= avgTarget) return 3; 
-                if (avgRepsDonePerSeries >= min) return 2;
-                if (avgRepsDonePerSeries > 0 && avgRepsDonePerSeries < min) return 1;
-                return 0;
+                if (avgRepsDonePerSeries > max) return 4; // Bônus: Acima do máximo
+                if (avgRepsDonePerSeries === max) return 3; // 3 Estrelas: Exatamente o máximo
+                if (avgRepsDonePerSeries >= min) return 2; // 2 Estrelas: Igual ou acima do mínimo (mas abaixo do máximo)
+                if (avgRepsDonePerSeries < min) return 1; // 1 Estrela: Abaixo do mínimo
+                return 0; 
             } else if (parsedTarget.type === 'fixed') {
                 const targetVal = parsedTarget.value;
-                if (avgRepsDonePerSeries > targetVal) return 4; 
-                if (avgRepsDonePerSeries === targetVal) return 3;
+                if (avgRepsDonePerSeries > targetVal) return 4; // Bônus: Acima do alvo
+                if (avgRepsDonePerSeries === targetVal) return 3; // 3 Estrelas: Exatamente o alvo
+                // Para alvo fixo, 2 estrelas se >= 75% e < 100% ; 1 estrela se < 75%
                 if (avgRepsDonePerSeries >= targetVal * 0.75) return 2; 
-                if (avgRepsDonePerSeries > 0 && avgRepsDonePerSeries < targetVal * 0.75) return 1;
+                if (avgRepsDonePerSeries < targetVal * 0.75) return 1; 
                 return 0;
             }
             return 0;
@@ -832,7 +845,8 @@
             let starsHtml = '';
             const totalDisplayStars = 3; 
             for (let i = 1; i <= totalDisplayStars; i++) {
-                starsHtml += `<span class="${i <= starCount ? '' : 'empty-star'}">★</span>`;
+                // Se for 4 estrelas (bônus), preenche as 3 normais
+                starsHtml += `<span class="${i <= starCount || starCount === 4 ? '' : 'empty-star'}">★</span>`;
             }
             if (starCount === 4) { 
                 starsHtml += `<span class="bonus-star">⭐</span>`;
@@ -843,8 +857,10 @@
 
         function finishWorkout() {
             userProgressData = []; 
-            const studentName = "Aluno Calistenia PRO"; 
+            const studentName = "Fulano"; // Nome alterado para Fulano
             const date = new Date().toLocaleDateString('pt-BR');
+            const workoutEndTime = Date.now(); 
+            const workoutDurationMs = workoutStartTime ? workoutEndTime - workoutStartTime : 0; 
 
             performanceData.forEach(exercisePerf => {
                 exercisePerf.stars = calculateExerciseStars(exercisePerf);
@@ -867,21 +883,27 @@
             console.log("Performance Data com Estrelas:", performanceData); 
             showToast(`Resumo do ${selectedWorkoutName} gerado! (Dados "enviados")`);
             
-            displaySummary();
+            displaySummary(workoutDurationMs); 
             showScreen(Screens.SUMMARY);
         }
 
-        function displaySummary() {
+        function displaySummary(durationMs = 0) { 
             if (!summaryContentElement || !statsDivElement || !motivationalMessageElement) {
                  console.error("Elementos da tela de resumo não encontrados.");
                  return;
             }
-            const studentInfo = userProgressData.length > 0 ? userProgressData[0] : { studentName: 'N/A', date: 'N/A' };
+            const studentName = "Fulano"; 
+            const date = new Date().toLocaleDateString('pt-BR');
+            let displayLevelName = selectedLevel; // Ajusta nome do nível para exibição
+             if (selectedLevel === 'avancado') displayLevelName = 'Avançado';
+             else if (selectedLevel === 'intermediario') displayLevelName = 'Intermediário';
+             else if (selectedLevel === 'iniciante') displayLevelName = 'Iniciante';
+             else displayLevelName = selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1);
 
             summaryContentElement.innerHTML = `
-                <p><strong>Aluno:</strong> ${studentInfo.studentName}</p>
-                <p><strong>Data:</strong> ${studentInfo.date}</p>
-                <p><strong>Nível:</strong> ${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)}</p>
+                <p><strong>Aluno:</strong> ${studentName}</p>
+                <p><strong>Data:</strong> ${date}</p>
+                <p><strong>Nível:</strong> ${displayLevelName}</p> 
                 <p><strong>Treino:</strong> ${selectedWorkoutName}</p>
                 <hr class="my-3 border-gray-600"> <h4 class="font-semibold mb-2 text-xl text-gray-200" style="font-family: 'Inter', sans-serif;">Desempenho Detalhado:</h4>
             `;
@@ -920,17 +942,54 @@
                 }
             });
 
+            const durationSeconds = Math.floor(durationMs / 1000);
+            const durationFormatted = formatTime(durationSeconds);
+
             statsDivElement.innerHTML = `
                 <h3 class="text-xl font-semibold mb-2 text-blue-400" style="font-family: 'Inter', sans-serif;">Estatísticas Gerais</h3>
+                <p><strong>Tempo Total de Treino:</strong> ${durationFormatted}</p> 
                 <p><strong>Total de Repetições (numéricas):</strong> ${totalRepsOverall > 0 ? totalRepsOverall : (userProgressData.some(e => !isNaN(parseInt(e.repsDone))) ? totalRepsOverall : "N/A")}</p>
                 <p><strong>Exercícios Registrados:</strong> ${performanceData.filter(ex => ex.seriesDone.length > 0).length}</p>
                 <p><strong>Progresso (vs último):</strong> <span class="text-gray-500">Comparação não implementada.</span></p>
             `;
             
-            motivationalMessageElement.textContent = `Parabéns, ${studentInfo.studentName}! Você mandou bem no ${selectedWorkoutName}! Continue focado(a)!`;
+            motivationalMessageElement.textContent = `Parabéns, ${studentName}! Você mandou bem no ${selectedWorkoutName}! Continue focado(a)!`;
         }
 
         // --- TIMERS ---
+        function parseRestTime(restString) {
+            if (!restString || typeof restString !== 'string') return 60; 
+
+            restString = restString.trim();
+            
+            const rangeMatch = restString.match(/^(\d+)\s*'\s*-\s*(\d+)\s*'/);
+            if (rangeMatch) {
+                const minSeconds = parseInt(rangeMatch[1]) * 60;
+                const maxSeconds = parseInt(rangeMatch[2]) * 60;
+                return Math.round((minSeconds + maxSeconds) / 2);
+            }
+
+             const rangeMatchSecMin = restString.match(/^(\d+)\s*"\s*-\s*(\d+)\s*'/);
+             if (rangeMatchSecMin) {
+                 const minSeconds = parseInt(rangeMatchSecMin[1]);
+                 const maxSeconds = parseInt(rangeMatchSecMin[2]) * 60;
+                 return Math.round((minSeconds + maxSeconds) / 2);
+             }
+
+            const minMatch = restString.match(/^(\d+)\s*'/);
+            if (minMatch) {
+                return parseInt(minMatch[1]) * 60;
+            }
+
+            const secMatch = restString.match(/^(\d+)/); 
+            if (secMatch) {
+                return parseInt(secMatch[1]);
+            }
+
+            return 60; 
+        }
+
+
         function formatTime(totalSeconds) {
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
@@ -1038,3 +1097,10 @@
 </body>
 </html>
 ```
+
+**O que fazer agora:**
+
+1.  **Salve este código** como seu arquivo `index.html`.
+2.  **Faça o upload para o GitHub**, substituindo o arquivo anterior.
+3.  **Aguarde a atualização** do GitHub Pages.
+4.  **Teste** o aplicativo no link público, limpando o cache do navegador. Verifique se a nova lógica de estrelas está funcionando e se o tempo total do treino aparece no resu
