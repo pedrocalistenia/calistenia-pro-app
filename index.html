@@ -5,219 +5,1036 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calistenia PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* Estilos CSS (Modo Escuro, Timer, etc. - Mantidos da v14) */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* bg-gray-900 Tailwind equivalent */
-            color: #e2e8f0; /* text-gray-200 Tailwind equivalent */
+            overscroll-behavior-y: contain;
+            background-color: #1a202c; /* bg-gray-900 */
+            color: #e2e8f0; /* text-gray-200 */
         }
-        .font-archivo-black { font-family: 'Archivo Black', sans-serif; }
-        .force-hidden { display: none !important; }
-        /* Styles for the circular SVG timer */
-        .progress-ring__circle--background {
-            stroke: #4a5568; /* Tailwind text-gray-600 */
+        #appContainer {
+            background-color: #2d3748; /* bg-gray-800 */
+            color: #e2e8f0;
         }
-        .progress-ring__circle--progress {
-            stroke: #63b3ed; /* Tailwind text-blue-400 */
-            stroke-linecap: round;
-            transform: rotate(-90deg);
-            transform-origin: 50% 50%;
-            transition: stroke-dashoffset 0.3s linear;
+        .app-header {
+            background-color: #000000; 
+            color: #7b8080; 
+            padding: 1rem; 
+            text-align: center;
+            border-top-left-radius: 0.5rem; 
+            border-top-right-radius: 0.5rem; 
         }
-        /* Custom scrollbar for specific containers */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 8px;
+        .app-header h1 {
+            font-family: 'Archivo Black', sans-serif; 
+            font-size: 1.875rem; 
+            font-weight: 400; 
+            letter-spacing: 0.025em; 
+            text-transform: uppercase; 
         }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #2d3748; /* Tailwind bg-gray-800 */
+        .pro-text-header { 
+            font-weight: 400; 
+            color: #FFFFFF; 
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #4a5568; /* Tailwind bg-gray-600 */
-            border-radius: 4px;
+        ::-webkit-scrollbar {
+            width: 6px;
         }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #718096; /* Tailwind bg-gray-500 */
+        ::-webkit-scrollbar-track {
+            background: #2d3748;
+            border-radius: 10px;
         }
-        /* Toast notification styles */
-        #toast {
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+        .action-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .action-button:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .media-display-area { 
+            display: flex; 
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            aspect-ratio: 16 / 9; 
+            border-radius: 0.5rem;
+            background-color: #4a5568; 
+            margin-bottom: 1rem; 
+            overflow: hidden; 
+        }
+        .video-container, #circularTimerWrapper {
+             width: 100%;
+             height: 100%;
+             flex-shrink: 0; 
+        }
+        .video-container {
+            position: relative; 
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        .toast {
             position: fixed;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #2d3748; /* Tailwind bg-gray-800 */
-            color: #e2e8f0; /* Tailwind text-gray-200 */
-            padding: 12px 20px;
+            padding: 12px 24px;
+            background-color: #1a202c; 
+            color: #e2e8f0; 
+            border: 1px solid #4a5568; 
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             z-index: 1000;
             opacity: 0;
-            transition: opacity 0.3s ease-in-out, bottom 0.3s ease-in-out;
+            transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
             font-size: 0.9rem;
-            pointer-events: none; /* So it doesn't interfere with clicks */
         }
-        #toast.show {
+        .toast.show {
             opacity: 1;
-            bottom: 30px;
+            transform: translateX(-50%) translateY(0);
         }
-        .star-rating .star {
-            color: #4a5568; /* text-gray-600 for empty star */
-            cursor: default;
-            font-size: 1.5rem; /* Adjust star size */
-            margin: 0 1px;
+        .toast.hide {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
         }
-        .star-rating .star.filled {
-            color: #facc15; /* text-yellow-400 for filled star (Tailwind yellow-400) */
+        
+        #circularTimerWrapper { 
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
-        .star-rating .star.bonus { /* For the 4th star if you implement it as visually distinct */
-            color: #4ade80; /* text-green-400 for bonus star (Tailwind green-400) */
+        #circularTimerContainer {
+            width: 150px; 
+            height: 150px;
+            margin-bottom: 0.75rem; 
+        }
+        #progressRing {
+            transition: stroke-dashoffset 0.3s linear; 
+        }
+        .timer-controls-circular { 
+            display: flex;
+            gap: 0.75rem; 
+            margin-top: 0.5rem; 
+        }
+        .timer-controls-circular button {
+            padding: 0.5rem 1rem; 
+            font-size: 0.875rem; 
+            border-radius: 0.375rem; 
+        }
+
+        .exercise-card { 
+            background-color: #4a5568; 
+            color: #e2e8f0; 
+            padding: 1.5rem; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
+            margin-bottom: 1.5rem;
+        }
+        .exercise-details-info { 
+            background-color: #2d3748; 
+            border: 1px solid #4a5568; 
+            color: #cbd5e0; 
+            padding: 1rem; 
+            border-radius: 0.5rem; 
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); 
+        }
+        .exercise-details-info strong {
+            color: #e2e8f0; 
+        }
+
+        #seriesInputArea label {
+            font-weight: 500; 
+            color: #cbd5e0; 
+        }
+        #repsInput {
+            background-color: #2d3748; 
+            color: #e2e8f0; 
+            border: 1px solid #4a5568; 
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        #repsInput::placeholder {
+            color: #a0aec0; 
+        }
+        #repsInput:focus {
+            border-color: #63b3ed; 
+            box-shadow: 0 0 0 2px rgba(99, 179, 237, 0.3); 
+        }
+        
+        #completeSeriesBtn {
+            background-color: #38a169; 
+        }
+        #completeSeriesBtn:hover {
+            background-color: #2f855a; 
+        }
+        .skip-exercise-btn {
+            background-color: #c53030; 
+            color: white;
+        }
+        .skip-exercise-btn:hover {
+            background-color: #9b2c2c; 
+        }
+        #finishWorkoutBtn {
+            background-color: #805ad5; 
+        }
+        #finishWorkoutBtn:hover {
+            background-color: #6b46c1; 
+        }
+
+        .text-blue-500 { 
+            color: #63b3ed; 
+        }
+        .text-blue-500:hover {
+            color: #4299e1; 
+        }
+        #workoutButtonsContainer button {
+            background-color: #4a5568; 
+            color: #e2e8f0; 
+            border: 1px solid #718096; 
+        }
+        #workoutButtonsContainer button:hover {
+            background-color: #718096; 
+        }
+
+        .star-rating span {
+            color: #facc15; 
+            font-size: 1.25rem; 
+            margin-right: 0.125rem; 
+        }
+        .star-rating .bonus-star {
+            color: #fbbf24; 
+        }
+         .star-rating .empty-star {
+            color: #718096; 
+        }
+        #workoutSummaryContent h4, #workoutStats h3 {
+            color: #e2e8f0; 
+        }
+        #workoutSummaryContent .bg-gray-800, 
+        #workoutStats .bg-gray-700 { 
+            background-color: #2d3748; 
+            color: #cbd5e0; 
+        }
+        #workoutSummaryContent .bg-gray-800 strong, 
+        #workoutStats .bg-gray-700 strong {
+            color: #e2e8f0; 
+        }
+        #motivationalMessage {
+            color: #68d391; 
+        }
+        .force-hidden {
+            display: none !important;
+        }
+        #loadingOverlay {
+            position: fixed; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050; 
+            color: white;
+            font-size: 1.2rem;
         }
     </style>
-    <script>
-        // Tailwind config (optional, as direct classes are used)
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        'archivo-black': ['Archivo Black', 'sans-serif'],
-                        'inter': ['Inter', 'sans-serif'],
-                    },
-                }
-            }
-        }
-    </script>
 </head>
-<body class="text-gray-200 bg-custom-gray-dark min-h-screen flex flex-col items-center">
+<body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-start min-h-screen pt-4 px-2 sm:px-4">
 
-    <div id="appContainer" class="w-full max-w-lg mx-auto flex-grow flex flex-col">
+    <div id="appContainer" class="w-full max-w-md bg-gray-800 shadow-xl rounded-lg overflow-hidden relative"> 
 
-        <div id="homeScreen" class="flex-grow flex flex-col">
-            <header class="sticky top-0 z-50 bg-black w-full py-4 px-6 shadow-md">
-                <h1 class="font-archivo-black text-3xl text-center">
-                    <span style="color: #7b8080;">CALISTENIA</span><span style="color: #ffffff;">PRO</span>
-                </h1>
-            </header>
-            <main class="flex-grow flex flex-col items-center justify-center p-6 space-y-8">
-                <h2 class="text-2xl font-inter font-bold text-gray-200">Escolha seu nível</h2>
-                <div class="w-full space-y-4">
-                    <button id="levelAvancado" data-level="avancado" class="level-btn w-full bg-red-600 hover:bg-red-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition-colors duration-150 text-xl">
-                        Avançado
-                        <span class="block text-sm font-normal text-red-200">(10+ barras e 15+ dips)</span>
+        <div id="fixedHeader" class="app-header hidden">
+             <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
+        </div>
+
+        <div id="homeScreen" class="text-center">
+            <div class="app-header">
+                <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
+            </div>
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-300 my-6" style="font-family: 'Inter', sans-serif;">Escolha seu nível</h2>
+                <div class="space-y-4">
+                    <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
+                        Avançado 
+                        <span class="block text-sm font-normal opacity-90">(10+ barras e 15+ dips)</span>
                     </button>
-                    <button id="levelIntermediario" data-level="intermediario" class="level-btn w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition-colors duration-150 text-xl">
-                        Intermediário
-                        <span class="block text-sm font-normal text-blue-200">(3 pull ups e 3 dips)</span>
+                    <button id="level-intermediario" onclick="selectLevel('intermediario')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
+                        Intermediário 
+                        <span class="block text-sm font-normal opacity-90">(3 pull ups e 3 dips)</span>
                     </button>
-                    <button id="levelIniciante" data-level="iniciante" class="level-btn w-full bg-green-600 hover:bg-green-700 text-white font-bold py-6 px-4 rounded-lg shadow-lg transition-colors duration-150 text-xl">
-                        Iniciante
-                        <span class="block text-sm font-normal text-green-200">(0 pull ups e 0 push ups)</span>
+                    <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
+                        Iniciante 
+                        <span class="block text-sm font-normal opacity-90">(0 pull ups e 0 push ups)</span>
                     </button>
                 </div>
-            </main>
+            </div>
         </div>
 
-        <div id="workoutListScreen" class="hidden flex-grow flex flex-col">
-            <header class="sticky top-0 z-50 bg-gray-800 w-full py-4 px-6 shadow-md flex items-center">
-                <button id="backToHomeFromList" class="text-gray-300 hover:text-white mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-                <h1 id="workoutListTitle" class="font-inter text-xl font-bold text-gray-200"></h1>
-            </header>
-            <main id="workoutListContainer" class="flex-grow p-6 space-y-3 overflow-y-auto custom-scrollbar">
-                </main>
+        <div id="workoutListScreen" class="p-6 hidden">
+            <button onclick="showScreen('homeScreen'); resetAppState();" class="mb-6 text-blue-400 hover:text-blue-500 font-semibold">← Voltar para Níveis</button>
+            <div id="workoutButtonsContainer" class="space-y-3 mt-6"> 
+                </div>
         </div>
 
-        <div id="workoutExecutionScreen" class="hidden flex-grow flex flex-col">
-            <header class="sticky top-0 z-50 bg-gray-800 w-full py-4 px-6 shadow-md flex items-center">
-                <button id="backToListFromExecution" class="text-gray-300 hover:text-white mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-                <h1 id="workoutExecutionTitle" class="font-inter text-lg font-bold text-gray-200 truncate"></h1>
-            </header>
-            <main id="exerciseContainer" class="flex-grow p-4 md:p-6 flex flex-col items-center space-y-4 overflow-y-auto custom-scrollbar">
-                <div class="exercise-card bg-gray-700 p-4 rounded-lg shadow-lg w-full max-w-md">
-                    <h2 id="exerciseName" class="text-xl font-bold text-center text-gray-100 mb-2">Nome do Exercício</h2>
-                    <p id="seriesProgress" class="text-sm text-gray-400 text-center mb-3">Série 1 de 4</p>
-
-                    <div id="mediaDisplayArea" class="aspect-w-16 aspect-h-9 bg-gray-700 mb-3 rounded overflow-hidden relative">
-                        <div id="videoPlayerContainer" class="w-full h-full">
-                            <iframe id="exerciseVideo" class="w-full h-full" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-                            <div id="videoPlaceholder" class="w-full h-full flex items-center justify-center bg-gray-600 text-gray-400 hidden">Vídeo indisponível</div>
-                        </div>
-                        <div id="circularTimerWrapper" class="force-hidden absolute inset-0 w-full h-full flex flex-col items-center justify-center p-4 bg-gray-700">
-                            <svg id="circularTimerSVG" class="w-32 h-32 md:w-40 md:h-40 mb-2" viewBox="0 0 100 100">
-                                <circle class="progress-ring__circle--background" stroke-width="8" fill="transparent" r="45" cx="50" cy="50"/>
-                                <circle id="progressRing" class="progress-ring__circle--progress" stroke-width="8" fill="transparent" r="45" cx="50" cy="50"/>
+        <div id="workoutExecutionScreen" class="p-6 hidden">
+             <button onclick="confirmExitWorkout()" class="mb-4 text-blue-400 hover:text-blue-500 font-semibold">← Voltar para Lista de Treinos</button>
+            
+            <div class="exercise-card">
+                <h3 id="exerciseName" class="text-2xl font-bold mb-1 text-center text-gray-100" style="font-family: 'Inter', sans-serif;">Nome do Exercício</h3>
+                <p id="seriesProgressText" class="text-md text-gray-300 mb-4 text-center">Série X de Y</p>
+                
+                <div id="mediaDisplayArea" class="media-display-area">
+                    <div id="videoPlayerContainer" class="video-container"> <p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo do exercício</p>
+                    </div>
+                    <div id="circularTimerWrapper" class="force-hidden"> <div id="circularTimerContainer" class="relative mx-auto">
+                            <svg class="w-full h-full" viewBox="0 0 100 100">
+                                <circle class="text-gray-600" stroke-width="8" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50"/>
+                                <circle id="progressRing"
+                                        class="text-blue-400" stroke-width="8"
+                                        stroke-linecap="round"
+                                        stroke="currentColor"
+                                        fill="transparent"
+                                        r="42" cx="50" cy="50"
+                                        style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
                             </svg>
-                            <div id="timerText" class="text-3xl md:text-4xl font-bold text-gray-100 mb-3">00:00</div>
-                            <div class="flex space-x-3">
-                                <button id="pauseTimerBtn" class="bg-yellow-600 hover:bg-yellow-700 text-white py-2 px-4 rounded text-sm">Pausar</button>
-                                <button id="skipRestBtn" class="bg-gray-600 hover:bg-gray-500 text-white py-2 px-4 rounded text-sm">Pular</button>
+                            <div id="circularTimerText" class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gray-100">
+                                00:00
                             </div>
                         </div>
-                    </div>
-
-                    <div class="exercise-details-info bg-gray-800 p-3 rounded mb-4 text-center">
-                        <p id="targetRepsInfo" class="text-gray-300">Repetições Alvo: </p>
-                    </div>
-
-                    <div id="seriesInputArea" class="mb-4 space-y-2">
-                        <label for="repsInput" class="block text-sm font-medium text-gray-300">Quantas reps/tempo você fez nesta série? (Opcional)</label>
-                        <input type="text" id="repsInput" class="bg-gray-800 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="Ex: 10, 30s, etc.">
-                    </div>
-
-                    <div class="flex flex-col items-center space-y-2">
-                        <button id="completeSeriesBtn" class="w-full max-w-xs bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-150">Concluir Série</button>
-                        <button id="skipExerciseBtn" class="w-full max-w-xs bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-150">Pular Exercício Atual</button>
-                        <button id="finishWorkoutBtn" class="hidden w-full max-w-xs bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-150 mt-3">Finalizar Treino</button>
+                        <div class="timer-controls-circular">
+                            <button id="pauseRestTimerBtn" onclick="pauseRestTimer()" class="bg-yellow-600 hover:bg-yellow-700 text-white action-button">Pausar</button>
+                            <button id="skipRestTimerBtn" onclick="skipRest()" class="bg-gray-600 hover:bg-gray-700 text-white action-button">Pular</button>
+                        </div>
                     </div>
                 </div>
-            </main>
+
+                <div class="exercise-details-info mt-4 text-center">
+                    <p class="text-lg"><strong>Repetições Alvo:</strong> <span id="exerciseReps" class="font-medium text-gray-100"></span></p>
+                </div>
+            </div>
+
+            <div id="seriesInputArea" class="mb-4 px-2">
+                <label for="repsInput" class="block text-sm font-medium text-gray-300 mb-1">Quantas reps/tempo você fez nesta série? (Opcional)</label>
+                <input type="text" id="repsInput" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400 text-base bg-gray-700 text-gray-100" placeholder="Ex: 10 ou 30s">
+            </div>
+            
+            <div class="flex flex-col items-center gap-2 mb-4">
+                <button id="completeSeriesBtn" onclick="completeSeries()" class="w-full max-w-xs bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg action-button text-base">Concluir Série</button>
+                <button id="skipExerciseBtn" onclick="confirmSkipExercise()" class="w-full max-w-xs skip-exercise-btn font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg action-button text-base">Pular Exercício Atual</button> 
+            </div>
+            
+            <button id="finishWorkoutBtn" onclick="finishWorkout()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg mt-3 hidden action-button text-base">Finalizar Treino (Ver Resumo)</button>
         </div>
 
-        <div id="summaryScreen" class="hidden flex-grow flex flex-col">
-            <header class="sticky top-0 z-50 bg-gray-800 w-full py-4 px-6 shadow-md flex items-center">
-                 <button id="backToHomeFromSummary" class="text-gray-300 hover:text-white mr-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-                    </svg>
-                </button>
-                <h1 id="summaryScreenTitle" class="font-inter text-xl font-bold text-gray-200">Resumo do Treino</h1>
-            </header>
-            <main class="flex-grow p-4 md:p-6 space-y-6 overflow-y-auto custom-scrollbar">
-                <div id="workoutSummaryContentContainer" class="bg-gray-700 p-4 rounded-lg shadow-lg">
-                    <h2 class="text-lg font-bold text-gray-100 mb-1">Detalhes do Treino</h2>
-                    <p class="text-sm text-gray-300"><strong>Aluno:</strong> Usuário PRO</p>
-                    <p id="summaryDate" class="text-sm text-gray-300"><strong>Data:</strong> </p>
-                    <p id="summaryLevel" class="text-sm text-gray-300"><strong>Nível:</strong> </p>
-                    <p id="summaryWorkoutName" class="text-sm text-gray-300 mb-3"><strong>Treino:</strong> </p>
-                    <hr class="border-gray-600 my-3">
-                    <div id="summaryExercisesList" class="space-y-4">
-                        </div>
+        <div id="summaryScreen" class="p-6 hidden text-center">
+            <div id="workoutSummaryContent" class="bg-gray-700 p-4 rounded-lg shadow-md mb-6 text-left mt-6"> 
                 </div>
-
-                <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-lg">
-                    <h2 class="text-lg font-bold text-gray-100 mb-2">Estatísticas Gerais</h2>
-                    <p id="totalRepsStat" class="text-sm text-gray-300"><strong>Total de Repetições (numéricas):</strong> 0</p>
-                    <p id="exercisesTrackedStat" class="text-sm text-gray-300"><strong>Exercícios Registrados:</strong> 0 de 0</p>
-                    <p class="text-sm text-gray-300"><strong>Progresso Total:</strong> <span class="text-yellow-400">Em breve!</span></p>
+            <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-md mb-6 text-left"> 
                 </div>
-
-                <div class="text-center mt-4">
-                    <p class="text-gray-400 italic">"A dor que você sente hoje será a força que você sentirá amanhã."</p>
-                </div>
-                 <button id="backToHomeFromSummaryBottom" class="w-full max-w-xs mx-auto mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-150">Voltar para o Início</button>
-            </main>
+            <p id="motivationalMessage" class="text-lg text-green-400 font-semibold mb-8"></p>
+            <button onclick="showScreen('homeScreen'); resetAppState();" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button">Voltar para o Início</button>
+        </div>
+        
+        <div id="loadingOverlay" class="force-hidden">
+             Carregando Treino...
         </div>
     </div>
 
-    <div id="toast" class=""></div>
+    <div id="toastNotification" class="toast">Mensagem!</div>
 
-    <script src="script.js"></script> </body>
+    <script>
+        // --- ESTADO DA APLICAÇÃO ---
+        let userProgressData = []; 
+        let currentScreen = 'homeScreen';
+        let selectedLevel = '';
+        let selectedWorkoutName = '';
+        let currentWorkout = []; 
+        let currentExerciseIndex = 0;
+        let currentSeriesNumber = 1; 
+        let performanceData = []; 
+
+        let restTimerInterval;
+        let restTimerSeconds = 0;
+        let totalRestDuration = 0; 
+        let restTimerRunning = false;
+
+        const Screens = {
+            HOME: 'homeScreen',
+            WORKOUT_LIST: 'workoutListScreen',
+            WORKOUT_EXECUTION: 'workoutExecutionScreen',
+            SUMMARY: 'summaryScreen'
+        };
+        const ALL_SCREENS = Object.values(Screens);
+
+        // --- REFERÊNCIAS A ELEMENTOS DOM ---
+        let fixedHeaderElement, videoPlayerContainerElement, circularTimerWrapperElement, 
+            progressRingElement, circularTimerTextElement, mediaDisplayAreaElement, 
+            loadingOverlayElement, workoutButtonsContainerElement, repsInputElement,
+            exerciseNameElement, seriesProgressTextElement, exerciseRepsElement,
+            completeSeriesBtnElement, skipExerciseBtnElement, finishWorkoutBtnElement,
+            seriesInputAreaElement, summaryContentElement, statsDivElement, 
+            motivationalMessageElement, toastNotificationElement;
+            
+        let radius;
+        let circumference;
+
+        // --- FUNÇÕES DE INICIALIZAÇÃO ---
+        document.addEventListener('DOMContentLoaded', () => {
+            fixedHeaderElement = document.getElementById('fixedHeader'); 
+            videoPlayerContainerElement = document.getElementById('videoPlayerContainer');
+            circularTimerWrapperElement = document.getElementById('circularTimerWrapper');
+            progressRingElement = document.getElementById('progressRing');
+            circularTimerTextElement = document.getElementById('circularTimerText');
+            mediaDisplayAreaElement = document.getElementById('mediaDisplayArea'); 
+            loadingOverlayElement = document.getElementById('loadingOverlay');
+            workoutButtonsContainerElement = document.getElementById('workoutButtonsContainer');
+            repsInputElement = document.getElementById('repsInput');
+            exerciseNameElement = document.getElementById('exerciseName');
+            seriesProgressTextElement = document.getElementById('seriesProgressText');
+            exerciseRepsElement = document.getElementById('exerciseReps');
+            completeSeriesBtnElement = document.getElementById('completeSeriesBtn');
+            skipExerciseBtnElement = document.getElementById('skipExerciseBtn');
+            finishWorkoutBtnElement = document.getElementById('finishWorkoutBtn');
+            seriesInputAreaElement = document.getElementById('seriesInputArea');
+            summaryContentElement = document.getElementById('workoutSummaryContent');
+            statsDivElement = document.getElementById('workoutStats');
+            motivationalMessageElement = document.getElementById('motivationalMessage');
+            toastNotificationElement = document.getElementById('toastNotification');
+
+            radius = progressRingElement?.getAttribute('r'); 
+            if (radius) { 
+                 radius = parseFloat(radius);
+                 circumference = 2 * Math.PI * radius;
+                 progressRingElement.style.strokeDasharray = `${circumference} ${circumference}`;
+                 progressRingElement.style.strokeDashoffset = circumference;
+            } else {
+                console.error("Elemento 'progressRing' ou seu atributo 'r' não encontrado.");
+            }
+
+            showScreen(Screens.HOME);
+            console.warn("IMPORTANTE: A integração com Google Sheets agora está ativa. A função de salvar progresso (doPost) ainda precisa ser implementada no script e no app.");
+            showToast("App Iniciado.", 4000);
+        });
+
+
+        // --- NAVEGAÇÃO E CONTROLE DE TELA ---
+        function showScreen(screenId) {
+            ALL_SCREENS.forEach(id => {
+                const screenElement = document.getElementById(id);
+                if (screenElement) {
+                    screenElement.classList.add('hidden');
+                } else {
+                    console.warn(`Elemento de tela não encontrado: ${id}`);
+                }
+            });
+            const targetScreen = document.getElementById(screenId);
+            if (targetScreen) {
+                targetScreen.classList.remove('hidden');
+            } else {
+                 console.error(`Tentativa de mostrar tela inexistente: ${screenId}`);
+                 return; 
+            }
+            
+            currentScreen = screenId;
+            window.scrollTo(0, 0);
+
+            if (!fixedHeaderElement) return; 
+
+            if (screenId === Screens.HOME) {
+                fixedHeaderElement.classList.add('hidden');
+            } else {
+                fixedHeaderElement.classList.remove('hidden');
+                let headerTitleText = `CALISTENIA <span class="pro-text-header">PRO</span>`; 
+                
+                if (screenId === Screens.WORKOUT_EXECUTION || screenId === Screens.SUMMARY) {
+                    if (selectedWorkoutName && selectedLevel) {
+                        headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">${selectedWorkoutName} <span class="text-lg font-normal">(${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)})</span></span>`;
+                    }
+                } else if (screenId === Screens.WORKOUT_LIST && selectedLevel) {
+                     headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">Nível ${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)}</span>`;
+                }
+                
+                let h1InHeader = fixedHeaderElement.querySelector('h1');
+                if (!h1InHeader) {
+                    h1InHeader = document.createElement('h1');
+                    fixedHeaderElement.appendChild(h1InHeader);
+                }
+                h1InHeader.innerHTML = headerTitleText; 
+            }
+        }
+        
+        function resetAppState() {
+            clearRestTimer(); 
+            
+            selectedLevel = ''; 
+            selectedWorkoutName = '';
+            currentWorkout = [];
+            currentExerciseIndex = 0;
+            currentSeriesNumber = 1;
+            performanceData = [];
+
+            if (completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
+            if (circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden'); 
+            if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden'); 
+            if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
+            if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
+            if (finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden');
+            
+            if (currentScreen === Screens.HOME && fixedHeaderElement) { 
+                 fixedHeaderElement.classList.add('hidden');
+            }
+        }
+
+        function selectLevel(level) {
+            console.log(`Nível selecionado: ${level}`); 
+            selectedLevel = level;
+            
+            if (!workoutButtonsContainerElement) {
+                console.error("Elemento workoutButtonsContainer não encontrado.");
+                return;
+            }
+            workoutButtonsContainerElement.innerHTML = ''; 
+
+            const availableWorkouts = ['Treino A', 'Treino B', 'Treino C', 'Treino D', 'Treino E']; 
+            
+            availableWorkouts.forEach(workoutName => {
+                const button = document.createElement('button');
+                button.className = 'w-full bg-gray-700 hover:bg-gray-600 border border-gray-600 text-gray-200 font-semibold py-3 px-4 rounded-lg shadow-sm hover:shadow-md action-button';
+                button.textContent = workoutName;
+                button.addEventListener('click', () => loadWorkout(workoutName)); 
+                workoutButtonsContainerElement.appendChild(button);
+            });
+            showScreen(Screens.WORKOUT_LIST);
+        }
+        
+        function confirmExitWorkout() {
+            const hasStartedWorkout = performanceData.some(ex => ex.seriesDone.length > 0);
+
+            if (hasStartedWorkout && currentScreen === Screens.WORKOUT_EXECUTION) {
+                if (confirm("Você tem um treino em andamento. Deseja realmente sair e perder o progresso não salvo desta sessão?")) {
+                    goBackToWorkoutListScreenClean();
+                }
+            } else {
+                goBackToWorkoutListScreenClean();
+            }
+        }
+
+        function goBackToWorkoutListScreenClean() {
+            clearRestTimer();
+            currentWorkout = [];
+            currentExerciseIndex = 0;
+            currentSeriesNumber = 1;
+            performanceData = [];
+            selectedWorkoutName = ''; 
+            if (completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
+            if (circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden'); 
+            if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
+            if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
+            if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
+            if (finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden');
+            showScreen(Screens.WORKOUT_LIST); 
+        }
+
+        // --- LÓGICA DE CARREGAMENTO DO TREINO (COM API) ---
+        async function loadWorkout(workoutName) { 
+            console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel}`); 
+            selectedWorkoutName = workoutName;
+            
+            // #############################################################
+            // # URL DO SCRIPT INSERIDA                                    #
+            // #############################################################
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec"; 
+            // #############################################################
+
+            if (SCRIPT_URL === "COLE_A_URL_DO_SEU_SCRIPT_IMPLANTADO_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
+                showToast("Erro: URL do Script inválida ou não configurada.", 5000);
+                console.error("URL do Script inválida ou não configurada:", SCRIPT_URL);
+                return; 
+            }
+            
+            const url = `${SCRIPT_URL}?level=${encodeURIComponent(selectedLevel)}&workout=${encodeURIComponent(workoutName)}`;
+            
+            showLoadingIndicator(); 
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    let errorMsg = `Erro HTTP: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (parseError) { /* Ignora erro de parse */ }
+                    throw new Error(errorMsg);
+                }
+                
+                currentWorkout = await response.json(); 
+
+                if (!Array.isArray(currentWorkout)) {
+                     if (currentWorkout && currentWorkout.error) {
+                         throw new Error(currentWorkout.error);
+                     }
+                     throw new Error("Resposta da API não é um array.");
+                }
+
+                performanceData = currentWorkout.map(ex => ({ 
+                    exerciseId: ex.exercise_id, 
+                    exerciseName: ex.exercise_name,
+                    seriesTargetCount: parseInt(ex.series) || 0, 
+                    repsTargetString: ex.reps, 
+                    restTimeString: ex.rest, 
+                    embedUrl: ex.embed_url, 
+                    loadInfo: ex.load, 
+                    seriesDone: [] 
+                }));
+
+                hideLoadingIndicator(); 
+
+                if (currentWorkout.length > 0) {
+                    displayCurrentExerciseAndSeries();
+                    showScreen(Screens.WORKOUT_EXECUTION);
+                    if(finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden'); 
+                } else {
+                    showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}).`);
+                }
+
+            } catch (error) {
+                hideLoadingIndicator(); 
+                console.error("Erro ao carregar treino:", error);
+                showToast(`Erro ao carregar: ${error.message}`, 5000);
+            }
+        }
+        
+        function showLoadingIndicator() {
+            if(loadingOverlayElement) loadingOverlayElement.classList.remove('force-hidden');
+        }
+        function hideLoadingIndicator() {
+             if(loadingOverlayElement) loadingOverlayElement.classList.add('force-hidden');
+        }
+        
+        // --- LÓGICA DE EXECUÇÃO DO TREINO ---
+        function displayCurrentExerciseAndSeries() {
+             if (!performanceData || currentExerciseIndex >= performanceData.length) {
+                finishWorkout(); 
+                return;
+            }
+
+            const exercisePerf = performanceData[currentExerciseIndex]; 
+            if (!exercisePerf) {
+                console.error("Dados de performance do exercício atual não encontrados.");
+                finishWorkout(); 
+                return;
+            }
+
+            if (exerciseNameElement) exerciseNameElement.textContent = exercisePerf.exerciseName;
+            if (seriesProgressTextElement) seriesProgressTextElement.textContent = `Série ${currentSeriesNumber} de ${exercisePerf.seriesTargetCount}`;
+            
+            if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden'); 
+            if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden'); 
+            if (circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden'); 
+
+            if (videoPlayerContainerElement) {
+                if (exercisePerf.embedUrl) { 
+                    videoPlayerContainerElement.innerHTML = `<iframe src="${exercisePerf.embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+                } else {
+                    videoPlayerContainerElement.innerHTML = `<p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo indisponível.</p>`;
+                }
+            }
+            
+            if (exerciseRepsElement) exerciseRepsElement.textContent = exercisePerf.repsTargetString; 
+            
+            if (repsInputElement) {
+                repsInputElement.value = ''; 
+                repsInputElement.focus();
+            }
+
+            const isLastExercise = currentExerciseIndex === performanceData.length - 1;
+            const areAllSeriesDone = currentSeriesNumber > exercisePerf.seriesTargetCount;
+
+            if (isLastExercise && areAllSeriesDone) {
+                if(finishWorkoutBtnElement) finishWorkoutBtnElement.classList.remove('hidden');
+                if(completeSeriesBtnElement) completeSeriesBtnElement.classList.add('hidden');
+                if(skipExerciseBtnElement) skipExerciseBtnElement.classList.add('hidden'); 
+            } else {
+                if(finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden');
+                if(completeSeriesBtnElement) completeSeriesBtnElement.classList.remove('hidden');
+                if(skipExerciseBtnElement) skipExerciseBtnElement.classList.remove('hidden');
+            }
+
+            if(completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
+            if(skipExerciseBtnElement) skipExerciseBtnElement.disabled = false; 
+            if(seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
+            clearRestTimer(); 
+        }
+
+        function completeSeries() {
+            if (!repsInputElement) return; 
+            let repsValue = repsInputElement.value.trim();
+            if (repsValue === "") {
+                repsValue = "N/A"; 
+            }
+
+            if (!performanceData || !performanceData[currentExerciseIndex]) return; 
+            const currentExercisePerformance = performanceData[currentExerciseIndex];
+            currentExercisePerformance.seriesDone.push({ reps: repsValue });
+
+            if(completeSeriesBtnElement) completeSeriesBtnElement.disabled = true; 
+            if(skipExerciseBtnElement) skipExerciseBtnElement.disabled = true; 
+            if(seriesInputAreaElement) seriesInputAreaElement.classList.add('hidden'); 
+
+            const restTimeString = currentExercisePerformance.restTimeString; 
+            totalRestDuration = parseInt(restTimeString) || 60; 
+            
+            startRestTimer(totalRestDuration); 
+        }
+        
+        function handleRestFinished() {
+            if (!performanceData || !performanceData[currentExerciseIndex]) return; 
+            currentSeriesNumber++;
+            const currentExercisePerformance = performanceData[currentExerciseIndex];
+            
+            if(mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
+            if(videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden'); 
+            if(circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden');  
+            if(skipExerciseBtnElement) skipExerciseBtnElement.disabled = false; 
+
+
+            if (currentSeriesNumber <= currentExercisePerformance.seriesTargetCount) {
+                displayCurrentExerciseAndSeries();
+            } else {
+                skipExercise(false); 
+            }
+        }
+
+        function confirmSkipExercise() {
+            if (confirm("Tem certeza que deseja pular todas as séries restantes deste exercício?")) {
+                skipExercise(true); 
+            }
+        }
+
+        function skipExercise(manualSkip) {
+            clearRestTimer(); 
+            if (!performanceData || !performanceData[currentExerciseIndex]) return; 
+
+            if (manualSkip) {
+                const currentExPerf = performanceData[currentExerciseIndex];
+                const seriesTarget = currentExPerf.seriesTargetCount;
+                while (currentExPerf.seriesDone.length < seriesTarget) {
+                    currentExPerf.seriesDone.push({ reps: "Pulado" });
+                }
+                showToast(`${currentExPerf.exerciseName} pulado.`);
+            }
+            
+            currentExerciseIndex++; 
+            currentSeriesNumber = 1; 
+
+            if (currentExerciseIndex < performanceData.length) {
+                displayCurrentExerciseAndSeries(); 
+            } else {
+                 if(finishWorkoutBtnElement) finishWorkoutBtnElement.classList.remove('hidden');
+                 if(completeSeriesBtnElement) completeSeriesBtnElement.classList.add('hidden'); 
+                 if(skipExerciseBtnElement) skipExerciseBtnElement.classList.add('hidden');
+                 if(seriesInputAreaElement) seriesInputAreaElement.classList.add('hidden');
+                 if(circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden'); 
+                 if(videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden'); 
+                 if(mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
+                showToast("Treino Concluído! Clique em Finalizar para ver o resumo.");
+            }
+        }
+
+        // --- LÓGICA DE PONTUAÇÃO DE ESTRELAS ---
+        function parseRepsTarget(repsString) {
+            if (!repsString || typeof repsString !== 'string') return { type: 'invalid' };
+
+            repsString = repsString.toLowerCase().trim();
+             const rangeMatch = repsString.match(/^(\d+)\s*-\s*(\d+)/);
+             if (rangeMatch) {
+                 return { type: 'range', min: parseInt(rangeMatch[1]), max: parseInt(rangeMatch[2]) };
+             }
+             const fixedMatch = repsString.match(/^(\d+)/);
+             if (fixedMatch) {
+                 if (!repsString.includes('-') && !repsString.includes('seg') && !repsString.includes('s') && !repsString.includes('"')) { 
+                     return { type: 'fixed', value: parseInt(fixedMatch[1]) };
+                 }
+             }
+            if (repsString.includes('hold') || repsString.includes('seg') || repsString.includes('s') || repsString.includes('"')) {
+                const match = repsString.match(/(\d+)/);
+                return match ? { type: 'hold', duration: parseInt(match[1]) } : { type: 'text' };
+            }
+            if (repsString === 'amrap' || repsString.includes('max')) {
+                return { type: 'amrap' };
+            }
+            return { type: 'text' }; 
+        }
+
+        function calculateExerciseStars(exercisePerfEntry) {
+             if (!exercisePerfEntry || !exercisePerfEntry.repsTargetString) return 0; 
+            const targetStr = exercisePerfEntry.repsTargetString;
+            const parsedTarget = parseRepsTarget(targetStr);
+
+            if (parsedTarget.type !== 'range' && parsedTarget.type !== 'fixed') {
+                return 0; 
+            }
+
+            let totalRepsDoneNum = 0;
+            let numericSeriesCount = 0;
+            if (exercisePerfEntry.seriesDone && Array.isArray(exercisePerfEntry.seriesDone)) {
+                exercisePerfEntry.seriesDone.forEach(serie => {
+                    if (serie.reps !== "Pulado" && serie.reps !== "N/A") {
+                        const repsNum = parseInt(serie.reps);
+                        if (!isNaN(repsNum)) {
+                            totalRepsDoneNum += repsNum;
+                            numericSeriesCount++;
+                        }
+                    }
+                });
+            } else {
+                 return 0; 
+            }
+
+
+            if (numericSeriesCount === 0) return 0; 
+
+            const avgRepsDonePerSeries = totalRepsDoneNum / numericSeriesCount;
+
+            if (parsedTarget.type === 'range') {
+                const { min, max } = parsedTarget;
+                const avgTarget = (min + max) / 2;
+                if (avgRepsDonePerSeries > max) return 4; 
+                if (avgRepsDonePerSeries >= avgTarget) return 3; 
+                if (avgRepsDonePerSeries >= min) return 2;
+                if (avgRepsDonePerSeries > 0 && avgRepsDonePerSeries < min) return 1;
+                return 0;
+            } else if (parsedTarget.type === 'fixed') {
+                const targetVal = parsedTarget.value;
+                if (avgRepsDonePerSeries > targetVal) return 4; 
+                if (avgRepsDonePerSeries === targetVal) return 3;
+                if (avgRepsDonePerSeries >= targetVal * 0.75) return 2; 
+                if (avgRepsDonePerSeries > 0 && avgRepsDonePerSeries < targetVal * 0.75) return 1;
+                return 0;
+            }
+            return 0;
+        }
+
+        function getStarString(starCount) {
+            let starsHtml = '';
+            const totalDisplayStars = 3; 
+            for (let i = 1; i <= totalDisplayStars; i++) {
+                starsHtml += `<span class="${i <= starCount ? '' : 'empty-star'}">★</span>`;
+            }
+            if (starCount === 4) { 
+                starsHtml += `<span class="bonus-star">⭐</span>`;
+            }
+            return `<div class="star-rating inline-block">${starsHtml}</div>`;
+        }
+
+
+        function finishWorkout() {
+            userProgressData = []; 
+            const studentName = "Aluno Calistenia PRO"; 
+            const date = new Date().toLocaleDateString('pt-BR');
+
+            performanceData.forEach(exercisePerf => {
+                exercisePerf.stars = calculateExerciseStars(exercisePerf);
+
+                exercisePerf.seriesDone.forEach((seriesData, index) => {
+                    userProgressData.push({
+                        date: date,
+                        studentName: studentName,
+                        level: selectedLevel,
+                        workoutName: selectedWorkoutName,
+                        exerciseName: exercisePerf.exerciseName,
+                        exerciseId: exercisePerf.exerciseId, 
+                        seriesNumber: index + 1, 
+                        repsDone: seriesData.reps,
+                    });
+                });
+            });
+            
+            console.log("Simulando envio para Google Sheets:", userProgressData);
+            console.log("Performance Data com Estrelas:", performanceData); 
+            showToast(`Resumo do ${selectedWorkoutName} gerado! (Dados "enviados")`);
+            
+            displaySummary();
+            showScreen(Screens.SUMMARY);
+        }
+
+        function displaySummary() {
+            if (!summaryContentElement || !statsDivElement || !motivationalMessageElement) {
+                 console.error("Elementos da tela de resumo não encontrados.");
+                 return;
+            }
+            const studentInfo = userProgressData.length > 0 ? userProgressData[0] : { studentName: 'N/A', date: 'N/A' };
+
+            summaryContentElement.innerHTML = `
+                <p><strong>Aluno:</strong> ${studentInfo.studentName}</p>
+                <p><strong>Data:</strong> ${studentInfo.date}</p>
+                <p><strong>Nível:</strong> ${selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)}</p>
+                <p><strong>Treino:</strong> ${selectedWorkoutName}</p>
+                <hr class="my-3 border-gray-600"> <h4 class="font-semibold mb-2 text-xl text-gray-200" style="font-family: 'Inter', sans-serif;">Desempenho Detalhado:</h4>
+            `;
+            
+            performanceData.forEach(exPerf => {
+                const exerciseDiv = document.createElement('div');
+                exerciseDiv.className = 'mb-3 p-3 bg-gray-800 rounded-md shadow-sm'; 
+                
+                const repsTargetDisplay = `(Alvo: ${exPerf.repsTargetString})`;
+                const starRatingHtml = getStarString(exPerf.stars);
+
+                exerciseDiv.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <p class="font-medium text-gray-100">${exPerf.exerciseName} <span class="text-sm text-gray-400">${repsTargetDisplay}</span></p>
+                        ${starRatingHtml}
+                    </div>`;
+                
+                if (exPerf.seriesDone.length > 0) {
+                    const seriesList = document.createElement('ul');
+                    seriesList.className = 'list-disc list-inside ml-4 text-sm text-gray-300 mt-1';
+                    exPerf.seriesDone.forEach((serie, index) => {
+                        seriesList.innerHTML += `<li>Série ${index + 1}: ${serie.reps}</li>`;
+                    });
+                    exerciseDiv.appendChild(seriesList);
+                } else {
+                     exerciseDiv.innerHTML += `<p class="text-sm text-gray-400 mt-1">Nenhuma série registrada.</p>`;
+                }
+                summaryContentElement.appendChild(exerciseDiv);
+            });
+            
+            let totalRepsOverall = 0;
+            userProgressData.forEach(entry => {
+                const repsNumeric = parseInt(entry.repsDone);
+                if (!isNaN(repsNumeric)) {
+                    totalRepsOverall += repsNumeric;
+                }
+            });
+
+            statsDivElement.innerHTML = `
+                <h3 class="text-xl font-semibold mb-2 text-blue-400" style="font-family: 'Inter', sans-serif;">Estatísticas Gerais</h3>
+                <p><strong>Total de Repetições (numéricas):</strong> ${totalRepsOverall > 0 ? totalRepsOverall : (userProgressData.some(e => !isNaN(parseInt(e.repsDone))) ? totalRepsOverall : "N/A")}</p>
+                <p><strong>Exercícios Registrados:</strong> ${performanceData.filter(ex => ex.seriesDone.length > 0).length}</p>
+                <p><strong>Progresso (vs último):</strong> <span class="text-gray-500">Comparação não implementada.</span></p>
+            `;
+            
+            motivationalMessageElement.textContent = `Parabéns, ${studentInfo.studentName}! Você mandou bem no ${selectedWorkoutName}! Continue focado(a)!`;
+        }
+
+        // --- TIMERS ---
+        function formatTime(totalSeconds) {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+        
+        function setProgress(percent) { 
+             if (circumference && progressRingElement) { 
+                const offset = circumference - (percent / 100) * circumference;
+                progressRingElement.style.strokeDashoffset = offset;
+             }
+        }
+
+        function startRestTimer(durationInSeconds) {
+            clearRestTimer(); 
+            restTimerSeconds = durationInSeconds;
+            totalRestDuration = durationInSeconds; 
+            restTimerRunning = true;
+
+            if(mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden'); 
+            if(videoPlayerContainerElement) videoPlayerContainerElement.classList.add('force-hidden'); 
+            if(circularTimerWrapperElement) circularTimerWrapperElement.classList.remove('force-hidden'); 
+            
+            const pauseBtn = document.getElementById('pauseRestTimerBtn');
+            const skipBtn = document.getElementById('skipRestTimerBtn');
+            if(pauseBtn) {
+                pauseBtn.textContent = 'Pausar'; 
+                pauseBtn.disabled = false;
+            }
+            if(skipBtn) skipBtn.disabled = false;
+
+            if(circularTimerTextElement) circularTimerTextElement.textContent = formatTime(restTimerSeconds);
+            setProgress(0); 
+
+            restTimerInterval = setInterval(() => {
+                restTimerSeconds--;
+                if(circularTimerTextElement) circularTimerTextElement.textContent = formatTime(restTimerSeconds);
+                
+                const percentCompleted = ((totalRestDuration - restTimerSeconds) / totalRestDuration) * 100;
+                setProgress(percentCompleted);
+
+                if (restTimerSeconds < 0) { 
+                    clearRestTimer();
+                    showToast("Descanso finalizado!");
+                    handleRestFinished();
+                }
+            }, 1000);
+        }
+
+        function pauseRestTimer() {
+            const pauseBtn = document.getElementById('pauseRestTimerBtn');
+            if (!pauseBtn) return;
+
+            if (restTimerRunning) {
+                restTimerRunning = false;
+                clearInterval(restTimerInterval);
+                pauseBtn.textContent = 'Retomar';
+            } else {
+                if (restTimerSeconds >= 0) { 
+                    restTimerRunning = true;
+                    pauseBtn.textContent = 'Pausar';
+                     restTimerInterval = setInterval(() => {
+                        restTimerSeconds--;
+                        if(circularTimerTextElement) circularTimerTextElement.textContent = formatTime(restTimerSeconds);
+                        const percentCompleted = ((totalRestDuration - restTimerSeconds) / totalRestDuration) * 100;
+                        setProgress(percentCompleted);
+                        if (restTimerSeconds < 0) {
+                            clearRestTimer();
+                            showToast("Descanso finalizado!");
+                            handleRestFinished();
+                        }
+                    }, 1000);
+                }
+            }
+        }
+        
+        function skipRest() {
+            clearRestTimer();
+            showToast("Descanso pulado.");
+            handleRestFinished(); 
+        }
+
+        function clearRestTimer() {
+            clearInterval(restTimerInterval);
+            restTimerRunning = false;
+            setProgress(0); 
+        }
+
+        // --- UTILITÁRIOS ---
+        function showToast(message, duration = 3000) {
+             if (!toastNotificationElement) return;
+            toastNotificationElement.textContent = message;
+            toastNotificationElement.classList.remove('hide');
+            toastNotificationElement.classList.add('show');
+            setTimeout(() => {
+                toastNotificationElement.classList.remove('show');
+                toastNotificationElement.classList.add('hide');
+            }, duration);
+        }
+
+        // --- INICIALIZAÇÃO ---
+        // Ocorre no listener 'DOMContentLoaded'
+
+    </script>
+</body>
 </html>
+```
