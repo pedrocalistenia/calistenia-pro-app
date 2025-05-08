@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Estilos CSS (Modo Escuro, Timer, etc. - Mantidos) */
+        /* Estilos CSS (Mantidos da v19) */
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior-y: contain;
@@ -154,28 +154,28 @@
             color: #e2e8f0; 
         }
 
-        #seriesInputArea label {
+        #seriesInputArea label, #loginScreen label {
             font-weight: 500; 
             color: #cbd5e0; 
         }
-        #repsInput {
+        #repsInput, #loginName, #loginEmail {
             background-color: #2d3748; 
             color: #e2e8f0; 
             border: 1px solid #4a5568; 
             transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
         }
-        #repsInput::placeholder {
+        #repsInput::placeholder, #loginName::placeholder, #loginEmail::placeholder {
             color: #a0aec0; 
         }
-        #repsInput:focus {
+        #repsInput:focus, #loginName:focus, #loginEmail:focus {
             border-color: #63b3ed; 
             box-shadow: 0 0 0 2px rgba(99, 179, 237, 0.3); 
         }
         
-        #completeSeriesBtn {
+        #completeSeriesBtn, #loginButton {
             background-color: #38a169; 
         }
-        #completeSeriesBtn:hover {
+        #completeSeriesBtn:hover, #loginButton:hover {
             background-color: #2f855a; 
         }
         .skip-exercise-btn {
@@ -260,8 +260,24 @@
              <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
         </div>
 
-        <div id="homeScreen" class="text-center">
-            <div class="app-header">
+        <div id="loginScreen" class="p-6">
+             <div class="app-header mb-6"> <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-300 mb-6 text-center">Identifique-se</h2>
+            <div class="space-y-4">
+                <div>
+                    <label for="loginName" class="block text-sm font-medium mb-1">Nome:</label>
+                    <input type="text" id="loginName" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400 text-base bg-gray-700 text-gray-100" placeholder="Seu nome completo">
+                </div>
+                 <div>
+                    <label for="loginEmail" class="block text-sm font-medium mb-1">Email:</label>
+                    <input type="email" id="loginEmail" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400 text-base bg-gray-700 text-gray-100" placeholder="seuemail@exemplo.com">
+                </div>
+                <button id="loginButton" onclick="loginUser()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button text-base">Entrar</button>
+            </div>
+        </div>
+
+        <div id="homeScreen" class="text-center hidden"> <div class="app-header">
                 <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
             </div>
             <div class="p-6">
@@ -284,8 +300,7 @@
         </div>
 
         <div id="workoutListScreen" class="p-6 hidden">
-            <button onclick="showScreen('homeScreen'); resetAppState();" class="mb-6 text-blue-400 hover:text-blue-500 font-semibold">← Voltar para Níveis</button>
-            <div id="workoutButtonsContainer" class="space-y-3 mt-6"> 
+            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="mb-6 text-blue-400 hover:text-blue-500 font-semibold">← Voltar para Níveis</button> <div id="workoutButtonsContainer" class="space-y-3 mt-6"> 
                 </div>
         </div>
 
@@ -345,7 +360,7 @@
             <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-md mb-6 text-left"> 
                 </div>
             <p id="motivationalMessage" class="text-lg text-green-400 font-semibold mb-8"></p>
-            <button onclick="showScreen('homeScreen'); resetAppState();" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button">Voltar para o Início</button>
+            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button">Voltar para Níveis</button>
         </div>
         
         <div id="loadingOverlay" class="force-hidden">
@@ -357,8 +372,9 @@
 
     <script>
         // --- ESTADO DA APLICAÇÃO ---
+        let currentUser = { name: null, email: null }; // Armazena dados do usuário logado
         let userProgressData = []; 
-        let currentScreen = 'homeScreen';
+        let currentScreen = 'loginScreen'; // Começa na tela de login
         let selectedLevel = '';
         let selectedWorkoutName = '';
         let currentWorkout = []; 
@@ -373,6 +389,7 @@
         let workoutStartTime = null; 
 
         const Screens = {
+            LOGIN: 'loginScreen', // Adiciona tela de login
             HOME: 'homeScreen',
             WORKOUT_LIST: 'workoutListScreen',
             WORKOUT_EXECUTION: 'workoutExecutionScreen',
@@ -387,13 +404,15 @@
             exerciseNameElement, seriesProgressTextElement, exerciseRepsElement,
             completeSeriesBtnElement, skipExerciseBtnElement, finishWorkoutBtnElement,
             seriesInputAreaElement, summaryContentElement, statsDivElement, 
-            motivationalMessageElement, toastNotificationElement;
+            motivationalMessageElement, toastNotificationElement,
+            loginNameInputElement, loginEmailInputElement; // Inputs de login
             
         let radius;
         let circumference;
 
         // --- FUNÇÕES DE INICIALIZAÇÃO ---
         document.addEventListener('DOMContentLoaded', () => {
+            // Obter referências aos elementos DOM
             fixedHeaderElement = document.getElementById('fixedHeader'); 
             videoPlayerContainerElement = document.getElementById('videoPlayerContainer');
             circularTimerWrapperElement = document.getElementById('circularTimerWrapper');
@@ -414,7 +433,10 @@
             statsDivElement = document.getElementById('workoutStats');
             motivationalMessageElement = document.getElementById('motivationalMessage');
             toastNotificationElement = document.getElementById('toastNotification');
+            loginNameInputElement = document.getElementById('loginName');
+            loginEmailInputElement = document.getElementById('loginEmail');
 
+            // Calcular circunferência do timer
             radius = progressRingElement?.getAttribute('r'); 
             if (radius) { 
                  radius = parseFloat(radius);
@@ -425,9 +447,10 @@
                 console.error("Elemento 'progressRing' ou seu atributo 'r' não encontrado.");
             }
 
-            showScreen(Screens.HOME);
-            console.warn("IMPORTANTE: A integração com Google Sheets agora está ativa. A função de salvar progresso (doPost) ainda precisa ser implementada no script e no app.");
-            showToast("App Iniciado.", 4000);
+            // Mostrar a tela inicial (Login)
+            showScreen(Screens.LOGIN); 
+            console.warn("IMPORTANTE: A integração com Google Sheets agora está ativa. Verifique se a função doPost no seu script está configurada e implantada para salvar o progresso.");
+            // showToast("App Iniciado.", 4000); // Mostra toast após login
         });
 
 
@@ -454,22 +477,18 @@
 
             if (!fixedHeaderElement) return; 
 
-            if (screenId === Screens.HOME) {
+            // Mostra o header fixo em todas as telas, exceto Login e Home inicial
+            if (screenId === Screens.LOGIN || screenId === Screens.HOME) {
                 fixedHeaderElement.classList.add('hidden');
             } else {
                 fixedHeaderElement.classList.remove('hidden');
                 let headerTitleText = `CALISTENIA <span class="pro-text-header">PRO</span>`; 
                 
                 let displayLevelName = selectedLevel;
-                if (selectedLevel === 'avancado') {
-                    displayLevelName = 'Avançado';
-                } else if (selectedLevel === 'intermediario') {
-                     displayLevelName = 'Intermediário';
-                } else if (selectedLevel === 'iniciante') {
-                     displayLevelName = 'Iniciante';
-                } else {
-                     displayLevelName = selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1); 
-                }
+                if (selectedLevel === 'avancado') displayLevelName = 'Avançado';
+                else if (selectedLevel === 'intermediario') displayLevelName = 'Intermediário';
+                else if (selectedLevel === 'iniciante') displayLevelName = 'Iniciante';
+                else displayLevelName = selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1); 
 
                 if (screenId === Screens.WORKOUT_EXECUTION || screenId === Screens.SUMMARY) {
                     if (selectedWorkoutName && selectedLevel) {
@@ -488,7 +507,9 @@
             }
         }
         
-        function resetAppState() {
+        // resetUser = true limpa os dados do usuário (ao voltar para login)
+        // resetUser = false mantém os dados do usuário (ao voltar de treino para lista)
+        function resetAppState(resetUser = true) { 
             clearRestTimer(); 
             
             selectedLevel = ''; 
@@ -498,6 +519,12 @@
             currentSeriesNumber = 1;
             performanceData = [];
             workoutStartTime = null; 
+
+            if (resetUser) {
+                currentUser = { name: null, email: null };
+                if(loginNameInputElement) loginNameInputElement.value = '';
+                if(loginEmailInputElement) loginEmailInputElement.value = '';
+            }
 
             if (completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
             if (circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden'); 
@@ -511,6 +538,30 @@
             }
         }
 
+        // --- LÓGICA DE LOGIN ---
+        function loginUser() {
+            const name = loginNameInputElement?.value.trim();
+            const email = loginEmailInputElement?.value.trim();
+
+            if (!name || !email) {
+                showToast("Por favor, preencha seu nome e email.");
+                return;
+            }
+            // Validação básica de email (pode ser melhorada)
+            if (!email.includes('@') || !email.includes('.')) {
+                 showToast("Por favor, insira um email válido.");
+                 return;
+            }
+
+            currentUser.name = name;
+            currentUser.email = email;
+            console.log("Usuário logado:", currentUser);
+            showToast(`Bem-vindo(a), ${name}!`);
+            showScreen(Screens.HOME); // Vai para a tela de seleção de nível após login
+        }
+
+
+        // --- LÓGICA DE SELEÇÃO DE NÍVEL ---
         function selectLevel(level) {
             console.log(`Nível selecionado: ${level}`); 
             selectedLevel = level;
@@ -799,7 +850,7 @@
             const parsedTarget = parseRepsTarget(targetStr);
 
             if (parsedTarget.type !== 'range' && parsedTarget.type !== 'fixed') {
-                return 0; // Não calcula para AMRAP, Hold, etc.
+                return 0; 
             }
 
             let totalRepsDoneNum = 0;
@@ -824,16 +875,15 @@
 
             if (parsedTarget.type === 'range') {
                 const { min, max } = parsedTarget;
-                if (avgRepsDonePerSeries > max) return 4; // Bônus: Acima do máximo
-                if (avgRepsDonePerSeries === max) return 3; // 3 Estrelas: Exatamente o máximo
-                if (avgRepsDonePerSeries >= min) return 2; // 2 Estrelas: Igual ou acima do mínimo (mas abaixo do máximo)
-                if (avgRepsDonePerSeries < min) return 1; // 1 Estrela: Abaixo do mínimo
+                if (avgRepsDonePerSeries > max) return 4; 
+                if (avgRepsDonePerSeries === max) return 3; 
+                if (avgRepsDonePerSeries >= min) return 2; 
+                if (avgRepsDonePerSeries < min) return 1; 
                 return 0; 
             } else if (parsedTarget.type === 'fixed') {
                 const targetVal = parsedTarget.value;
-                if (avgRepsDonePerSeries > targetVal) return 4; // Bônus: Acima do alvo
-                if (avgRepsDonePerSeries === targetVal) return 3; // 3 Estrelas: Exatamente o alvo
-                // Para alvo fixo, 2 estrelas se >= 75% e < 100% ; 1 estrela se < 75%
+                if (avgRepsDonePerSeries > targetVal) return 4; 
+                if (avgRepsDonePerSeries === targetVal) return 3;
                 if (avgRepsDonePerSeries >= targetVal * 0.75) return 2; 
                 if (avgRepsDonePerSeries < targetVal * 0.75) return 1; 
                 return 0;
@@ -845,7 +895,6 @@
             let starsHtml = '';
             const totalDisplayStars = 3; 
             for (let i = 1; i <= totalDisplayStars; i++) {
-                // Se for 4 estrelas (bônus), preenche as 3 normais
                 starsHtml += `<span class="${i <= starCount || starCount === 4 ? '' : 'empty-star'}">★</span>`;
             }
             if (starCount === 4) { 
@@ -855,13 +904,17 @@
         }
 
 
-        function finishWorkout() {
+        // --- FINALIZAR TREINO E SALVAR PROGRESSO ---
+        async function finishWorkout() { // Adiciona async para esperar o salvamento
             userProgressData = []; 
-            const studentName = "Fulano"; // Nome alterado para Fulano
-            const date = new Date().toLocaleDateString('pt-BR');
+            const studentName = currentUser.name || "Fulano"; // Usa o nome do usuário logado
+            const studentEmail = currentUser.email || "N/A"; // Usa o email do usuário logado
+            const date = new Date().toISOString(); // Usa formato ISO para data/hora
             const workoutEndTime = Date.now(); 
             const workoutDurationMs = workoutStartTime ? workoutEndTime - workoutStartTime : 0; 
+            const workoutDurationSec = Math.floor(workoutDurationMs / 1000);
 
+            // Prepara os dados para cada série
             performanceData.forEach(exercisePerf => {
                 exercisePerf.stars = calculateExerciseStars(exercisePerf);
 
@@ -869,32 +922,103 @@
                     userProgressData.push({
                         date: date,
                         studentName: studentName,
+                        studentEmail: studentEmail, // Adiciona email
                         level: selectedLevel,
                         workoutName: selectedWorkoutName,
                         exerciseName: exercisePerf.exerciseName,
                         exerciseId: exercisePerf.exerciseId, 
                         seriesNumber: index + 1, 
                         repsDone: seriesData.reps,
+                        stars: exercisePerf.stars, // Adiciona estrelas do exercício
+                        workoutDurationSec: workoutDurationSec // Adiciona duração total (a mesma para todas as linhas do treino)
                     });
                 });
             });
             
-            console.log("Simulando envio para Google Sheets:", userProgressData);
-            console.log("Performance Data com Estrelas:", performanceData); 
-            showToast(`Resumo do ${selectedWorkoutName} gerado! (Dados "enviados")`);
+            console.log("Dados a serem enviados:", userProgressData);
+            showToast(`Finalizando e salvando ${selectedWorkoutName}...`);
+            
+            // Chama a função para salvar na planilha
+            const saveSuccess = await saveProgressToSheet(userProgressData); 
+
+            if (saveSuccess) {
+                 showToast(`Resumo do ${selectedWorkoutName} gerado e salvo!`);
+            } else {
+                 showToast(`Resumo gerado, mas houve erro ao salvar na planilha.`);
+            }
             
             displaySummary(workoutDurationMs); 
             showScreen(Screens.SUMMARY);
         }
+
+        // --- FUNÇÃO PARA SALVAR PROGRESSO NA PLANILHA ---
+        async function saveProgressToSheet(progressDataArray) {
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec"; // Mesma URL
+
+             if (SCRIPT_URL === "COLE_A_URL_DO_SEU_SCRIPT_IMPLANTADO_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
+                console.error("URL do Script inválida ou não configurada para salvar.");
+                return false; 
+            }
+            if (!progressDataArray || progressDataArray.length === 0) {
+                console.log("Nenhum dado de progresso para salvar.");
+                return true; // Considera sucesso se não há nada a salvar
+            }
+
+            try {
+                // Envia CADA linha de progresso individualmente para a função doPost
+                // (O Apps Script geralmente processa uma linha por vez mais facilmente com appendRow)
+                // Se sua função doPost espera um array, ajuste aqui para enviar o array completo.
+                for (const progressEntry of progressDataArray) {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'cors', // Necessário para requisições cross-origin
+                        cache: 'no-cache',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        // Redirecionamento manual é necessário para POST no Apps Script
+                        redirect: 'follow', 
+                        // Envia UMA entrada de progresso por vez
+                        body: JSON.stringify(progressEntry) 
+                    });
+
+                    // Apps Script com doPost geralmente retorna um redirect, 
+                    // então verificar response.ok pode não ser o ideal.
+                    // Verificamos se houve erro na rede ou status inesperado.
+                    if (response.type === 'error' || !response.redirected) { 
+                        // Tenta obter mais detalhes do erro se possível
+                         let errorMsg = `Erro ao salvar série ${progressEntry.seriesNumber} de ${progressEntry.exerciseName}. Status: ${response.status}`;
+                         try {
+                             const errorData = await response.json();
+                             errorMsg = errorData.message || errorData.error || errorMsg;
+                         } catch(e) { /* ignora erro de parse */ }
+                        console.error("Falha ao salvar progresso:", errorMsg);
+                        // Decide se quer parar ou continuar salvando as outras séries
+                        // return false; // Para parar no primeiro erro
+                    }
+                     // Pequena pausa entre requisições para não sobrecarregar (opcional)
+                    await new Promise(resolve => setTimeout(resolve, 50)); 
+                }
+                
+                console.log("Todas as entradas de progresso enviadas.");
+                return true; // Indica sucesso geral no envio
+
+            } catch (error) {
+                console.error("Erro na função saveProgressToSheet:", error);
+                showToast(`Erro de rede ao salvar progresso: ${error.message}`, 5000);
+                return false; // Indica falha
+            }
+        }
+
 
         function displaySummary(durationMs = 0) { 
             if (!summaryContentElement || !statsDivElement || !motivationalMessageElement) {
                  console.error("Elementos da tela de resumo não encontrados.");
                  return;
             }
-            const studentName = "Fulano"; 
+            const studentName = currentUser.name || "Fulano"; // Usa nome do usuário logado
             const date = new Date().toLocaleDateString('pt-BR');
-            let displayLevelName = selectedLevel; // Ajusta nome do nível para exibição
+            let displayLevelName = selectedLevel; 
              if (selectedLevel === 'avancado') displayLevelName = 'Avançado';
              else if (selectedLevel === 'intermediario') displayLevelName = 'Intermediário';
              else if (selectedLevel === 'iniciante') displayLevelName = 'Iniciante';
@@ -1097,10 +1221,3 @@
 </body>
 </html>
 ```
-
-**O que fazer agora:**
-
-1.  **Salve este código** como seu arquivo `index.html`.
-2.  **Faça o upload para o GitHub**, substituindo o arquivo anterior.
-3.  **Aguarde a atualização** do GitHub Pages.
-4.  **Teste** o aplicativo no link público, limpando o cache do navegador. Verifique se a nova lógica de estrelas está funcionando e se o tempo total do treino aparece no resu
