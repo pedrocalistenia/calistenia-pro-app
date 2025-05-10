@@ -21,7 +21,6 @@
         }
         .screen-hidden { /* Para transição de tela */
             opacity: 0;
-            /* display: none; é gerenciado pela classe 'hidden' do Tailwind */
         }
         .app-header {
             background-color: #000000; 
@@ -46,11 +45,11 @@
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #1E1E1E; /* Fundo da scrollbar escuro */
+            background: #1E1E1E; 
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #555555; /* Cor do thumb da scrollbar */
+            background: #555555; 
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
@@ -69,7 +68,7 @@
             width: 100%;
             aspect-ratio: 16 / 9; 
             border-radius: 0.5rem;
-            background-color: #333333; /* Fundo para área de vídeo/mídia */
+            background-color: #333333; 
             margin-bottom: 0.5rem; 
             overflow: hidden; 
         }
@@ -165,7 +164,6 @@
             background-color: #555555;
         }
 
-
         .exercise-card { 
             background-color: #2C2C2C; 
             color: #E0E0E0; 
@@ -197,7 +195,6 @@
             text-align: center;
             margin-bottom: 1rem; 
         }
-
 
         #seriesInputArea label, #loginScreen label {
             font-weight: 500; 
@@ -238,12 +235,25 @@
             background-color: #5B2C6F; 
         }
 
-        .text-blue-500 { 
-            color: #CCCCCC; 
+        .nav-button { /* Nova classe para botões de voltar */
+            background-color: #4A5568; /* bg-gray-700 */
+            color: #E2E8F0; /* text-gray-200 */
+            padding: 0.5rem 1rem; /* py-2 px-4 */
+            border-radius: 0.5rem; /* rounded-lg */
+            font-weight: 600; /* semibold */
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
-        .text-blue-500:hover {
-            color: #FFFFFF; 
+        .nav-button:hover {
+            background-color: #2D3748; /* bg-gray-800 */
         }
+        .nav-button svg {
+            width: 1.25rem; /* w-5 */
+            height: 1.25rem; /* h-5 */
+            margin-right: 0.5rem; /* mr-2 */
+        }
+
         #workoutButtonsContainer button {
             background-color: #333333; 
             color: #E0E0E0; 
@@ -355,13 +365,19 @@
         </div>
 
         <div id="workoutListScreen" class="p-6 hidden">
-            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="mb-6 text-gray-400 hover:text-gray-200 font-semibold">← Voltar para Níveis</button> 
+            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="nav-button mb-6 action-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                Voltar para Níveis
+            </button> 
             <div id="workoutButtonsContainer" class="space-y-3 mt-6"> 
-                </div>
+            </div>
         </div>
 
         <div id="workoutExecutionScreen" class="p-6 hidden">
-             <button onclick="confirmExitWorkout()" class="mb-4 text-gray-400 hover:text-gray-200 font-semibold">← Voltar para Lista de Treinos</button>
+             <button onclick="confirmExitWorkout()" class="nav-button mb-4 action-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                Voltar para Treinos
+            </button>
             
             <div class="exercise-card">
                 <h3 id="exerciseName" class="text-2xl font-bold mb-1 text-center text-gray-100" style="font-family: 'Inter', sans-serif;">Nome do Exercício</h3>
@@ -418,7 +434,9 @@
             <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-md mb-6 text-left"> 
                 </div>
             <p id="motivationalMessage" class="text-lg text-green-400 font-semibold mb-8"></p>
-            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button">Voltar para Níveis</button>
+            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="nav-button mx-auto action-button"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                Voltar para Níveis
+            </button>
         </div>
         
         <div id="loadingOverlay" class="force-hidden">
