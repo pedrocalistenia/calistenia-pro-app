@@ -307,7 +307,7 @@
 </head>
 <body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-start min-h-screen pt-4 px-2 sm:px-4">
 
-    <div id="appContainer" class="w-full max-w-lg bg-gray-800 shadow-xl rounded-lg overflow-hidden relative"> 
+    <div id="appContainer" class="w-full max-w-xl bg-gray-800 shadow-xl rounded-lg overflow-hidden relative"> 
 
         <div id="fixedHeader" class="app-header hidden">
              <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
@@ -509,7 +509,7 @@
                 if (screenElement && id !== Screens.LOGIN) {
                     screenElement.classList.add('hidden', 'screen-hidden', 'opacity-0'); 
                 } else if (screenElement) {
-                    screenElement.classList.remove('hidden'); // Garante que a tela de login esteja visível
+                    screenElement.classList.remove('hidden'); 
                     screenElement.classList.remove('opacity-0', 'screen-hidden');
                 }
             });
@@ -529,8 +529,7 @@
                 
                 setTimeout(() => {
                     currentScreenElement.classList.add('hidden');
-                    // currentScreenElement.classList.remove('opacity-0'); // Não precisa remover aqui se 'screen-hidden' controla
-
+                    
                     if (nextScreenElement) {
                         nextScreenElement.classList.remove('hidden', 'screen-hidden');
                         void nextScreenElement.offsetWidth; 
@@ -549,8 +548,7 @@
                 });
                 if (nextScreenElement) {
                      nextScreenElement.classList.remove('hidden', 'screen-hidden', 'opacity-0');
-                     void nextScreenElement.offsetWidth; // Força reflow
-                     // A opacidade será 1 por padrão se 'opacity-0' for removida
+                     void nextScreenElement.offsetWidth; 
                 }
                 currentScreen = screenId;
                 window.scrollTo(0, 0);
