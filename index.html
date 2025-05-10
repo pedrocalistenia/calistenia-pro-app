@@ -7,20 +7,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Estilos CSS (Mantidos da v19) */
+        /* --- NOVA PALETA DE CORES E ESTILOS GERAIS --- */
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior-y: contain;
-            background-color: #1a202c; /* bg-gray-900 */
-            color: #e2e8f0; /* text-gray-200 */
+            background-color: #121212; /* Preto principal para o fundo */
+            color: #E0E0E0; /* Cinza claro (prata) para texto padrão */
         }
         #appContainer {
-            background-color: #2d3748; /* bg-gray-800 */
-            color: #e2e8f0;
+            background-color: #1E1E1E; /* Cinza escuro para o container do app */
+            color: #E0E0E0;
+            transition: opacity 0.3s ease-in-out; /* Para transição de tela */
+        }
+        .screen-hidden { /* Para transição de tela */
+            opacity: 0;
+            /* display: none; é gerenciado pela classe 'hidden' do Tailwind */
         }
         .app-header {
             background-color: #000000; 
-            color: #7b8080; 
+            color: #A0A0A0; /* Cinza médio para "CALISTENIA" */
             padding: 1rem; 
             text-align: center;
             border-top-left-radius: 0.5rem; 
@@ -35,28 +40,27 @@
         }
         .pro-text-header { 
             font-weight: 400; 
-            color: #FFFFFF; 
+            color: #FFFFFF; /* Branco para "PRO" */
         }
         ::-webkit-scrollbar {
             width: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #2d3748;
+            background: #1E1E1E; /* Fundo da scrollbar escuro */
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #4a5568;
+            background: #555555; /* Cor do thumb da scrollbar */
             border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #718096;
+            background: #777777;
         }
         .action-button {
             transition: all 0.2s ease-in-out;
         }
         .action-button:active {
             transform: scale(0.95);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .media-display-area { 
             display: flex; 
@@ -65,8 +69,8 @@
             width: 100%;
             aspect-ratio: 16 / 9; 
             border-radius: 0.5rem;
-            background-color: #4a5568; 
-            margin-bottom: 1rem; 
+            background-color: #333333; /* Fundo para área de vídeo/mídia */
+            margin-bottom: 0.5rem; 
             overflow: hidden; 
         }
         .video-container, #circularTimerWrapper {
@@ -91,9 +95,9 @@
             left: 50%;
             transform: translateX(-50%);
             padding: 12px 24px;
-            background-color: #1a202c; 
-            color: #e2e8f0; 
-            border: 1px solid #4a5568; 
+            background-color: #121212; 
+            color: #E0E0E0; 
+            border: 1px solid #333333; 
             border-radius: 8px;
             z-index: 1000;
             opacity: 0;
@@ -115,123 +119,165 @@
             align-items: center;
             justify-content: center;
         }
+        .timer-display-and-controls { 
+            display: flex;
+            align-items: center;
+            justify-content: center; 
+            gap: 1rem; 
+            width: 100%;
+            padding: 0 0.5rem; 
+        }
         #circularTimerContainer {
-            width: 150px; 
-            height: 150px;
-            margin-bottom: 0.75rem; 
+            width: 100px; 
+            height: 100px;
+            margin: 0 0.5rem; 
+        }
+        #circularTimerText {
+            font-size: 2rem; 
+            color: #E0E0E0;
         }
         #progressRing {
             transition: stroke-dashoffset 0.3s linear; 
         }
-        .timer-controls-circular { 
-            display: flex;
-            gap: 0.75rem; 
-            margin-top: 0.5rem; 
-        }
         .timer-controls-circular button {
-            padding: 0.5rem 1rem; 
-            font-size: 0.875rem; 
-            border-radius: 0.375rem; 
+            padding: 0.75rem; /* Aumentado padding para melhor área de toque */
+            font-size: 0.8rem; 
+            border-radius: 0.5rem; /* Quadrado com bordas arredondadas */
+            width: 50px; /* Largura fixa */
+            height: 50px; /* Altura fixa */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600; /* semi-bold */
+        }
+        #pauseRestTimerBtn {
+            background-color: #B0B0B0; /* Prata/Cinza claro */
+            color: #121212; /* Texto preto para contraste */
+        }
+        #pauseRestTimerBtn:hover {
+            background-color: #999999;
+        }
+        #skipRestTimerBtn {
+            background-color: #444444; /* Cinza escuro */
+            color: #E0E0E0;
+        }
+        #skipRestTimerBtn:hover {
+            background-color: #555555;
         }
 
+
         .exercise-card { 
-            background-color: #4a5568; 
-            color: #e2e8f0; 
-            padding: 1.5rem; 
+            background-color: #2C2C2C; 
+            color: #E0E0E0; 
+            padding: 1.25rem; 
             border-radius: 0.75rem; 
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); 
-            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); 
+            margin-bottom: 1.25rem;
         }
         .exercise-details-info { 
-            background-color: #2d3748; 
-            border: 1px solid #4a5568; 
-            color: #cbd5e0; 
-            padding: 1rem; 
+            background-color: #1E1E1E; 
+            border: 1px solid #333333; 
+            color: #B0B0B0; 
+            padding: 0.75rem; 
             border-radius: 0.5rem; 
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.1); 
         }
         .exercise-details-info strong {
-            color: #e2e8f0; 
+            color: #E0E0E0; 
         }
+        .series-display-text { 
+            font-size: 1.75rem; /* Aumentado um pouco */
+            font-weight: 700; 
+            color: #CCCCCC; /* Prata claro */
+            text-transform: uppercase;
+            margin-bottom: 0.75rem !important; 
+        }
+        .instruction-text { 
+            font-size: 0.8rem; 
+            color: #A0A0A0; 
+            text-align: center;
+            margin-bottom: 1rem; 
+        }
+
 
         #seriesInputArea label, #loginScreen label {
             font-weight: 500; 
-            color: #cbd5e0; 
+            color: #B0B0B0; 
         }
         #repsInput, #loginName, #loginEmail {
-            background-color: #2d3748; 
-            color: #e2e8f0; 
-            border: 1px solid #4a5568; 
-            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            background-color: #1E1E1E; 
+            color: #E0E0E0; 
+            border: 1px solid #444444; 
         }
         #repsInput::placeholder, #loginName::placeholder, #loginEmail::placeholder {
-            color: #a0aec0; 
+            color: #888888; 
         }
         #repsInput:focus, #loginName:focus, #loginEmail:focus {
-            border-color: #63b3ed; 
-            box-shadow: 0 0 0 2px rgba(99, 179, 237, 0.3); 
+            border-color: #A0A0A0; 
+            box-shadow: 0 0 0 2px rgba(160, 160, 160, 0.3); 
         }
         
         #completeSeriesBtn, #loginButton {
-            background-color: #38a169; 
+            background-color: #27AE60; 
+            color: #FFFFFF;
         }
         #completeSeriesBtn:hover, #loginButton:hover {
-            background-color: #2f855a; 
+            background-color: #1E8449; 
         }
         .skip-exercise-btn {
-            background-color: #c53030; 
+            background-color: #C0392B; 
             color: white;
         }
         .skip-exercise-btn:hover {
-            background-color: #9b2c2c; 
+            background-color: #922B21; 
         }
         #finishWorkoutBtn {
-            background-color: #805ad5; 
+            background-color: #7D3C98; 
+            color: #FFFFFF;
         }
         #finishWorkoutBtn:hover {
-            background-color: #6b46c1; 
+            background-color: #5B2C6F; 
         }
 
         .text-blue-500 { 
-            color: #63b3ed; 
+            color: #CCCCCC; 
         }
         .text-blue-500:hover {
-            color: #4299e1; 
+            color: #FFFFFF; 
         }
         #workoutButtonsContainer button {
-            background-color: #4a5568; 
-            color: #e2e8f0; 
-            border: 1px solid #718096; 
+            background-color: #333333; 
+            color: #E0E0E0; 
+            border: 1px solid #555555; 
         }
         #workoutButtonsContainer button:hover {
-            background-color: #718096; 
+            background-color: #444444; 
         }
 
         .star-rating span {
-            color: #facc15; 
+            color: #F1C40F; 
             font-size: 1.25rem; 
             margin-right: 0.125rem; 
         }
         .star-rating .bonus-star {
-            color: #fbbf24; 
+            color: #E67E22; 
         }
          .star-rating .empty-star {
-            color: #718096; 
+            color: #555555; 
         }
         #workoutSummaryContent h4, #workoutStats h3 {
-            color: #e2e8f0; 
+            color: #E0E0E0; 
         }
         #workoutSummaryContent .bg-gray-800, 
         #workoutStats .bg-gray-700 { 
-            background-color: #2d3748; 
-            color: #cbd5e0; 
+            background-color: #1E1E1E; 
+            color: #B0B0B0; 
         }
         #workoutSummaryContent .bg-gray-800 strong, 
         #workoutStats .bg-gray-700 strong {
-            color: #e2e8f0; 
+            color: #E0E0E0; 
         }
         #motivationalMessage {
-            color: #68d391; 
+            color: #2ECC71; 
         }
         .force-hidden {
             display: none !important;
@@ -242,13 +288,20 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6); 
+            background-color: rgba(18, 18, 18, 0.7); 
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1050; 
             color: white;
             font-size: 1.2rem;
+        }
+        #exerciseActionButtons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem; 
+            margin-bottom: 1rem; 
         }
     </style>
 </head>
@@ -261,97 +314,102 @@
         </div>
 
         <div id="loginScreen" class="p-6">
-             <div class="app-header mb-6"> <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
+             <div class="app-header mb-6"> 
+                <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
             </div>
             <h2 class="text-2xl font-bold text-gray-300 mb-6 text-center">Identifique-se</h2>
             <div class="space-y-4">
                 <div>
                     <label for="loginName" class="block text-sm font-medium mb-1">Nome:</label>
-                    <input type="text" id="loginName" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400 text-base bg-gray-700 text-gray-100" placeholder="Seu nome completo">
+                    <input type="text" id="loginName" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100" placeholder="Seu nome completo">
                 </div>
                  <div>
                     <label for="loginEmail" class="block text-sm font-medium mb-1">Email:</label>
-                    <input type="email" id="loginEmail" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400 text-base bg-gray-700 text-gray-100" placeholder="seuemail@exemplo.com">
+                    <input type="email" id="loginEmail" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100" placeholder="seuemail@exemplo.com">
                 </div>
-                <button id="loginButton" onclick="loginUser()" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button text-base">Entrar</button>
+                <button id="loginButton" onclick="loginUser()" class="w-full font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button text-base">Entrar</button>
             </div>
         </div>
 
-        <div id="homeScreen" class="text-center hidden"> <div class="app-header">
+        <div id="homeScreen" class="text-center hidden"> 
+            <div class="app-header">
                 <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
             </div>
             <div class="p-6">
                 <h2 class="text-2xl font-bold text-gray-300 my-6" style="font-family: 'Inter', sans-serif;">Escolha seu nível</h2>
                 <div class="space-y-4">
-                    <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
+                    <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
                         Avançado 
-                        <span class="block text-sm font-normal opacity-90">(10+ barras e 15+ dips)</span>
+                        <span class="block text-sm font-normal opacity-80">(10+ barras e 15+ dips)</span>
                     </button>
-                    <button id="level-intermediario" onclick="selectLevel('intermediario')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
+                    <button id="level-intermediario" onclick="selectLevel('intermediario')" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
                         Intermediário 
-                        <span class="block text-sm font-normal opacity-90">(3 pull ups e 3 dips)</span>
+                        <span class="block text-sm font-normal opacity-80">(3 pull ups e 3 dips)</span>
                     </button>
-                    <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
+                    <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
                         Iniciante 
-                        <span class="block text-sm font-normal opacity-90">(0 pull ups e 0 push ups)</span>
+                        <span class="block text-sm font-normal opacity-80">(0 pull ups e 0 push ups)</span>
                     </button>
                 </div>
             </div>
         </div>
 
         <div id="workoutListScreen" class="p-6 hidden">
-            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="mb-6 text-blue-400 hover:text-blue-500 font-semibold">← Voltar para Níveis</button> <div id="workoutButtonsContainer" class="space-y-3 mt-6"> 
+            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="mb-6 text-gray-400 hover:text-gray-200 font-semibold">← Voltar para Níveis</button> 
+            <div id="workoutButtonsContainer" class="space-y-3 mt-6"> 
                 </div>
         </div>
 
         <div id="workoutExecutionScreen" class="p-6 hidden">
-             <button onclick="confirmExitWorkout()" class="mb-4 text-blue-400 hover:text-blue-500 font-semibold">← Voltar para Lista de Treinos</button>
+             <button onclick="confirmExitWorkout()" class="mb-4 text-gray-400 hover:text-gray-200 font-semibold">← Voltar para Lista de Treinos</button>
             
             <div class="exercise-card">
                 <h3 id="exerciseName" class="text-2xl font-bold mb-1 text-center text-gray-100" style="font-family: 'Inter', sans-serif;">Nome do Exercício</h3>
-                <p id="seriesProgressText" class="text-md text-gray-300 mb-4 text-center">Série X de Y</p>
+                <p id="seriesProgressText" class="series-display-text mb-4 text-center">SÉRIE X</p>
                 
                 <div id="mediaDisplayArea" class="media-display-area">
                     <div id="videoPlayerContainer" class="video-container"> <p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo do exercício</p>
                     </div>
-                    <div id="circularTimerWrapper" class="force-hidden"> <div id="circularTimerContainer" class="relative mx-auto">
-                            <svg class="w-full h-full" viewBox="0 0 100 100">
-                                <circle class="text-gray-600" stroke-width="8" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50"/>
-                                <circle id="progressRing"
-                                        class="text-blue-400" stroke-width="8"
-                                        stroke-linecap="round"
-                                        stroke="currentColor"
-                                        fill="transparent"
-                                        r="42" cx="50" cy="50"
-                                        style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
-                            </svg>
-                            <div id="circularTimerText" class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gray-100">
-                                00:00
+                    <div id="circularTimerWrapper" class="force-hidden"> 
+                        <div class="timer-display-and-controls">
+                            <button id="skipRestTimerBtn" onclick="skipRest()" class="action-button">Pular</button>
+                            <div id="circularTimerContainer" class="relative">
+                                <svg class="w-full h-full" viewBox="0 0 100 100">
+                                    <circle class="text-gray-700" stroke-width="8" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50"/>
+                                    <circle id="progressRing"
+                                            class="text-sky-400" stroke-width="8" 
+                                            stroke-linecap="round"
+                                            stroke="currentColor"
+                                            fill="transparent"
+                                            r="42" cx="50" cy="50"
+                                            style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
+                                </svg>
+                                <div id="circularTimerText" class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gray-100">
+                                    00:00
+                                </div>
                             </div>
-                        </div>
-                        <div class="timer-controls-circular">
-                            <button id="pauseRestTimerBtn" onclick="pauseRestTimer()" class="bg-yellow-600 hover:bg-yellow-700 text-white action-button">Pausar</button>
-                            <button id="skipRestTimerBtn" onclick="skipRest()" class="bg-gray-600 hover:bg-gray-700 text-white action-button">Pular</button>
+                            <button id="pauseRestTimerBtn" onclick="pauseRestTimer()" class="action-button">Pausar</button>
                         </div>
                     </div>
                 </div>
+                 <p class="instruction-text">Execute como no vídeo, anote as repetições e clique em concluir série.</p>
 
-                <div class="exercise-details-info mt-4 text-center">
+                <div class="exercise-details-info mt-2 text-center">
                     <p class="text-lg"><strong>Repetições Alvo:</strong> <span id="exerciseReps" class="font-medium text-gray-100"></span></p>
                 </div>
             </div>
 
             <div id="seriesInputArea" class="mb-4 px-2">
                 <label for="repsInput" class="block text-sm font-medium text-gray-300 mb-1">Quantas reps/tempo você fez nesta série? (Opcional)</label>
-                <input type="text" id="repsInput" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-blue-400 focus:border-blue-400 text-base bg-gray-700 text-gray-100" placeholder="Ex: 10 ou 30s">
+                <input type="text" id="repsInput" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100" placeholder="Exemplo: 10 (nº de reps) ou 10s (tempo)">
             </div>
             
-            <div class="flex flex-col items-center gap-2 mb-4">
-                <button id="completeSeriesBtn" onclick="completeSeries()" class="w-full max-w-xs bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg action-button text-base">Concluir Série</button>
-                <button id="skipExerciseBtn" onclick="confirmSkipExercise()" class="w-full max-w-xs skip-exercise-btn font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg action-button text-base">Pular Exercício Atual</button> 
+            <div id="exerciseActionButtons" class="mb-4">
+                <button id="completeSeriesBtn" onclick="completeSeries()" class="w-full max-w-xs font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg action-button text-base">Concluir Série</button>
+                <button id="skipExerciseBtn" onclick="confirmSkipExercise()" class="w-full max-w-xs skip-exercise-btn font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg action-button text-base mt-2">Pular Exercício Atual</button> 
             </div>
             
-            <button id="finishWorkoutBtn" onclick="finishWorkout()" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg mt-3 hidden action-button text-base">Finalizar Treino (Ver Resumo)</button>
+            <button id="finishWorkoutBtn" onclick="finishWorkout()" class="w-full font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg mt-3 hidden action-button text-base">Finalizar Treino (Ver Resumo)</button>
         </div>
 
         <div id="summaryScreen" class="p-6 hidden text-center">
@@ -372,9 +430,9 @@
 
     <script>
         // --- ESTADO DA APLICAÇÃO ---
-        let currentUser = { name: null, email: null }; // Armazena dados do usuário logado
+        let currentUser = { name: null, email: null }; 
         let userProgressData = []; 
-        let currentScreen = 'loginScreen'; // Começa na tela de login
+        let currentScreen = 'loginScreen'; 
         let selectedLevel = '';
         let selectedWorkoutName = '';
         let currentWorkout = []; 
@@ -389,7 +447,7 @@
         let workoutStartTime = null; 
 
         const Screens = {
-            LOGIN: 'loginScreen', // Adiciona tela de login
+            LOGIN: 'loginScreen', 
             HOME: 'homeScreen',
             WORKOUT_LIST: 'workoutListScreen',
             WORKOUT_EXECUTION: 'workoutExecutionScreen',
@@ -405,14 +463,13 @@
             completeSeriesBtnElement, skipExerciseBtnElement, finishWorkoutBtnElement,
             seriesInputAreaElement, summaryContentElement, statsDivElement, 
             motivationalMessageElement, toastNotificationElement,
-            loginNameInputElement, loginEmailInputElement; // Inputs de login
+            loginNameInputElement, loginEmailInputElement, exerciseActionButtonsElement; 
             
         let radius;
         let circumference;
 
         // --- FUNÇÕES DE INICIALIZAÇÃO ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Obter referências aos elementos DOM
             fixedHeaderElement = document.getElementById('fixedHeader'); 
             videoPlayerContainerElement = document.getElementById('videoPlayerContainer');
             circularTimerWrapperElement = document.getElementById('circularTimerWrapper');
@@ -435,8 +492,8 @@
             toastNotificationElement = document.getElementById('toastNotification');
             loginNameInputElement = document.getElementById('loginName');
             loginEmailInputElement = document.getElementById('loginEmail');
+            exerciseActionButtonsElement = document.getElementById('exerciseActionButtons'); 
 
-            // Calcular circunferência do timer
             radius = progressRingElement?.getAttribute('r'); 
             if (radius) { 
                  radius = parseFloat(radius);
@@ -447,37 +504,63 @@
                 console.error("Elemento 'progressRing' ou seu atributo 'r' não encontrado.");
             }
 
-            // Mostrar a tela inicial (Login)
+            // Prepara todas as telas para a transição, exceto a inicial
+            ALL_SCREENS.forEach(id => {
+                const screenElement = document.getElementById(id);
+                if (screenElement && id !== Screens.LOGIN) {
+                    screenElement.classList.add('hidden', 'screen-hidden'); // Começa escondida e pronta para fade-in
+                }
+            });
+
             showScreen(Screens.LOGIN); 
             console.warn("IMPORTANTE: A integração com Google Sheets agora está ativa. Verifique se a função doPost no seu script está configurada e implantada para salvar o progresso.");
-            // showToast("App Iniciado.", 4000); // Mostra toast após login
         });
 
 
         // --- NAVEGAÇÃO E CONTROLE DE TELA ---
         function showScreen(screenId) {
-            ALL_SCREENS.forEach(id => {
-                const screenElement = document.getElementById(id);
-                if (screenElement) {
-                    screenElement.classList.add('hidden');
-                } else {
-                    console.warn(`Elemento de tela não encontrado: ${id}`);
+            const currentScreenElement = document.getElementById(currentScreen);
+            const nextScreenElement = document.getElementById(screenId);
+
+            if (currentScreenElement && nextScreenElement && currentScreenElement !== nextScreenElement) {
+                currentScreenElement.classList.add('opacity-0'); 
+                
+                setTimeout(() => {
+                    currentScreenElement.classList.add('hidden');
+                    currentScreenElement.classList.remove('opacity-0'); 
+
+                    if (nextScreenElement) {
+                        nextScreenElement.classList.remove('hidden');
+                        void nextScreenElement.offsetWidth; 
+                        nextScreenElement.classList.remove('screen-hidden'); 
+                        // Adiciona a classe de opacidade total após um pequeno delay para garantir a transição
+                        setTimeout(() => nextScreenElement.classList.remove('opacity-0'), 20); 
+                    }
+                    currentScreen = screenId;
+                    window.scrollTo(0, 0);
+                    updateHeader(screenId); 
+                }, 300); 
+            } else { 
+                ALL_SCREENS.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && id !== screenId) {
+                        el.classList.add('hidden', 'screen-hidden'); // Garante que outras telas estejam prontas para fade-in
+                    }
+                });
+                if (nextScreenElement) {
+                     nextScreenElement.classList.remove('hidden', 'screen-hidden');
+                     void nextScreenElement.offsetWidth;
+                     nextScreenElement.classList.remove('opacity-0');
                 }
-            });
-            const targetScreen = document.getElementById(screenId);
-            if (targetScreen) {
-                targetScreen.classList.remove('hidden');
-            } else {
-                 console.error(`Tentativa de mostrar tela inexistente: ${screenId}`);
-                 return; 
+                currentScreen = screenId;
+                window.scrollTo(0, 0);
+                updateHeader(screenId);
             }
-            
-            currentScreen = screenId;
-            window.scrollTo(0, 0);
+        }
 
-            if (!fixedHeaderElement) return; 
+        function updateHeader(screenId) {
+             if (!fixedHeaderElement) return; 
 
-            // Mostra o header fixo em todas as telas, exceto Login e Home inicial
             if (screenId === Screens.LOGIN || screenId === Screens.HOME) {
                 fixedHeaderElement.classList.add('hidden');
             } else {
@@ -507,8 +590,6 @@
             }
         }
         
-        // resetUser = true limpa os dados do usuário (ao voltar para login)
-        // resetUser = false mantém os dados do usuário (ao voltar de treino para lista)
         function resetAppState(resetUser = true) { 
             clearRestTimer(); 
             
@@ -532,6 +613,7 @@
             if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
             if (finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden');
+            if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden'); 
             
             if (currentScreen === Screens.HOME && fixedHeaderElement) { 
                  fixedHeaderElement.classList.add('hidden');
@@ -547,7 +629,6 @@
                 showToast("Por favor, preencha seu nome e email.");
                 return;
             }
-            // Validação básica de email (pode ser melhorada)
             if (!email.includes('@') || !email.includes('.')) {
                  showToast("Por favor, insira um email válido.");
                  return;
@@ -557,7 +638,7 @@
             currentUser.email = email;
             console.log("Usuário logado:", currentUser);
             showToast(`Bem-vindo(a), ${name}!`);
-            showScreen(Screens.HOME); // Vai para a tela de seleção de nível após login
+            showScreen(Screens.HOME); 
         }
 
 
@@ -610,6 +691,7 @@
             if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
             if (finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden');
+            if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden');
             showScreen(Screens.WORKOUT_LIST); 
         }
 
@@ -704,11 +786,13 @@
             }
 
             if (exerciseNameElement) exerciseNameElement.textContent = exercisePerf.exerciseName;
-            if (seriesProgressTextElement) seriesProgressTextElement.textContent = `Série ${currentSeriesNumber} de ${exercisePerf.seriesTargetCount}`;
+            if (seriesProgressTextElement) seriesProgressTextElement.textContent = `SÉRIE ${currentSeriesNumber}`; 
             
             if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden'); 
             if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden'); 
             if (circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden'); 
+            if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden'); 
+            if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden'); 
 
             if (videoPlayerContainerElement) {
                 if (exercisePerf.embedUrl) { 
@@ -740,7 +824,6 @@
 
             if(completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
             if(skipExerciseBtnElement) skipExerciseBtnElement.disabled = false; 
-            if(seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
             clearRestTimer(); 
         }
 
@@ -755,8 +838,7 @@
             const currentExercisePerformance = performanceData[currentExerciseIndex];
             currentExercisePerformance.seriesDone.push({ reps: repsValue });
 
-            if(completeSeriesBtnElement) completeSeriesBtnElement.disabled = true; 
-            if(skipExerciseBtnElement) skipExerciseBtnElement.disabled = true; 
+            if(exerciseActionButtonsElement) exerciseActionButtonsElement.classList.add('force-hidden'); 
             if(seriesInputAreaElement) seriesInputAreaElement.classList.add('hidden'); 
 
             const restTimeString = currentExercisePerformance.restTimeString; 
@@ -773,7 +855,10 @@
             if(mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if(videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden'); 
             if(circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden');  
+            if(exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden'); 
+            if(seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden'); 
             if(skipExerciseBtnElement) skipExerciseBtnElement.disabled = false; 
+            // O texto da série será atualizado por displayCurrentExerciseAndSeries
 
 
             if (currentSeriesNumber <= currentExercisePerformance.seriesTargetCount) {
@@ -819,7 +904,7 @@
             }
         }
 
-        // --- LÓGICA DE PONTUAÇÃO DE ESTRELAS (NOVA LÓGICA v19) ---
+        // --- LÓGICA DE PONTUAÇÃO DE ESTRELAS (AJUSTADA v22) ---
         function parseRepsTarget(repsString) {
             if (!repsString || typeof repsString !== 'string') return { type: 'invalid' };
 
@@ -875,17 +960,17 @@
 
             if (parsedTarget.type === 'range') {
                 const { min, max } = parsedTarget;
-                if (avgRepsDonePerSeries > max) return 4; 
-                if (avgRepsDonePerSeries === max) return 3; 
-                if (avgRepsDonePerSeries >= min) return 2; 
-                if (avgRepsDonePerSeries < min) return 1; 
+                if (avgRepsDonePerSeries > max) return 4;      // Bônus
+                if (avgRepsDonePerSeries === max) return 3;    
+                if (avgRepsDonePerSeries >= min) return 2;     
+                if (avgRepsDonePerSeries < min && avgRepsDonePerSeries > 0) return 1; 
                 return 0; 
             } else if (parsedTarget.type === 'fixed') {
                 const targetVal = parsedTarget.value;
-                if (avgRepsDonePerSeries > targetVal) return 4; 
-                if (avgRepsDonePerSeries === targetVal) return 3;
+                if (avgRepsDonePerSeries > targetVal) return 4;  
+                if (avgRepsDonePerSeries === targetVal) return 3; 
                 if (avgRepsDonePerSeries >= targetVal * 0.75) return 2; 
-                if (avgRepsDonePerSeries < targetVal * 0.75) return 1; 
+                if (avgRepsDonePerSeries < targetVal * 0.75 && avgRepsDonePerSeries > 0) return 1;  
                 return 0;
             }
             return 0;
@@ -905,16 +990,15 @@
 
 
         // --- FINALIZAR TREINO E SALVAR PROGRESSO ---
-        async function finishWorkout() { // Adiciona async para esperar o salvamento
+        async function finishWorkout() { 
             userProgressData = []; 
-            const studentName = currentUser.name || "Fulano"; // Usa o nome do usuário logado
-            const studentEmail = currentUser.email || "N/A"; // Usa o email do usuário logado
-            const date = new Date().toISOString(); // Usa formato ISO para data/hora
+            const studentName = currentUser.name || "Fulano"; 
+            const studentEmail = currentUser.email || "N/A"; 
+            const date = new Date().toISOString(); 
             const workoutEndTime = Date.now(); 
             const workoutDurationMs = workoutStartTime ? workoutEndTime - workoutStartTime : 0; 
             const workoutDurationSec = Math.floor(workoutDurationMs / 1000);
 
-            // Prepara os dados para cada série
             performanceData.forEach(exercisePerf => {
                 exercisePerf.stars = calculateExerciseStars(exercisePerf);
 
@@ -922,15 +1006,15 @@
                     userProgressData.push({
                         date: date,
                         studentName: studentName,
-                        studentEmail: studentEmail, // Adiciona email
+                        studentEmail: studentEmail, 
                         level: selectedLevel,
                         workoutName: selectedWorkoutName,
                         exerciseName: exercisePerf.exerciseName,
                         exerciseId: exercisePerf.exerciseId, 
                         seriesNumber: index + 1, 
                         repsDone: seriesData.reps,
-                        stars: exercisePerf.stars, // Adiciona estrelas do exercício
-                        workoutDurationSec: workoutDurationSec // Adiciona duração total (a mesma para todas as linhas do treino)
+                        stars: exercisePerf.stars, 
+                        workoutDurationSec: workoutDurationSec 
                     });
                 });
             });
@@ -938,7 +1022,6 @@
             console.log("Dados a serem enviados:", userProgressData);
             showToast(`Finalizando e salvando ${selectedWorkoutName}...`);
             
-            // Chama a função para salvar na planilha
             const saveSuccess = await saveProgressToSheet(userProgressData); 
 
             if (saveSuccess) {
@@ -953,7 +1036,7 @@
 
         // --- FUNÇÃO PARA SALVAR PROGRESSO NA PLANILHA ---
         async function saveProgressToSheet(progressDataArray) {
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec"; // Mesma URL
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec"; 
 
              if (SCRIPT_URL === "COLE_A_URL_DO_SEU_SCRIPT_IMPLANTADO_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
                 console.error("URL do Script inválida ou não configurada para salvar.");
@@ -961,52 +1044,40 @@
             }
             if (!progressDataArray || progressDataArray.length === 0) {
                 console.log("Nenhum dado de progresso para salvar.");
-                return true; // Considera sucesso se não há nada a salvar
+                return true; 
             }
 
             try {
-                // Envia CADA linha de progresso individualmente para a função doPost
-                // (O Apps Script geralmente processa uma linha por vez mais facilmente com appendRow)
-                // Se sua função doPost espera um array, ajuste aqui para enviar o array completo.
                 for (const progressEntry of progressDataArray) {
                     const response = await fetch(SCRIPT_URL, {
                         method: 'POST',
-                        mode: 'cors', // Necessário para requisições cross-origin
+                        mode: 'cors', 
                         cache: 'no-cache',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        // Redirecionamento manual é necessário para POST no Apps Script
                         redirect: 'follow', 
-                        // Envia UMA entrada de progresso por vez
                         body: JSON.stringify(progressEntry) 
                     });
 
-                    // Apps Script com doPost geralmente retorna um redirect, 
-                    // então verificar response.ok pode não ser o ideal.
-                    // Verificamos se houve erro na rede ou status inesperado.
                     if (response.type === 'error' || !response.redirected) { 
-                        // Tenta obter mais detalhes do erro se possível
                          let errorMsg = `Erro ao salvar série ${progressEntry.seriesNumber} de ${progressEntry.exerciseName}. Status: ${response.status}`;
                          try {
                              const errorData = await response.json();
                              errorMsg = errorData.message || errorData.error || errorMsg;
                          } catch(e) { /* ignora erro de parse */ }
                         console.error("Falha ao salvar progresso:", errorMsg);
-                        // Decide se quer parar ou continuar salvando as outras séries
-                        // return false; // Para parar no primeiro erro
                     }
-                     // Pequena pausa entre requisições para não sobrecarregar (opcional)
                     await new Promise(resolve => setTimeout(resolve, 50)); 
                 }
                 
                 console.log("Todas as entradas de progresso enviadas.");
-                return true; // Indica sucesso geral no envio
+                return true; 
 
             } catch (error) {
                 console.error("Erro na função saveProgressToSheet:", error);
                 showToast(`Erro de rede ao salvar progresso: ${error.message}`, 5000);
-                return false; // Indica falha
+                return false; 
             }
         }
 
@@ -1016,7 +1087,7 @@
                  console.error("Elementos da tela de resumo não encontrados.");
                  return;
             }
-            const studentName = currentUser.name || "Fulano"; // Usa nome do usuário logado
+            const studentName = currentUser.name || "Fulano"; 
             const date = new Date().toLocaleDateString('pt-BR');
             let displayLevelName = selectedLevel; 
              if (selectedLevel === 'avancado') displayLevelName = 'Avançado';
@@ -1136,6 +1207,7 @@
             if(mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden'); 
             if(videoPlayerContainerElement) videoPlayerContainerElement.classList.add('force-hidden'); 
             if(circularTimerWrapperElement) circularTimerWrapperElement.classList.remove('force-hidden'); 
+            if(seriesProgressTextElement) seriesProgressTextElement.textContent = "DESCANSO"; 
             
             const pauseBtn = document.getElementById('pauseRestTimerBtn');
             const skipBtn = document.getElementById('skipRestTimerBtn');
@@ -1220,4 +1292,3 @@
     </script>
 </body>
 </html>
-```
