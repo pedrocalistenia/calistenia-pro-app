@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* --- NOVA PALETA DE CORES E ESTILOS GERAIS --- */
+        /* Estilos CSS (Modo Escuro, Timer, etc. - Mantidos) */
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior-y: contain;
@@ -140,25 +140,25 @@
             transition: stroke-dashoffset 0.3s linear; 
         }
         .timer-controls-circular button {
-            padding: 0.75rem; /* Aumentado padding para melhor área de toque */
+            padding: 0.75rem; 
             font-size: 0.8rem; 
-            border-radius: 0.5rem; /* Quadrado com bordas arredondadas */
-            width: 50px; /* Largura fixa */
-            height: 50px; /* Altura fixa */
+            border-radius: 0.5rem; 
+            width: 50px; 
+            height: 50px; 
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 600; /* semi-bold */
+            font-weight: 600; 
         }
         #pauseRestTimerBtn {
-            background-color: #B0B0B0; /* Prata/Cinza claro */
-            color: #121212; /* Texto preto para contraste */
+            background-color: #B0B0B0; 
+            color: #121212; 
         }
         #pauseRestTimerBtn:hover {
             background-color: #999999;
         }
         #skipRestTimerBtn {
-            background-color: #444444; /* Cinza escuro */
+            background-color: #444444; 
             color: #E0E0E0;
         }
         #skipRestTimerBtn:hover {
@@ -185,9 +185,9 @@
             color: #E0E0E0; 
         }
         .series-display-text { 
-            font-size: 1.75rem; /* Aumentado um pouco */
+            font-size: 1.75rem; 
             font-weight: 700; 
-            color: #CCCCCC; /* Prata claro */
+            color: #CCCCCC; 
             text-transform: uppercase;
             margin-bottom: 0.75rem !important; 
         }
@@ -307,7 +307,7 @@
 </head>
 <body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-start min-h-screen pt-4 px-2 sm:px-4">
 
-    <div id="appContainer" class="w-full max-w-md bg-gray-800 shadow-xl rounded-lg overflow-hidden relative"> 
+    <div id="appContainer" class="w-full max-w-lg bg-gray-800 shadow-xl rounded-lg overflow-hidden relative"> 
 
         <div id="fixedHeader" class="app-header hidden">
              <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
@@ -504,11 +504,13 @@
                 console.error("Elemento 'progressRing' ou seu atributo 'r' não encontrado.");
             }
 
-            // Prepara todas as telas para a transição, exceto a inicial
             ALL_SCREENS.forEach(id => {
                 const screenElement = document.getElementById(id);
                 if (screenElement && id !== Screens.LOGIN) {
-                    screenElement.classList.add('hidden', 'screen-hidden'); // Começa escondida e pronta para fade-in
+                    screenElement.classList.add('hidden', 'screen-hidden', 'opacity-0'); 
+                } else if (screenElement) {
+                    screenElement.classList.remove('hidden'); // Garante que a tela de login esteja visível
+                    screenElement.classList.remove('opacity-0', 'screen-hidden');
                 }
             });
 
@@ -527,14 +529,12 @@
                 
                 setTimeout(() => {
                     currentScreenElement.classList.add('hidden');
-                    currentScreenElement.classList.remove('opacity-0'); 
+                    // currentScreenElement.classList.remove('opacity-0'); // Não precisa remover aqui se 'screen-hidden' controla
 
                     if (nextScreenElement) {
-                        nextScreenElement.classList.remove('hidden');
+                        nextScreenElement.classList.remove('hidden', 'screen-hidden');
                         void nextScreenElement.offsetWidth; 
-                        nextScreenElement.classList.remove('screen-hidden'); 
-                        // Adiciona a classe de opacidade total após um pequeno delay para garantir a transição
-                        setTimeout(() => nextScreenElement.classList.remove('opacity-0'), 20); 
+                        nextScreenElement.classList.remove('opacity-0'); 
                     }
                     currentScreen = screenId;
                     window.scrollTo(0, 0);
@@ -544,13 +544,13 @@
                 ALL_SCREENS.forEach(id => {
                     const el = document.getElementById(id);
                     if (el && id !== screenId) {
-                        el.classList.add('hidden', 'screen-hidden'); // Garante que outras telas estejam prontas para fade-in
+                        el.classList.add('hidden', 'screen-hidden', 'opacity-0'); 
                     }
                 });
                 if (nextScreenElement) {
-                     nextScreenElement.classList.remove('hidden', 'screen-hidden');
-                     void nextScreenElement.offsetWidth;
-                     nextScreenElement.classList.remove('opacity-0');
+                     nextScreenElement.classList.remove('hidden', 'screen-hidden', 'opacity-0');
+                     void nextScreenElement.offsetWidth; // Força reflow
+                     // A opacidade será 1 por padrão se 'opacity-0' for removida
                 }
                 currentScreen = screenId;
                 window.scrollTo(0, 0);
