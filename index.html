@@ -468,6 +468,29 @@
             align-items: center;
             gap: 0.5rem;
         }
+        /* Estilo para a seção de comparação de progresso */
+        #progressComparisonArea {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #2C2C2C;
+            border-radius: 0.5rem;
+            text-align: left;
+        }
+        #progressComparisonArea h4 {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            margin-bottom: 0.5rem;
+            color: #E0E0E0;
+        }
+        #progressComparisonArea p {
+            font-size: 0.875rem; /* text-sm */
+            color: #B0B0B0;
+            margin-bottom: 0.25rem;
+        }
+        .progress-increase { color: #34D399; } /* Verde para progresso */
+        .progress-decrease { color: #F87171; } /* Vermelho para regressão */
+        .progress-same { color: #A0A0A0; }    /* Cinza para sem alteração */
+
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-start min-h-screen pt-4 px-2 sm:px-4">
@@ -591,6 +614,11 @@
             </div>
             <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left"> 
             </div>
+            <div id="progressComparisonArea" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left hidden">
+                <h4 class="text-lg font-semibold mb-2 text-gray-100">Comparação com Último Treino:</h4>
+                <div id="comparisonDetails"></div>
+            </div>
+
 
             <div id="pseInputArea" class="text-left mb-4">
                 <h4 class="text-lg font-semibold mb-1 text-gray-100">Percepção de Esforço (PSE)</h4>
@@ -632,8 +660,8 @@
 
         // --- CONSTANTES ---
         const ANIMATION_DURATION = 300; 
-        // URL do Google Apps Script para carregar treinos
         const SCRIPT_URL_LOAD_WORKOUT = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec";
+        // SCRIPT_URL_SAVE_PROGRESS não é mais necessária se salvamos apenas no Firebase
 
 
         // --- ESTADO DA APLICAÇÃO ---
@@ -641,9 +669,7 @@
         let currentScreen = ''; 
         let selectedLevel = '';
         let selectedWorkoutName = '';
-        let currentWorkout = [];
-        let currentExerciseIndex = 0;
-        let currentSeriesNumber = 1;
+        let currentWorkout = []; 
         let performanceData = []; 
         let workoutPSE = null; 
         
@@ -671,14 +697,13 @@
             seriesInputAreaElement, summaryContentElement, statsDivElement,
             motivationalMessageElement, toastNotificationElement,
             loginNameInputElement, loginEmailInputElement, exerciseActionButtonsElement,
-            pseInputElement;
+            pseInputElement, progressComparisonAreaElement, comparisonDetailsElement;
 
         let radius;
         let circumference;
 
         // --- FUNÇÕES DE INICIALIZAÇÃO ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Inicializa referências DOM
             fixedHeaderElement = document.getElementById('fixedHeader');
             videoPlayerContainerElement = document.getElementById('videoPlayerContainer');
             circularTimerWrapperElement = document.getElementById('circularTimerWrapper');
@@ -702,9 +727,10 @@
             loginEmailInputElement = document.getElementById('loginEmail');
             exerciseActionButtonsElement = document.getElementById('exerciseActionButtons');
             pseInputElement = document.getElementById('pseInput'); 
+            progressComparisonAreaElement = document.getElementById('progressComparisonArea');
+            comparisonDetailsElement = document.getElementById('comparisonDetails');
 
 
-            // Configuração do anel de progresso do timer
             radius = progressRingElement?.getAttribute('r');
             if (radius) {
                 radius = parseFloat(radius);
@@ -718,7 +744,6 @@
             }
             
             currentScreen = Screens.LOGIN; 
-
             showScreen(Screens.LOGIN); 
             console.log("Firebase SDKs carregados. App inicializado.");
         });
@@ -836,7 +861,9 @@
             workoutStartTime = null;
             workoutPSE = null; 
             if(pseInputElement) pseInputElement.value = ''; 
-            viewingAlternativeType = null; 
+            if(progressComparisonAreaElement) progressComparisonAreaElement.classList.add('hidden');
+            if(comparisonDetailsElement) comparisonDetailsElement.innerHTML = '';
+
 
             if (resetUser) {
                 currentUser = { name: null, email: null };
@@ -920,7 +947,6 @@
             workoutStartTime = null;
             workoutPSE = null;
             if(pseInputElement) pseInputElement.value = '';
-            viewingAlternativeType = null;
 
 
             if (completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
@@ -934,14 +960,13 @@
             showScreen(Screens.WORKOUT_LIST);
         }
 
-        // --- LÓGICA DE CARREGAMENTO DO TREINO (AGORA DO GOOGLE SHEETS) ---
+        // --- LÓGICA DE CARREGAMENTO DO TREINO (DO GOOGLE SHEETS) ---
         async function loadWorkout(workoutName) {
             console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel} via Google Sheets`);
             selectedWorkoutName = workoutName;
             workoutStartTime = Date.now();
             workoutPSE = null; 
             if(pseInputElement) pseInputElement.value = '';
-            viewingAlternativeType = null;
             
             if (SCRIPT_URL_LOAD_WORKOUT === "COLOQUE_A_URL_DO_SEU_SCRIPT_AQUI" || !SCRIPT_URL_LOAD_WORKOUT.startsWith("https://script.google.com/")) {
                 showToast("Erro: URL do Script para carregar treinos inválida ou não configurada.", 5000);
@@ -1243,25 +1268,22 @@
                 date: new Date().toISOString(),
                 workoutDurationSec: workoutStartTime ? Math.floor((Date.now() - workoutStartTime) / 1000) : 0,
                 pse: workoutPSE,
-                exercises: performanceData.map(exPerf => {
-                    return {
-                        exerciseName: exPerf.exerciseName,
-                        exerciseId: exPerf.exerciseId,
-                        stars: calculateExerciseStars(exPerf),
-                        seriesDone: exPerf.seriesDone.map((serie, index) => ({
-                            seriesNumber: index + 1,
-                            repsDone: serie.reps
-                        }))
-                    };
-                })
+                exercises: performanceData.map(exPerf => ({
+                    exerciseName: exPerf.exerciseName,
+                    exerciseId: exPerf.exerciseId,
+                    stars: calculateExerciseStars(exPerf),
+                    seriesDone: exPerf.seriesDone.map((serie, index) => ({
+                        seriesNumber: index + 1,
+                        repsDone: serie.reps
+                    }))
+                }))
             };
             
             console.log("Dados do treino a serem enviados para o Firestore:", workoutDataForFirestore);
             showToast(`Salvando ${selectedWorkoutName} no Firebase...`);
+            const firestoreSaveSuccess = await saveProgressToFirestore(workoutDataForFirestore);
 
-            const saveSuccess = await saveProgressToFirestore(workoutDataForFirestore);
-
-            if (saveSuccess) {
+            if (firestoreSaveSuccess) {
                  showToast(`Treino salvo com sucesso!`); // MENSAGEM ALTERADA
             } else {
                  showToast(`Erro ao salvar o treino ${selectedWorkoutName} no Firebase.`);
@@ -1280,24 +1302,23 @@
                 return false;
             }
             if (!singleWorkoutData) {
-                console.log("Nenhum dado de treino para salvar.");
+                console.log("Nenhum dado de treino para salvar no Firestore.");
                 return true; 
             }
 
             try {
-                // Construir o ID do documento personalizado
                 const dateForId = new Date(singleWorkoutData.date);
                 const day = String(dateForId.getDate()).padStart(2, '0');
-                const month = String(dateForId.getMonth() + 1).padStart(2, '0'); // Meses são 0-indexados
+                const month = String(dateForId.getMonth() + 1).padStart(2, '0'); 
                 const year = dateForId.getFullYear();
                 const studentFirstName = (singleWorkoutData.studentName || "Aluno").split(" ")[0].replace(/[^a-zA-Z0-9]/g, "");
                 const workoutNameClean = (singleWorkoutData.workoutName || "Treino").replace(/\s+/g, "");
                 
                 const customDocId = `${studentFirstName}${day}${month}${year}${workoutNameClean}`;
-                console.log("ID do Documento Personalizado:", customDocId);
+                console.log("ID do Documento Personalizado (Firestore):", customDocId);
 
-                const workoutDocRef = db.collection("workoutProgress").doc(customDocId); 
-                await workoutDocRef.set(singleWorkoutData); 
+                const workoutDocRef = db.collection("completedWorkouts").doc(customDocId); 
+                await workoutDocRef.set(singleWorkoutData, { merge: true }); 
 
                 console.log("Treino salvo no Firestore com sucesso. ID:", customDocId);
                 return true;
@@ -1310,11 +1331,12 @@
         }
 
         function displaySummary() { 
-            if (!summaryContentElement || !statsDivElement || !motivationalMessageElement) {
-                 console.error("Elementos da tela de resumo não encontrados.");
+            if (!summaryContentElement || !statsDivElement || !motivationalMessageElement || !progressComparisonAreaElement || !comparisonDetailsElement) {
+                 console.error("Um ou mais elementos da tela de resumo não encontrados.");
                  return;
             }
             const studentName = currentUser.name || "Convidado";
+            const studentFirstName = studentName.split(" ")[0]; 
             const date = new Date().toLocaleDateString('pt-BR');
             let displayLevelName = selectedLevel;
              if (selectedLevel === 'avancado') displayLevelName = 'Avançado';
@@ -1323,9 +1345,20 @@
              else if (selectedLevel) displayLevelName = selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1);
              else displayLevelName = 'N/A';
 
+            // Array de mensagens motivacionais
+            const motivationalMessages = [
+                `Parabéns, ${studentFirstName}! Mandou bem!`,
+                `Excelente treino, ${studentFirstName}! Continue assim!`,
+                `Mais um pra conta, ${studentFirstName}! Orgulho!`,
+                `Impressionante, ${studentFirstName}! A evolução não para!`,
+                `Que performance, ${studentFirstName}! Continue focado(a)!`
+            ];
+            const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+            motivationalMessageElement.textContent = randomMessage;
+
 
             summaryContentElement.innerHTML = `
-                <p><strong>Aluno:</strong> ${studentName}</p>
+                <p><strong>Aluno:</strong> ${currentUser.name || "Convidado"}</p>
                 <p><strong>Data:</strong> ${date}</p>
                 <p><strong>Nível:</strong> ${displayLevelName}</p>
                 <p><strong>Treino:</strong> ${selectedWorkoutName || 'N/A'}</p>
@@ -1390,11 +1423,84 @@
                 <p><strong>Total de Repetições (numéricas):</strong> ${totalRepsOverallForDisplay > 0 ? totalRepsOverallForDisplay : "N/A"}</p>
                 <p><strong>Exercícios com séries registradas:</strong> ${registeredExercisesCountForDisplay}</p>
                 `;
-
-            motivationalMessageElement.textContent = `Parabéns, ${studentName}! Você mandou bem no ${selectedWorkoutName || 'treino'}! Revise seu resumo e adicione sua PSE.`;
+            
+            comparisonDetailsElement.innerHTML = '';
+            progressComparisonAreaElement.classList.add('hidden');
+            loadAndDisplayProgressComparison();
             
             if(pseInputElement) pseInputElement.focus();
         }
+        
+        async function loadAndDisplayProgressComparison() {
+            if (!currentUser.email || !selectedWorkoutName || !db) {
+                console.log("Dados insuficientes para buscar comparação de progresso.");
+                return;
+            }
+
+            try {
+                const querySnapshot = await db.collection("completedWorkouts") 
+                    .where("studentEmail", "==", currentUser.email)
+                    .where("workoutName", "==", selectedWorkoutName)
+                    .where("level", "==", selectedLevel) 
+                    .orderBy("date", "desc")
+                    .limit(1) 
+                    .get();
+
+                let previousWorkoutData = null;
+                if (!querySnapshot.empty) {
+                    previousWorkoutData = querySnapshot.docs[0].data();
+                }
+
+
+                if (previousWorkoutData && previousWorkoutData.exercises) {
+                    comparisonDetailsElement.innerHTML = ''; 
+                    let comparisonHtml = '';
+                    let hasComparison = false;
+
+                    performanceData.forEach(currentExercise => {
+                        const prevExercise = previousWorkoutData.exercises.find(pe => pe.exerciseName === currentExercise.exerciseName);
+                        
+                        let currentTotalReps = 0;
+                        currentExercise.seriesDone.forEach(s => { 
+                            const reps = parseInt(s.repsDone);
+                            if(!isNaN(reps)) currentTotalReps += reps;
+                        });
+
+                        if (prevExercise && prevExercise.seriesDone) {
+                            let prevTotalReps = 0;
+                            prevExercise.seriesDone.forEach(s => {
+                                const reps = parseInt(s.repsDone);
+                                if(!isNaN(reps)) prevTotalReps += reps;
+                            });
+
+                            if (currentTotalReps > 0 || prevTotalReps > 0) { 
+                                hasComparison = true;
+                                let diff = currentTotalReps - prevTotalReps;
+                                let diffClass = diff > 0 ? 'progress-increase' : (diff < 0 ? 'progress-decrease' : 'progress-same');
+                                let diffSymbol = diff > 0 ? '+' : (diff < 0 ? '' : ''); 
+                                comparisonHtml += `<p><strong>${currentExercise.exerciseName}:</strong> ${currentTotalReps} reps (anterior: ${prevTotalReps} reps) <span class="${diffClass}">(${diffSymbol}${diff} reps)</span></p>`;
+                            }
+                        }
+                    });
+
+                    if (hasComparison) {
+                        comparisonDetailsElement.innerHTML = comparisonHtml;
+                        progressComparisonAreaElement.classList.remove('hidden');
+                    } else {
+                        comparisonDetailsElement.innerHTML = '<p>Nenhum dado comparável com o último treino.</p>';
+                        progressComparisonAreaElement.classList.remove('hidden');
+                    }
+                } else {
+                    comparisonDetailsElement.innerHTML = '<p>Primeira vez realizando este treino ou nenhum dado anterior encontrado.</p>';
+                    progressComparisonAreaElement.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error("Erro ao buscar comparação de progresso:", error);
+                comparisonDetailsElement.innerHTML = '<p>Erro ao carregar comparação.</p>';
+                progressComparisonAreaElement.classList.remove('hidden');
+            }
+        }
+
 
         // --- TIMERS ---
         function parseRestTime(restString) {
