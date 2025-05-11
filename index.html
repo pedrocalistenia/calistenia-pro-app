@@ -16,7 +16,7 @@
             overscroll-behavior-y: contain;
             background-color: #121212; /* Preto principal */
             color: #E0E0E0; /* Prata/Cinza claro para texto */
-            overflow-x: hidden; /* Prevenir scroll horizontal causado por animações de slide */
+            overflow-x: hidden; /* Prevenir scroll horizontal por animações de slide */
         }
         #appContainer {
             background-color: #1E1E1E; /* Cinza escuro para container principal */
@@ -638,7 +638,6 @@
 
         // --- ESTADO DA APLICAÇÃO ---
         let currentUser = { name: null, email: null };
-        let userProgressData = [];
         let currentScreen = ''; 
         let selectedLevel = '';
         let selectedWorkoutName = '';
@@ -648,13 +647,6 @@
         let performanceData = []; 
         let workoutPSE = null; 
         
-        let originalExerciseDetails = { 
-            name: null, 
-            embedUrl: null,
-            reps: null 
-        };
-        let viewingAlternativeType = null; 
-
         let restTimerInterval;
         let restTimerSeconds = 0;
         let totalRestDuration = 0;
@@ -679,8 +671,7 @@
             seriesInputAreaElement, summaryContentElement, statsDivElement,
             motivationalMessageElement, toastNotificationElement,
             loginNameInputElement, loginEmailInputElement, exerciseActionButtonsElement,
-            pseInputElement,
-            altEasyBtnElement, altHardBtnElement, showOriginalBtnElement; 
+            pseInputElement;
 
         let radius;
         let circumference;
@@ -711,9 +702,6 @@
             loginEmailInputElement = document.getElementById('loginEmail');
             exerciseActionButtonsElement = document.getElementById('exerciseActionButtons');
             pseInputElement = document.getElementById('pseInput'); 
-            altEasyBtnElement = document.getElementById('altEasyBtn');
-            altHardBtnElement = document.getElementById('altHardBtn');
-            showOriginalBtnElement = document.getElementById('showOriginalBtn');
 
 
             // Configuração do anel de progresso do timer
@@ -955,7 +943,6 @@
             if(pseInputElement) pseInputElement.value = '';
             viewingAlternativeType = null;
             
-            // SCRIPT_URL_LOAD_WORKOUT é a URL do seu Google Apps Script que termina em /exec
             if (SCRIPT_URL_LOAD_WORKOUT === "COLOQUE_A_URL_DO_SEU_SCRIPT_AQUI" || !SCRIPT_URL_LOAD_WORKOUT.startsWith("https://script.google.com/")) {
                 showToast("Erro: URL do Script para carregar treinos inválida ou não configurada.", 5000);
                 console.error("URL do Script para carregar treinos inválida:", SCRIPT_URL_LOAD_WORKOUT);
@@ -995,7 +982,6 @@
                     restTimeString: String(ex.rest || "60"),            
                     embedUrl: ex.embed_url || "",                       
                     loadInfo: ex.load || "",     
-                    // Campos de alternativa não são mais usados aqui, mas podem vir da planilha
                     seriesDone: []                                      
                 }));
 
@@ -1048,7 +1034,6 @@
             if (seriesProgressTextElement) seriesProgressTextElement.textContent = `SÉRIE ${currentSeriesNumber}`;
             if (exerciseRepsElement) exerciseRepsElement.textContent = exercisePerf.repsTargetString; 
 
-            // Esconde botões de alternativa, pois foram removidos
             const altButtonsArea = document.getElementById('alternativeButtonsArea');
             if (altButtonsArea) altButtonsArea.classList.add('hidden');
 
@@ -1277,7 +1262,7 @@
             const saveSuccess = await saveProgressToFirestore(workoutDataForFirestore);
 
             if (saveSuccess) {
-                 showToast(`Treino ${selectedWorkoutName} salvo com sucesso no Firebase!`);
+                 showToast(`Treino salvo com sucesso!`); // MENSAGEM ALTERADA
             } else {
                  showToast(`Erro ao salvar o treino ${selectedWorkoutName} no Firebase.`);
             }
@@ -1300,16 +1285,21 @@
             }
 
             try {
-                // Usaremos o email do usuário (se disponível) como parte do caminho para organizar os dados por usuário.
-                // Se não houver email, salvaremos em uma coleção mais genérica.
-                // É altamente recomendável implementar autenticação Firebase para ter um `currentUser.uid` confiável.
-                const userIdentifier = currentUser.email || "anonymous_users";
-                const collectionPath = `userWorkouts/${userIdentifier}/completed_workouts`;
+                // Construir o ID do documento personalizado
+                const dateForId = new Date(singleWorkoutData.date);
+                const day = String(dateForId.getDate()).padStart(2, '0');
+                const month = String(dateForId.getMonth() + 1).padStart(2, '0'); // Meses são 0-indexados
+                const year = dateForId.getFullYear();
+                const studentFirstName = (singleWorkoutData.studentName || "Aluno").split(" ")[0].replace(/[^a-zA-Z0-9]/g, "");
+                const workoutNameClean = (singleWorkoutData.workoutName || "Treino").replace(/\s+/g, "");
+                
+                const customDocId = `${studentFirstName}${day}${month}${year}${workoutNameClean}`;
+                console.log("ID do Documento Personalizado:", customDocId);
 
-                const workoutDocRef = db.collection(collectionPath).doc(); // Gera ID automático para o treino
+                const workoutDocRef = db.collection("workoutProgress").doc(customDocId); 
                 await workoutDocRef.set(singleWorkoutData); 
 
-                console.log("Treino salvo no Firestore com sucesso. Caminho:", `${collectionPath}/${workoutDocRef.id}`);
+                console.log("Treino salvo no Firestore com sucesso. ID:", customDocId);
                 return true;
 
             } catch (error) {
