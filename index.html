@@ -6,6 +6,8 @@
     <title>Calistenia PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
     <style>
         /* --- PALETA DE CORES E ESTILOS GERAIS (PRETO E PRATA) --- */
         body {
@@ -115,16 +117,15 @@
         .button-3d {
             border-width: 1px;
             border-style: solid;
-            /* A cor da borda e da sombra será definida por variáveis CSS ou especificamente */
-            box-shadow: 0 2px 0 var(--shadow-color-dark, #222), /* Sombra inferior principal com fallback */
-                        0 3px 4px rgba(0,0,0,0.2);    /* Sombra suave geral */
+            box-shadow: 0 2px 0 var(--shadow-color-dark, #222), 
+                        0 3px 4px rgba(0,0,0,0.2);    
         }
         .button-3d:hover {
-            box-shadow: 0 1px 0 var(--shadow-color-dark, #222), /* Sombra inferior menor no hover */
+            box-shadow: 0 1px 0 var(--shadow-color-dark, #222), 
                         0 2px 3px rgba(0,0,0,0.25);
         }
         .button-3d:active {
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.25); /* Sombra interna ao pressionar */
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.25); 
             transform: translateY(2px) scale(0.98); 
         }
 
@@ -420,12 +421,11 @@
             margin-right: 0.5rem; 
         }
         
-        /* Botão Salvar Resumo - Dourado Escuro */
         #saveSummaryAndGoHomeBtn {
-            background-color: #B08D57; /* Tom de dourado escuro */
-            color: #FFFFFF; /* Texto branco para contraste */
-            border-color: #8C6D41; /* Borda mais escura para profundidade */
-            --shadow-color-dark: #8C6D41; /* Sombra correspondente */
+            background-color: #B08D57; 
+            color: #FFFFFF; 
+            border-color: #8C6D41; 
+            --shadow-color-dark: #8C6D41; 
         }
         #saveSummaryAndGoHomeBtn:hover {
             background-color: #8C6D41; 
@@ -433,21 +433,6 @@
         #saveSummaryAndGoHomeBtn:active {
             background-color: #79552B; 
         }
-
-
-        #finishWorkoutBtn { 
-            background-color: #7D3C98;
-            color: #FFFFFF;
-            border-color: #5B2C6F;
-            --shadow-color-dark: #5B2C6F;
-        }
-        #finishWorkoutBtn:hover {
-            background-color: #5B2C6F;
-        }
-         #finishWorkoutBtn:active {
-            background-color: #4A235A;
-        }
-
 
         .star-rating span {
             color: #F1C40F;
@@ -645,6 +630,24 @@
     <div id="toastNotification" class="toast">Mensagem!</div>
 
     <script>
+        // --- CONFIGURAÇÃO DO FIREBASE ---
+        // COLE AQUI O SEU OBJETO firebaseConfig
+        const firebaseConfig = {
+            apiKey: "AIzaSyD5W173nhaqoTqFfteDepWqRxu7m984nII", // SUBSTITUA COM SEUS DADOS REAIS
+            authDomain: "calisteniaproapp-d6bec.firebaseapp.com",
+            projectId: "calisteniaproapp-d6bec",
+            storageBucket: "calisteniaproapp-d6bec.appspot.com",
+            messagingSenderId: "584608398103",
+            appId: "1:584608398103:web:133b7a222adae255999552",
+            measurementId: "G-809MBMS2BL" // Opcional, mas bom ter se você usar Analytics
+        };
+
+        // Inicializa o Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore(); // Referência ao Firestore
+        // const analytics = firebase.analytics(); // Descomente se quiser usar Analytics
+
+
         // --- CONSTANTES ---
         const ANIMATION_DURATION = 300; 
 
@@ -744,7 +747,7 @@
             currentScreen = Screens.LOGIN; 
 
             showScreen(Screens.LOGIN); 
-            console.warn("IMPORTANTE: A integração com Google Sheets agora está ativa. Verifique se a função doPost no seu script está configurada e implantada para salvar o progresso.");
+            console.log("Firebase SDKs carregados. App inicializado.");
         });
 
 
@@ -958,7 +961,7 @@
             showScreen(Screens.WORKOUT_LIST);
         }
 
-        // --- LÓGICA DE CARREGAMENTO DO TREINO (COM API) ---
+        // --- LÓGICA DE CARREGAMENTO DO TREINO ---
         async function loadWorkout(workoutName) {
             console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel}`);
             selectedWorkoutName = workoutName;
@@ -967,72 +970,48 @@
             if(pseInputElement) pseInputElement.value = '';
             viewingAlternativeType = null;
             
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec";
-
-            if (SCRIPT_URL === "COLOQUE_O_ID_DA_SUA_PLANILHA_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
-                showToast("Erro: URL do Script inválida ou não configurada.", 5000);
-                console.error("URL do Script inválida ou não configurada:", SCRIPT_URL);
-                workoutStartTime = null;
-                selectedWorkoutName = ''; 
-                return;
-            }
-
-            const url = `${SCRIPT_URL}?level=${encodeURIComponent(selectedLevel)}&workout=${encodeURIComponent(workoutName)}`;
-
             showLoadingIndicator();
 
-            try {
-                const response = await fetch(url);
-                if (!response.ok) {
-                    let errorMsg = `Erro HTTP: ${response.status}`;
-                    try {
-                        const errorData = await response.json();
-                        errorMsg = errorData.error || errorMsg;
-                    } catch (parseError) { /* Ignora erro de parse do erro */ }
-                    throw new Error(errorMsg);
-                }
+            // SIMULAÇÃO DE DADOS DE TREINO (substituir por fetch do Firestore no futuro)
+            let fetchedWorkoutData = [];
+            if (selectedLevel === 'iniciante' && workoutName === 'Treino A') {
+                fetchedWorkoutData = [
+                    { exercise_name: "Flexão Inclinada", series: 3, reps: "8-12", rest: "60", embed_url: "https://www.youtube.com/embed/Z0bRiX_o0-Q", alt_easy_name: "Flexão na Parede", alt_easy_url:"https://www.youtube.com/embed/PzM1sE7t4yM" },
+                    { exercise_name: "Remada Australiana", series: 3, reps: "AMRAP", rest: "90", embed_url: "https://www.youtube.com/embed/cW2q3zQc3uQ", alt_hard_name: "Barra Fixa (Negativa)", alt_hard_url:"https://www.youtube.com/embed/L77b5b4ZTIA" },
+                    { exercise_name: "Agachamento Livre", series: 3, reps: "10-15", rest: "60", embed_url: "https://www.youtube.com/embed/0A45nJ9d3yU" }
+                ];
+            } else {
+                 fetchedWorkoutData = [ 
+                    { exercise_name: "Flexão Padrão", series: 3, reps: "Máximo", rest: "60", embed_url: "https://www.youtube.com/embed/IODxDxX7oi4", alt_easy_name: "Flexão de Joelhos", alt_easy_url:"https://www.youtube.com/embed/EwY9nJ43btE", alt_hard_name: "Flexão Diamante", alt_hard_url:"https://www.youtube.com/embed/J0DnG1_S9EA" },
+                    { exercise_name: "Barra Fixa", series: 3, reps: "3-5", rest: "120", embed_url: "https://www.youtube.com/embed/XeErfmGSwfE" }
+                ];
+            }
+            currentWorkout = fetchedWorkoutData; 
+            
+            performanceData = currentWorkout.map(ex => ({
+                exerciseId: ex.exercise_id || `exid_${Math.random().toString(36).substr(2, 9)}`, 
+                exerciseName: ex.exercise_name || "Exercício Desconhecido", 
+                seriesTargetCount: parseInt(ex.series) || 0,       
+                repsTargetString: String(ex.reps || "N/A"),         
+                restTimeString: String(ex.rest || "60"),            
+                embedUrl: ex.embed_url || "",                       
+                loadInfo: ex.load || "",     
+                alt_easy_name: ex.alt_easy_name || null,
+                alt_easy_url: ex.alt_easy_url || null,
+                alt_hard_name: ex.alt_hard_name || null,
+                alt_hard_url: ex.alt_hard_url || null,
+                seriesDone: []                                      
+            }));
 
-                currentWorkout = await response.json();
+            hideLoadingIndicator();
 
-                if (!Array.isArray(currentWorkout)) {
-                     if (currentWorkout && currentWorkout.error) { 
-                         throw new Error(currentWorkout.error);
-                     }
-                     throw new Error("Resposta da API não é um array de exercícios.");
-                }
-                
-                performanceData = currentWorkout.map(ex => ({
-                    exerciseId: ex.exercise_id || `exid_${Math.random().toString(36).substr(2, 9)}`, 
-                    exerciseName: ex.exercise_name || "Exercício Desconhecido", 
-                    seriesTargetCount: parseInt(ex.series) || 0,       
-                    repsTargetString: String(ex.reps || "N/A"),         
-                    restTimeString: String(ex.rest || "60"),            
-                    embedUrl: ex.embed_url || "",                       
-                    loadInfo: ex.load || "",     
-                    alt_easy_name: ex.alt_easy_name || null,
-                    alt_easy_url: ex.alt_easy_url || null,
-                    alt_hard_name: ex.alt_hard_name || null,
-                    alt_hard_url: ex.alt_hard_url || null,
-                    seriesDone: []                                      
-                }));
-
-                hideLoadingIndicator();
-
-                if (currentWorkout.length > 0) {
-                    currentExerciseIndex = 0; 
-                    currentSeriesNumber = 1;  
-                    displayCurrentExerciseAndSeries();
-                    showScreen(Screens.WORKOUT_EXECUTION);
-                } else {
-                    showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}).`);
-                    workoutStartTime = null;
-                    selectedWorkoutName = ''; 
-                }
-
-            } catch (error) {
-                hideLoadingIndicator();
-                console.error("Erro ao carregar treino:", error);
-                showToast(`Erro ao carregar treino: ${error.message}`, 5000);
+            if (currentWorkout.length > 0) {
+                currentExerciseIndex = 0; 
+                currentSeriesNumber = 1;  
+                displayCurrentExerciseAndSeries();
+                showScreen(Screens.WORKOUT_EXECUTION);
+            } else {
+                showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}).`);
                 workoutStartTime = null;
                 selectedWorkoutName = ''; 
             }
@@ -1304,7 +1283,7 @@
 
             userProgressData = []; 
             const studentName = currentUser.name || "Convidado";
-            const studentEmail = currentUser.email || "N/A";
+            const studentEmail = currentUser.email || "N/A"; 
             const date = new Date().toISOString();
             const workoutEndTime = Date.now();
             const workoutDurationMs = workoutStartTime ? workoutEndTime - workoutStartTime : 0;
@@ -1337,15 +1316,15 @@
                 }
             });
 
-            console.log("Dados a serem enviados para a planilha (após resumo):", userProgressData);
+            console.log("Dados a serem enviados para o Firestore:", userProgressData);
             showToast(`Salvando ${selectedWorkoutName}...`);
 
-            const saveSuccess = await saveProgressToSheet(userProgressData);
+            const saveSuccess = await saveProgressToFirestore(userProgressData);
 
             if (saveSuccess) {
                  showToast(`Treino ${selectedWorkoutName} salvo com sucesso!`);
             } else {
-                 showToast(`Erro ao salvar o treino ${selectedWorkoutName} na planilha.`);
+                 showToast(`Erro ao salvar o treino ${selectedWorkoutName} no Firestore.`);
             }
             
             showScreen(Screens.HOME);
@@ -1353,12 +1332,11 @@
         }
 
 
-        // --- FUNÇÃO PARA SALVAR PROGRESSO NA PLANILHA ---
-        async function saveProgressToSheet(progressDataArray) {
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec"; 
-
-             if (SCRIPT_URL === "COLOQUE_O_ID_DA_SUA_PLANILHA_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
-                console.error("URL do Script inválida ou não configurada para salvar.");
+        // --- FUNÇÃO PARA SALVAR PROGRESSO NO FIRESTORE ---
+        async function saveProgressToFirestore(progressDataArray) {
+            if (!db) {
+                showToast("Erro: Conexão com o banco de dados não estabelecida.", 5000);
+                console.error("Firestore 'db' instance is not available.");
                 return false;
             }
             if (!progressDataArray || progressDataArray.length === 0) {
@@ -1367,31 +1345,20 @@
             }
 
             try {
-                for (const progressEntry of progressDataArray) {
-                    const response = await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'cors',
-                        cache: 'no-cache',
-                        headers: { 'Content-Type': 'application/json', },
-                        redirect: 'follow',
-                        body: JSON.stringify(progressEntry)
-                    });
-                    
-                    if (response.type === 'error' || (response.status !== 200 && response.status !== 302 && response.status !== 0) ) { 
-                        let errorMsg = `Erro ao salvar dados. Status: ${response.status}`;
-                         try {
-                            const errorData = await response.json();
-                            errorMsg = errorData.message || errorData.error || errorMsg;
-                        } catch(e) { /* ignora erro de parse */ }
-                        console.error("Falha ao salvar progresso:", errorMsg, "Entrada:", progressEntry);
-                    }
-                    await new Promise(resolve => setTimeout(resolve, 50)); 
-                }
-                console.log("Todas as entradas de progresso foram enviadas (ou tentativas foram feitas).");
+                const batch = db.batch();
+                
+                progressDataArray.forEach(progressEntry => {
+                    const progressDocRef = db.collection("workoutProgress").doc(); 
+                    batch.set(progressDocRef, progressEntry);
+                });
+
+                await batch.commit();
+                console.log("Todas as entradas de progresso salvas no Firestore com sucesso.");
                 return true;
+
             } catch (error) {
-                console.error("Erro de rede ou na função saveProgressToSheet:", error);
-                showToast(`Erro de rede ao salvar: ${error.message}`, 5000);
+                console.error("Erro ao salvar progresso no Firestore:", error);
+                showToast(`Erro ao salvar no Firestore: ${error.message}`, 5000);
                 return false;
             }
         }
