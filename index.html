@@ -104,12 +104,31 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #777777;
         }
-        .action-button {
-            transition: all 0.2s ease-in-out;
+        .action-button { /* Classe base para botões com interação */
+            transition: all 0.15s ease-out; 
         }
         .action-button:active {
-            transform: scale(0.95);
+            transform: scale(0.97) translateY(1px); 
         }
+
+        /* Classe genérica para botões 3D */
+        .button-3d {
+            border-width: 1px;
+            border-style: solid;
+            /* A cor da borda e da sombra será definida por variáveis CSS ou especificamente */
+            box-shadow: 0 2px 0 var(--shadow-color-dark, #222), /* Sombra inferior principal com fallback */
+                        0 3px 4px rgba(0,0,0,0.2);    /* Sombra suave geral */
+        }
+        .button-3d:hover {
+            box-shadow: 0 1px 0 var(--shadow-color-dark, #222), /* Sombra inferior menor no hover */
+                        0 2px 3px rgba(0,0,0,0.25);
+        }
+        .button-3d:active {
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.25); /* Sombra interna ao pressionar */
+            transform: translateY(2px) scale(0.98); 
+        }
+
+
         .media-display-area {
             display: flex;
             align-items: center;
@@ -300,62 +319,135 @@
             margin-bottom: 0.5rem;
             line-height: 1.4;
         }
+        .alternative-exercise-buttons {
+            margin-top: 0.75rem;
+            display: flex;
+            justify-content: space-around; 
+            gap: 0.5rem;
+        }
+        .alternative-btn {
+            background-color: #4A5568; 
+            color: #E2E8F0; 
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem; 
+            font-size: 0.75rem; 
+            font-weight: 600;
+            border: 1px solid #718096; 
+        }
+        .alternative-btn:hover {
+            background-color: #2D3748; 
+        }
+        .alternative-btn.hidden {
+            display: none;
+        }
 
-
-        #completeSeriesBtn, #loginButton { 
+        /* Botões 3D - Concluir Série e Pular Exercício */
+        #completeSeriesBtn {
             background-color: #145A32;  
             color: #FFFFFF;
+            border-color: #0B5345; 
+            --shadow-color-dark: #0B5345;
         }
         #completeSeriesBtn:hover {
             background-color: #0B5345; 
         }
-        #loginButton:hover { 
-             background-color: #1E8449;
+        #completeSeriesBtn:active {
+            background-color: #07352B;
         }
 
         .skip-exercise-btn {
             background-color: #7B241C;  
             color: white;
+            border-color: #641E16; 
+            --shadow-color-dark: #641E16;
         }
         .skip-exercise-btn:hover {
             background-color: #641E16; 
         }
+        .skip-exercise-btn:active {
+            background-color: #4B120E;
+        }
+        
+        #loginButton { 
+            background-color: #1A5D1A; 
+            color: #FFFFFF;
+            border-color: #113C11;
+            --shadow-color-dark: #113C11;
+        }
+        #loginButton:hover { 
+             background-color: #113C11;
+        }
+         #loginButton:active { 
+             background-color: #0A270A;
+        }
+
+        #homeScreen button,
+        #workoutButtonsContainer button {
+            background-color: #374151; 
+            color: #F3F4F6; 
+            border-color: #1F2937; 
+            --shadow-color-dark: #1F2937;
+        }
+        #homeScreen button:hover,
+        #workoutButtonsContainer button:hover {
+            background-color: #4B5563; 
+        }
+         #homeScreen button:active,
+        #workoutButtonsContainer button:active {
+            background-color: #1F2937; 
+        }
+
+        .nav-button {
+            background-color: #4B5563; 
+            color: #E0E0E0;
+            border-color: #2D3748; 
+            --shadow-color-dark: #1A202C; 
+            padding: 0.6rem 1.1rem; 
+            border-radius: 0.5rem; 
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+        .nav-button:hover {
+            background-color: #2D3748; 
+        }
+        .nav-button:active {
+            background-color: #1A202C; 
+        }
+        .nav-button svg {
+            width: 1.25rem; 
+            height: 1.25rem; 
+            margin-right: 0.5rem; 
+        }
+        
+        /* Botão Salvar Resumo - Dourado Escuro */
+        #saveSummaryAndGoHomeBtn {
+            background-color: #B08D57; /* Tom de dourado escuro */
+            color: #FFFFFF; /* Texto branco para contraste */
+            border-color: #8C6D41; /* Borda mais escura para profundidade */
+            --shadow-color-dark: #8C6D41; /* Sombra correspondente */
+        }
+        #saveSummaryAndGoHomeBtn:hover {
+            background-color: #8C6D41; 
+        }
+        #saveSummaryAndGoHomeBtn:active {
+            background-color: #79552B; 
+        }
+
 
         #finishWorkoutBtn { 
             background-color: #7D3C98;
             color: #FFFFFF;
+            border-color: #5B2C6F;
+            --shadow-color-dark: #5B2C6F;
         }
         #finishWorkoutBtn:hover {
             background-color: #5B2C6F;
         }
-
-        .nav-button {
-            background-color: #333333;
-            color: #E0E0E0;
-            padding: 0.5rem 1rem;
-            border-radius: 0.5rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1);
-        }
-        .nav-button:hover {
-            background-color: #444444;
-        }
-        .nav-button svg {
-            width: 1.25rem;
-            height: 1.25rem;
-            margin-right: 0.5rem;
+         #finishWorkoutBtn:active {
+            background-color: #4A235A;
         }
 
-        #workoutButtonsContainer button {
-            background-color: #333333;
-            color: #E0E0E0;
-            border: 1px solid #555555;
-        }
-        #workoutButtonsContainer button:hover {
-            background-color: #444444;
-        }
 
         .star-rating span {
             color: #F1C40F;
@@ -432,7 +524,7 @@
                     <label for="loginEmail" class="block text-sm font-medium mb-1">Email:</label>
                     <input type="email" id="loginEmail" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100" placeholder="seuemail@exemplo.com">
                 </div>
-                <button id="loginButton" onclick="loginUser()" class="w-full font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button text-base">Entrar</button>
+                <button id="loginButton" onclick="loginUser()" class="w-full font-semibold py-3 px-6 rounded-lg action-button button-3d text-base">Entrar</button>
             </div>
         </div>
 
@@ -444,15 +536,15 @@
             <div class="p-6">
                 <h2 class="text-2xl font-bold text-gray-300 my-6" style="font-family: 'Inter', sans-serif;">Escolha seu nível</h2>
                 <div class="space-y-4">
-                    <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
+                    <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
                         Avançado
                         <span class="block text-sm font-normal opacity-80">(10+ barras e 15+ dips)</span>
                     </button>
-                    <button id="level-intermediario" onclick="selectLevel('intermediario')" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
+                    <button id="level-intermediario" onclick="selectLevel('intermediario')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
                         Intermediário
                         <span class="block text-sm font-normal opacity-80">(3 pull ups e 3 dips)</span>
                     </button>
-                    <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold py-4 px-6 rounded-lg shadow-md hover:shadow-lg action-button">
+                    <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
                         Iniciante
                         <span class="block text-sm font-normal opacity-80">(0 pull ups e 0 push ups)</span>
                     </button>
@@ -461,7 +553,7 @@
         </div>
 
         <div id="workoutListScreen" class="p-6 hidden">
-            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="nav-button mb-6 action-button">
+            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="nav-button mb-6 action-button button-3d">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
                 Voltar para Níveis
             </button>
@@ -470,16 +562,14 @@
         </div>
 
         <div id="workoutExecutionScreen" class="p-6 hidden">
-             <button onclick="confirmExitWorkout()" class="nav-button mb-4 action-button">
+             <button onclick="confirmExitWorkout()" class="nav-button mb-4 action-button button-3d">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
                 Voltar para Treinos
             </button>
 
-            <div class="exercise-card"> <h3 id="exerciseName" class="text-2xl font-bold mb-1 text-center text-gray-100" style="font-family: 'Inter', sans-serif;">Nome do Exercício</h3>
-                <p id="seriesProgressText" class="series-display-text mb-4 text-center">SÉRIE X</p>
-
-                <div id="mediaDisplayArea" class="media-display-area">
-                    <div id="videoPlayerContainer" class="video-container">
+            <div class="exercise-card"> 
+                <h3 id="exerciseName" class="text-2xl font-bold mb-1 text-center text-gray-100" style="font-family: 'Inter', sans-serif;">Nome do Exercício</h3>
+                <p id="seriesProgressText" class="series-display-text mb-2 text-center">SÉRIE X</p> <div id="mediaDisplayArea" class="media-display-area mb-3"> <div id="videoPlayerContainer" class="video-container">
                         <p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo do exercício</p>
                     </div>
                     <div id="circularTimerWrapper" class="force-hidden"> <div class="timer-display-and-controls">
@@ -504,6 +594,12 @@
                     </div>
                 </div>
                 
+                <div id="alternativeButtonsArea" class="alternative-exercise-buttons mb-3">
+                    <button id="showOriginalBtn" onclick="showOriginalExercise()" class="alternative-btn hidden">Ver Original</button>
+                    <button id="altEasyBtn" onclick="showAlternativeExercise('easy')" class="alternative-btn hidden">Alternativa + Fácil</button>
+                    <button id="altHardBtn" onclick="showAlternativeExercise('hard')" class="alternative-btn hidden">Alternativa + Difícil</button>
+                </div>
+
                 <div class="exercise-details-info text-center"> 
                     <p class="text-base"><strong>Repetições alvo:</strong> <span id="exerciseReps" class="font-medium text-gray-100"></span></p> 
                 </div>
@@ -513,8 +609,8 @@
                     <input type="text" id="repsInput" class="w-full p-2.5 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100 placeholder-gray-500 text-center" placeholder="Ex: 10 ou 30s (Opcional)">
                 </div>
             
-                <div id="exerciseActionButtons" class="mt-3"> <button id="completeSeriesBtn" onclick="completeSeries()" class="w-full max-w-xs font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg action-button text-base">Concluir Série</button>
-                    <button id="skipExerciseBtn" onclick="confirmSkipExercise()" class="w-full max-w-xs skip-exercise-btn font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg action-button text-base mt-2">Pular Exercício Atual</button> 
+                <div id="exerciseActionButtons" class="mt-3"> <button id="completeSeriesBtn" onclick="completeSeries()" class="w-full max-w-xs font-semibold py-3 px-4 rounded-lg action-button button-3d text-base">Concluir Série</button>
+                    <button id="skipExerciseBtn" onclick="confirmSkipExercise()" class="w-full max-w-xs skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button button-3d text-base mt-2">Pular Exercício Atual</button> 
                 </div>
 
             </div> 
@@ -537,7 +633,7 @@
             </div>
 
             <p id="motivationalMessage" class="text-lg text-green-400 font-semibold mb-6"></p> 
-            <button id="saveSummaryAndGoHomeBtn" onclick="saveSummaryAndGoHome()" class="w-full max-w-md font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button text-base bg-blue-600 hover:bg-blue-700 text-white">
+            <button id="saveSummaryAndGoHomeBtn" onclick="saveSummaryAndGoHome()" class="w-full max-w-md font-semibold py-3 px-6 rounded-lg action-button button-3d text-base text-white">
                 Salvar Resumo e Voltar para Home
             </button>
         </div>
@@ -561,8 +657,15 @@
         let currentWorkout = [];
         let currentExerciseIndex = 0;
         let currentSeriesNumber = 1;
-        let performanceData = [];
+        let performanceData = []; 
         let workoutPSE = null; 
+        
+        let originalExerciseDetails = { 
+            name: null, 
+            embedUrl: null,
+            reps: null 
+        };
+        let viewingAlternativeType = null; 
 
         let restTimerInterval;
         let restTimerSeconds = 0;
@@ -584,11 +687,12 @@
             progressRingElement, circularTimerTextElement, mediaDisplayAreaElement,
             loadingOverlayElement, workoutButtonsContainerElement, repsInputElement,
             exerciseNameElement, seriesProgressTextElement, exerciseRepsElement,
-            completeSeriesBtnElement, skipExerciseBtnElement, finishWorkoutBtnElement,
+            completeSeriesBtnElement, skipExerciseBtnElement, 
             seriesInputAreaElement, summaryContentElement, statsDivElement,
             motivationalMessageElement, toastNotificationElement,
             loginNameInputElement, loginEmailInputElement, exerciseActionButtonsElement,
-            pseInputElement; 
+            pseInputElement,
+            altEasyBtnElement, altHardBtnElement, showOriginalBtnElement; 
 
         let radius;
         let circumference;
@@ -610,7 +714,6 @@
             exerciseRepsElement = document.getElementById('exerciseReps'); 
             completeSeriesBtnElement = document.getElementById('completeSeriesBtn');
             skipExerciseBtnElement = document.getElementById('skipExerciseBtn');
-            finishWorkoutBtnElement = document.getElementById('finishWorkoutBtn'); 
             seriesInputAreaElement = document.getElementById('seriesInputArea');
             summaryContentElement = document.getElementById('workoutSummaryContent');
             statsDivElement = document.getElementById('workoutStats');
@@ -620,6 +723,10 @@
             loginEmailInputElement = document.getElementById('loginEmail');
             exerciseActionButtonsElement = document.getElementById('exerciseActionButtons');
             pseInputElement = document.getElementById('pseInput'); 
+            altEasyBtnElement = document.getElementById('altEasyBtn');
+            altHardBtnElement = document.getElementById('altHardBtn');
+            showOriginalBtnElement = document.getElementById('showOriginalBtn');
+
 
             // Configuração do anel de progresso do timer
             radius = progressRingElement?.getAttribute('r');
@@ -672,7 +779,7 @@
                     currentScreen = screenId; 
                     window.scrollTo(0, 0);
                     updateHeader(screenId);
-                    if (screenId === Screens.SUMMARY) { // Chama displaySummary quando a tela de resumo é mostrada
+                    if (screenId === Screens.SUMMARY) { 
                         displaySummary();
                     }
                 }, ANIMATION_DURATION);
@@ -694,7 +801,7 @@
                 currentScreen = screenId; 
                 window.scrollTo(0, 0);
                 updateHeader(screenId);
-                if (screenId === Screens.SUMMARY) { // Chama displaySummary quando a tela de resumo é mostrada
+                if (screenId === Screens.SUMMARY) { 
                     displaySummary();
                 }
             }
@@ -753,6 +860,7 @@
             workoutStartTime = null;
             workoutPSE = null; 
             if(pseInputElement) pseInputElement.value = ''; 
+            viewingAlternativeType = null; 
 
             if (resetUser) {
                 currentUser = { name: null, email: null };
@@ -765,7 +873,6 @@
             if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
             if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
-            // finishWorkoutBtnElement não é mais relevante na tela de execução
             if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden');
             if (repsInputElement) repsInputElement.value = '';
 
@@ -808,7 +915,7 @@
 
             availableWorkouts.forEach(workoutName => {
                 const button = document.createElement('button');
-                button.className = 'w-full bg-gray-700 hover:bg-gray-600 border border-gray-600 text-gray-200 font-semibold py-3 px-4 rounded-lg shadow-sm hover:shadow-md action-button';
+                button.className = 'w-full font-semibold py-3 px-4 rounded-lg action-button button-3d'; 
                 button.textContent = workoutName;
                 button.addEventListener('click', () => loadWorkout(workoutName));
                 workoutButtonsContainerElement.appendChild(button);
@@ -837,6 +944,7 @@
             workoutStartTime = null;
             workoutPSE = null;
             if(pseInputElement) pseInputElement.value = '';
+            viewingAlternativeType = null;
 
 
             if (completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
@@ -844,7 +952,6 @@
             if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
             if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
-            // finishWorkoutBtnElement não é mais relevante na tela de execução
             if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden');
             if (repsInputElement) repsInputElement.value = '';
 
@@ -858,6 +965,7 @@
             workoutStartTime = Date.now();
             workoutPSE = null; 
             if(pseInputElement) pseInputElement.value = '';
+            viewingAlternativeType = null;
             
             const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec";
 
@@ -900,7 +1008,11 @@
                     repsTargetString: String(ex.reps || "N/A"),         
                     restTimeString: String(ex.rest || "60"),            
                     embedUrl: ex.embed_url || "",                       
-                    loadInfo: ex.load || "",                            
+                    loadInfo: ex.load || "",     
+                    alt_easy_name: ex.alt_easy_name || null,
+                    alt_easy_url: ex.alt_easy_url || null,
+                    alt_hard_name: ex.alt_hard_name || null,
+                    alt_hard_url: ex.alt_hard_url || null,
                     seriesDone: []                                      
                 }));
 
@@ -936,7 +1048,7 @@
         // --- LÓGICA DE EXECUÇÃO DO TREINO ---
         function displayCurrentExerciseAndSeries() {
              if (!performanceData || currentExerciseIndex >= performanceData.length) {
-                finishWorkout(); // Chama finishWorkout que agora transita para a tela de resumo
+                finishWorkout(); 
                 return;
             }
 
@@ -946,10 +1058,37 @@
                 finishWorkout(); 
                 return;
             }
+            
+            if (!viewingAlternativeType || originalExerciseDetails.name !== exercisePerf.exerciseName) {
+                originalExerciseDetails.name = exercisePerf.exerciseName;
+                originalExerciseDetails.embedUrl = exercisePerf.embedUrl;
+                originalExerciseDetails.reps = exercisePerf.repsTargetString;
+            }
 
-            if (exerciseNameElement) exerciseNameElement.textContent = exercisePerf.exerciseName;
+            let displayName = originalExerciseDetails.name;
+            let displayUrl = originalExerciseDetails.embedUrl;
+
+            if (viewingAlternativeType === 'easy' && exercisePerf.alt_easy_name) {
+                displayName = "Alternativa: " + exercisePerf.alt_easy_name;
+                displayUrl = exercisePerf.alt_easy_url || originalExerciseDetails.embedUrl;
+            } else if (viewingAlternativeType === 'hard' && exercisePerf.alt_hard_name) {
+                displayName = "Alternativa: " + exercisePerf.alt_hard_name;
+                displayUrl = exercisePerf.alt_hard_url || originalExerciseDetails.embedUrl;
+            } else { 
+                 displayName = "Exercício: " + originalExerciseDetails.name; 
+            }
+            
+            if(exerciseNameElement) exerciseNameElement.textContent = displayName;
+            if(videoPlayerContainerElement) videoPlayerContainerElement.innerHTML = displayUrl ? `<iframe src="${displayUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : `<p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo indisponível.</p>`;
+
+
             if (seriesProgressTextElement) seriesProgressTextElement.textContent = `SÉRIE ${currentSeriesNumber}`;
-            if (exerciseRepsElement) exerciseRepsElement.textContent = exercisePerf.repsTargetString; 
+            if (exerciseRepsElement) exerciseRepsElement.textContent = originalExerciseDetails.reps; 
+
+            altEasyBtnElement.classList.toggle('hidden', !exercisePerf.alt_easy_name || !exercisePerf.alt_easy_url || viewingAlternativeType === 'easy');
+            altHardBtnElement.classList.toggle('hidden', !exercisePerf.alt_hard_name || !exercisePerf.alt_hard_url || viewingAlternativeType === 'hard');
+            showOriginalBtnElement.classList.toggle('hidden', !viewingAlternativeType);
+
 
             if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
@@ -957,14 +1096,6 @@
             if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
             if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden');
 
-
-            if (videoPlayerContainerElement) {
-                if (exercisePerf.embedUrl) {
-                    videoPlayerContainerElement.innerHTML = `<iframe src="${exercisePerf.embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-                } else {
-                    videoPlayerContainerElement.innerHTML = `<p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo indisponível.</p>`;
-                }
-            }
 
             if (repsInputElement) {
                 repsInputElement.value = ''; 
@@ -979,6 +1110,20 @@
 
             clearRestTimer(); 
         }
+        
+        function showAlternativeExercise(type) {
+            const currentEx = performanceData[currentExerciseIndex];
+            if (!currentEx) return;
+
+            viewingAlternativeType = type; 
+            displayCurrentExerciseAndSeries(); 
+        }
+
+        function showOriginalExercise() {
+            viewingAlternativeType = null; 
+            displayCurrentExerciseAndSeries(); 
+        }
+
 
         function completeSeries() {
             if (!repsInputElement) return;
@@ -989,7 +1134,7 @@
 
             if (!performanceData || !performanceData[currentExerciseIndex]) return;
             const currentExercisePerformance = performanceData[currentExerciseIndex];
-            currentExercisePerformance.seriesDone.push({ reps: repsValue });
+            currentExercisePerformance.seriesDone.push({ reps: repsValue }); 
 
             if(exerciseActionButtonsElement) exerciseActionButtonsElement.classList.add('force-hidden');
             if(seriesInputAreaElement) seriesInputAreaElement.classList.add('hidden');
@@ -1001,7 +1146,7 @@
             const isLastExerciseOverall = currentExerciseIndex === performanceData.length - 1;
 
             if (isLastSeriesOfCurrentExercise && isLastExerciseOverall) {
-                finishWorkout(); // Vai para a tela de resumo
+                finishWorkout(); 
             } else {
                 startRestTimer(totalRestDuration);
             }
@@ -1014,6 +1159,7 @@
             }
             currentSeriesNumber++;
             const currentExercisePerformance = performanceData[currentExerciseIndex];
+            viewingAlternativeType = null; 
 
             if(mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if(videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
@@ -1048,9 +1194,9 @@
                 while (currentExPerf.seriesDone.length < seriesTarget) {
                     currentExPerf.seriesDone.push({ reps: "Pulado" });
                 }
-                showToast(`${currentExPerf.exerciseName} pulado.`);
+                showToast(`${originalExerciseDetails.name} pulado.`); 
             }
-
+            viewingAlternativeType = null; 
             currentExerciseIndex++; 
             currentSeriesNumber = 1; 
 
@@ -1082,7 +1228,7 @@
 
         function calculateExerciseStars(exercisePerfEntry) {
              if (!exercisePerfEntry || !exercisePerfEntry.repsTargetString) return 0;
-            const targetStr = exercisePerfEntry.repsTargetString;
+            const targetStr = exercisePerfEntry.repsTargetString; 
             const parsedTarget = parseRepsTarget(targetStr);
 
             if (parsedTarget.type !== 'range' && parsedTarget.type !== 'fixed') {
@@ -1142,9 +1288,8 @@
 
         // --- FINALIZAR TREINO E IR PARA RESUMO ---
         function finishWorkout() {
-            if(pseInputElement) pseInputElement.value = ''; // Limpa campo PSE para nova entrada
-            showScreen(Screens.SUMMARY); // Transita para a tela de resumo
-            // displaySummary() será chamado pelo showScreen se a próxima tela for SUMMARY
+            if(pseInputElement) pseInputElement.value = ''; 
+            showScreen(Screens.SUMMARY); 
         }
 
         // NOVA FUNÇÃO para ser chamada pelo botão "Salvar Resumo e Voltar para Home" na tela de resumo
@@ -1157,7 +1302,7 @@
             }
             workoutPSE = pseValue;
 
-            userProgressData = []; // Garante que está limpo antes de popular
+            userProgressData = []; 
             const studentName = currentUser.name || "Convidado";
             const studentEmail = currentUser.email || "N/A";
             const date = new Date().toISOString();
@@ -1166,7 +1311,6 @@
             const workoutDurationSec = Math.floor(workoutDurationMs / 1000);
 
             performanceData.forEach(exercisePerf => {
-                // Recalcula estrelas aqui para garantir que estão atualizadas antes de salvar
                 exercisePerf.stars = calculateExerciseStars(exercisePerf); 
 
                 if (exercisePerf.seriesDone.length === 0) { 
