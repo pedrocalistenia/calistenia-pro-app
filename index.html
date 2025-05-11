@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+
     <style>
         /* --- PALETA DE CORES E ESTILOS GERAIS (PRETO E PRATA) --- */
         body {
@@ -113,7 +114,7 @@
             transform: scale(0.97) translateY(1px); 
         }
 
-        /* Classe genérica para botões 3D */
+        /* Classe genérica para botões 3D (aplicada seletivamente) */
         .button-3d {
             border-width: 1px;
             border-style: solid;
@@ -320,28 +321,7 @@
             margin-bottom: 0.5rem;
             line-height: 1.4;
         }
-        .alternative-exercise-buttons {
-            margin-top: 0.75rem;
-            display: flex;
-            justify-content: space-around; 
-            gap: 0.5rem;
-        }
-        .alternative-btn {
-            background-color: #4A5568; 
-            color: #E2E8F0; 
-            padding: 0.5rem 0.75rem;
-            border-radius: 0.375rem; 
-            font-size: 0.75rem; 
-            font-weight: 600;
-            border: 1px solid #718096; 
-        }
-        .alternative-btn:hover {
-            background-color: #2D3748; 
-        }
-        .alternative-btn.hidden {
-            display: none;
-        }
-
+        
         /* Botões 3D - Concluir Série e Pular Exercício */
         #completeSeriesBtn {
             background-color: #145A32;  
@@ -382,38 +362,42 @@
              background-color: #0A270A;
         }
 
+        /* Botões de Nível e Treino - Estilo Original (mais plano) */
         #homeScreen button,
         #workoutButtonsContainer button {
-            background-color: #374151; 
-            color: #F3F4F6; 
-            border-color: #1F2937; 
-            --shadow-color-dark: #1F2937;
+            background-color: #374151; /* bg-gray-700 */
+            color: #F3F4F6; /* text-gray-100 ou text-white */
+            border: 1px solid #4B5563; /* Borda sutil */
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Sombra suave original */
         }
         #homeScreen button:hover,
         #workoutButtonsContainer button:hover {
-            background-color: #4B5563; 
+            background-color: #4B5563; /* bg-gray-600 */
         }
          #homeScreen button:active,
         #workoutButtonsContainer button:active {
-            background-color: #1F2937; 
+            background-color: #1F2937; /* bg-gray-800 */
+            transform: scale(0.98); /* Efeito de clique sutil */
         }
 
+        /* Botões de Navegação - Estilo Original (mais plano) */
         .nav-button {
             background-color: #4B5563; 
             color: #E0E0E0;
-            border-color: #2D3748; 
-            --shadow-color-dark: #1A202C; 
+            border: 1px solid #2D3748; 
             padding: 0.6rem 1.1rem; 
             border-radius: 0.5rem; 
             font-weight: 600;
             display: inline-flex;
             align-items: center;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1); 
         }
         .nav-button:hover {
             background-color: #2D3748; 
         }
         .nav-button:active {
             background-color: #1A202C; 
+            transform: scale(0.98); 
         }
         .nav-button svg {
             width: 1.25rem; 
@@ -421,6 +405,7 @@
             margin-right: 0.5rem; 
         }
         
+        /* Botão Salvar Resumo com efeito 3D */
         #saveSummaryAndGoHomeBtn {
             background-color: #B08D57; 
             color: #FFFFFF; 
@@ -521,15 +506,15 @@
             <div class="p-6">
                 <h2 class="text-2xl font-bold text-gray-300 my-6" style="font-family: 'Inter', sans-serif;">Escolha seu nível</h2>
                 <div class="space-y-4">
-                    <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
+                    <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
                         Avançado
                         <span class="block text-sm font-normal opacity-80">(10+ barras e 15+ dips)</span>
                     </button>
-                    <button id="level-intermediario" onclick="selectLevel('intermediario')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
+                    <button id="level-intermediario" onclick="selectLevel('intermediario')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
                         Intermediário
                         <span class="block text-sm font-normal opacity-80">(3 pull ups e 3 dips)</span>
                     </button>
-                    <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
+                    <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
                         Iniciante
                         <span class="block text-sm font-normal opacity-80">(0 pull ups e 0 push ups)</span>
                     </button>
@@ -538,7 +523,7 @@
         </div>
 
         <div id="workoutListScreen" class="p-6 hidden">
-            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="nav-button mb-6 action-button button-3d">
+            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="nav-button mb-6 action-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
                 Voltar para Níveis
             </button>
@@ -547,7 +532,7 @@
         </div>
 
         <div id="workoutExecutionScreen" class="p-6 hidden">
-             <button onclick="confirmExitWorkout()" class="nav-button mb-4 action-button button-3d">
+             <button onclick="confirmExitWorkout()" class="nav-button mb-4 action-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
                 Voltar para Treinos
             </button>
@@ -579,7 +564,7 @@
                     </div>
                 </div>
                 
-                <div id="alternativeButtonsArea" class="alternative-exercise-buttons mb-3">
+                <div id="alternativeButtonsArea" class="alternative-exercise-buttons mb-3 hidden"> 
                     <button id="showOriginalBtn" onclick="showOriginalExercise()" class="alternative-btn hidden">Ver Original</button>
                     <button id="altEasyBtn" onclick="showAlternativeExercise('easy')" class="alternative-btn hidden">Alternativa + Fácil</button>
                     <button id="altHardBtn" onclick="showAlternativeExercise('hard')" class="alternative-btn hidden">Alternativa + Difícil</button>
@@ -631,25 +616,25 @@
 
     <script>
         // --- CONFIGURAÇÃO DO FIREBASE ---
-        // COLE AQUI O SEU OBJETO firebaseConfig
         const firebaseConfig = {
-            apiKey: "AIzaSyD5W173nhaqoTqFfteDepWqRxu7m984nII", // SUBSTITUA COM SEUS DADOS REAIS
+            apiKey: "AIzaSyD5W173nhaqoTqFfteDepWqRxu7m984nII", 
             authDomain: "calisteniaproapp-d6bec.firebaseapp.com",
             projectId: "calisteniaproapp-d6bec",
             storageBucket: "calisteniaproapp-d6bec.appspot.com",
             messagingSenderId: "584608398103",
             appId: "1:584608398103:web:133b7a222adae255999552",
-            measurementId: "G-809MBMS2BL" // Opcional, mas bom ter se você usar Analytics
+            measurementId: "G-809MBMS2BL" 
         };
 
-        // Inicializa o Firebase
         firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore(); // Referência ao Firestore
-        // const analytics = firebase.analytics(); // Descomente se quiser usar Analytics
+        const db = firebase.firestore(); 
 
 
         // --- CONSTANTES ---
         const ANIMATION_DURATION = 300; 
+        // URL do Google Apps Script para carregar treinos
+        const SCRIPT_URL_LOAD_WORKOUT = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec";
+
 
         // --- ESTADO DA APLICAÇÃO ---
         let currentUser = { name: null, email: null };
@@ -961,57 +946,76 @@
             showScreen(Screens.WORKOUT_LIST);
         }
 
-        // --- LÓGICA DE CARREGAMENTO DO TREINO ---
+        // --- LÓGICA DE CARREGAMENTO DO TREINO (AGORA DO GOOGLE SHEETS) ---
         async function loadWorkout(workoutName) {
-            console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel}`);
+            console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel} via Google Sheets`);
             selectedWorkoutName = workoutName;
             workoutStartTime = Date.now();
             workoutPSE = null; 
             if(pseInputElement) pseInputElement.value = '';
             viewingAlternativeType = null;
             
+            // SCRIPT_URL_LOAD_WORKOUT é a URL do seu Google Apps Script que termina em /exec
+            if (SCRIPT_URL_LOAD_WORKOUT === "COLOQUE_A_URL_DO_SEU_SCRIPT_AQUI" || !SCRIPT_URL_LOAD_WORKOUT.startsWith("https://script.google.com/")) {
+                showToast("Erro: URL do Script para carregar treinos inválida ou não configurada.", 5000);
+                console.error("URL do Script para carregar treinos inválida:", SCRIPT_URL_LOAD_WORKOUT);
+                selectedWorkoutName = ''; 
+                return;
+            }
+
+            const url = `${SCRIPT_URL_LOAD_WORKOUT}?level=${encodeURIComponent(selectedLevel)}&workout=${encodeURIComponent(workoutName)}`;
+            
             showLoadingIndicator();
 
-            // SIMULAÇÃO DE DADOS DE TREINO (substituir por fetch do Firestore no futuro)
-            let fetchedWorkoutData = [];
-            if (selectedLevel === 'iniciante' && workoutName === 'Treino A') {
-                fetchedWorkoutData = [
-                    { exercise_name: "Flexão Inclinada", series: 3, reps: "8-12", rest: "60", embed_url: "https://www.youtube.com/embed/Z0bRiX_o0-Q", alt_easy_name: "Flexão na Parede", alt_easy_url:"https://www.youtube.com/embed/PzM1sE7t4yM" },
-                    { exercise_name: "Remada Australiana", series: 3, reps: "AMRAP", rest: "90", embed_url: "https://www.youtube.com/embed/cW2q3zQc3uQ", alt_hard_name: "Barra Fixa (Negativa)", alt_hard_url:"https://www.youtube.com/embed/L77b5b4ZTIA" },
-                    { exercise_name: "Agachamento Livre", series: 3, reps: "10-15", rest: "60", embed_url: "https://www.youtube.com/embed/0A45nJ9d3yU" }
-                ];
-            } else {
-                 fetchedWorkoutData = [ 
-                    { exercise_name: "Flexão Padrão", series: 3, reps: "Máximo", rest: "60", embed_url: "https://www.youtube.com/embed/IODxDxX7oi4", alt_easy_name: "Flexão de Joelhos", alt_easy_url:"https://www.youtube.com/embed/EwY9nJ43btE", alt_hard_name: "Flexão Diamante", alt_hard_url:"https://www.youtube.com/embed/J0DnG1_S9EA" },
-                    { exercise_name: "Barra Fixa", series: 3, reps: "3-5", rest: "120", embed_url: "https://www.youtube.com/embed/XeErfmGSwfE" }
-                ];
-            }
-            currentWorkout = fetchedWorkoutData; 
-            
-            performanceData = currentWorkout.map(ex => ({
-                exerciseId: ex.exercise_id || `exid_${Math.random().toString(36).substr(2, 9)}`, 
-                exerciseName: ex.exercise_name || "Exercício Desconhecido", 
-                seriesTargetCount: parseInt(ex.series) || 0,       
-                repsTargetString: String(ex.reps || "N/A"),         
-                restTimeString: String(ex.rest || "60"),            
-                embedUrl: ex.embed_url || "",                       
-                loadInfo: ex.load || "",     
-                alt_easy_name: ex.alt_easy_name || null,
-                alt_easy_url: ex.alt_easy_url || null,
-                alt_hard_name: ex.alt_hard_name || null,
-                alt_hard_url: ex.alt_hard_url || null,
-                seriesDone: []                                      
-            }));
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    let errorMsg = `Erro HTTP ao carregar treino: ${response.status}`;
+                    try {
+                        const errorData = await response.json();
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (parseError) { /* Ignora erro de parse do erro */ }
+                    throw new Error(errorMsg);
+                }
 
-            hideLoadingIndicator();
+                currentWorkout = await response.json();
 
-            if (currentWorkout.length > 0) {
-                currentExerciseIndex = 0; 
-                currentSeriesNumber = 1;  
-                displayCurrentExerciseAndSeries();
-                showScreen(Screens.WORKOUT_EXECUTION);
-            } else {
-                showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}).`);
+                if (!Array.isArray(currentWorkout)) {
+                     if (currentWorkout && currentWorkout.error) { 
+                         throw new Error(currentWorkout.error);
+                     }
+                     throw new Error("Resposta da API de treinos não é um array de exercícios.");
+                }
+                
+                performanceData = currentWorkout.map(ex => ({
+                    exerciseId: ex.exercise_id || `exid_${Math.random().toString(36).substr(2, 9)}`, 
+                    exerciseName: ex.exercise_name || "Exercício Desconhecido", 
+                    seriesTargetCount: parseInt(ex.series) || 0,       
+                    repsTargetString: String(ex.reps || "N/A"),         
+                    restTimeString: String(ex.rest || "60"),            
+                    embedUrl: ex.embed_url || "",                       
+                    loadInfo: ex.load || "",     
+                    // Campos de alternativa não são mais usados aqui, mas podem vir da planilha
+                    seriesDone: []                                      
+                }));
+
+                hideLoadingIndicator();
+
+                if (currentWorkout.length > 0) {
+                    currentExerciseIndex = 0; 
+                    currentSeriesNumber = 1;  
+                    displayCurrentExerciseAndSeries();
+                    showScreen(Screens.WORKOUT_EXECUTION);
+                } else {
+                    showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}). Verifique a planilha.`);
+                    workoutStartTime = null;
+                    selectedWorkoutName = ''; 
+                }
+
+            } catch (error) {
+                hideLoadingIndicator();
+                console.error("Erro ao carregar treino do Google Sheets:", error);
+                showToast(`Erro ao carregar treino: ${error.message}`, 5000);
                 workoutStartTime = null;
                 selectedWorkoutName = ''; 
             }
@@ -1038,35 +1042,15 @@
                 return;
             }
             
-            if (!viewingAlternativeType || originalExerciseDetails.name !== exercisePerf.exerciseName) {
-                originalExerciseDetails.name = exercisePerf.exerciseName;
-                originalExerciseDetails.embedUrl = exercisePerf.embedUrl;
-                originalExerciseDetails.reps = exercisePerf.repsTargetString;
-            }
-
-            let displayName = originalExerciseDetails.name;
-            let displayUrl = originalExerciseDetails.embedUrl;
-
-            if (viewingAlternativeType === 'easy' && exercisePerf.alt_easy_name) {
-                displayName = "Alternativa: " + exercisePerf.alt_easy_name;
-                displayUrl = exercisePerf.alt_easy_url || originalExerciseDetails.embedUrl;
-            } else if (viewingAlternativeType === 'hard' && exercisePerf.alt_hard_name) {
-                displayName = "Alternativa: " + exercisePerf.alt_hard_name;
-                displayUrl = exercisePerf.alt_hard_url || originalExerciseDetails.embedUrl;
-            } else { 
-                 displayName = "Exercício: " + originalExerciseDetails.name; 
-            }
-            
-            if(exerciseNameElement) exerciseNameElement.textContent = displayName;
-            if(videoPlayerContainerElement) videoPlayerContainerElement.innerHTML = displayUrl ? `<iframe src="${displayUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : `<p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo indisponível.</p>`;
-
+            if(exerciseNameElement) exerciseNameElement.textContent = "Exercício: " + exercisePerf.exerciseName;
+            if(videoPlayerContainerElement) videoPlayerContainerElement.innerHTML = exercisePerf.embedUrl ? `<iframe src="${exercisePerf.embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : `<p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo indisponível.</p>`;
 
             if (seriesProgressTextElement) seriesProgressTextElement.textContent = `SÉRIE ${currentSeriesNumber}`;
-            if (exerciseRepsElement) exerciseRepsElement.textContent = originalExerciseDetails.reps; 
+            if (exerciseRepsElement) exerciseRepsElement.textContent = exercisePerf.repsTargetString; 
 
-            altEasyBtnElement.classList.toggle('hidden', !exercisePerf.alt_easy_name || !exercisePerf.alt_easy_url || viewingAlternativeType === 'easy');
-            altHardBtnElement.classList.toggle('hidden', !exercisePerf.alt_hard_name || !exercisePerf.alt_hard_url || viewingAlternativeType === 'hard');
-            showOriginalBtnElement.classList.toggle('hidden', !viewingAlternativeType);
+            // Esconde botões de alternativa, pois foram removidos
+            const altButtonsArea = document.getElementById('alternativeButtonsArea');
+            if (altButtonsArea) altButtonsArea.classList.add('hidden');
 
 
             if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
@@ -1090,20 +1074,6 @@
             clearRestTimer(); 
         }
         
-        function showAlternativeExercise(type) {
-            const currentEx = performanceData[currentExerciseIndex];
-            if (!currentEx) return;
-
-            viewingAlternativeType = type; 
-            displayCurrentExerciseAndSeries(); 
-        }
-
-        function showOriginalExercise() {
-            viewingAlternativeType = null; 
-            displayCurrentExerciseAndSeries(); 
-        }
-
-
         function completeSeries() {
             if (!repsInputElement) return;
             let repsValue = repsInputElement.value.trim();
@@ -1138,7 +1108,6 @@
             }
             currentSeriesNumber++;
             const currentExercisePerformance = performanceData[currentExerciseIndex];
-            viewingAlternativeType = null; 
 
             if(mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if(videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
@@ -1173,9 +1142,8 @@
                 while (currentExPerf.seriesDone.length < seriesTarget) {
                     currentExPerf.seriesDone.push({ reps: "Pulado" });
                 }
-                showToast(`${originalExerciseDetails.name} pulado.`); 
+                showToast(`${currentExPerf.exerciseName} pulado.`); 
             }
-            viewingAlternativeType = null; 
             currentExerciseIndex++; 
             currentSeriesNumber = 1; 
 
@@ -1281,50 +1249,37 @@
             }
             workoutPSE = pseValue;
 
-            userProgressData = []; 
-            const studentName = currentUser.name || "Convidado";
-            const studentEmail = currentUser.email || "N/A"; 
-            const date = new Date().toISOString();
-            const workoutEndTime = Date.now();
-            const workoutDurationMs = workoutStartTime ? workoutEndTime - workoutStartTime : 0;
-            const workoutDurationSec = Math.floor(workoutDurationMs / 1000);
+            // Construir o objeto único do treino para Firestore
+            const workoutDataForFirestore = {
+                studentName: currentUser.name || "Convidado",
+                studentEmail: currentUser.email || "N/A",
+                level: selectedLevel,
+                workoutName: selectedWorkoutName,
+                date: new Date().toISOString(),
+                workoutDurationSec: workoutStartTime ? Math.floor((Date.now() - workoutStartTime) / 1000) : 0,
+                pse: workoutPSE,
+                exercises: performanceData.map(exPerf => {
+                    return {
+                        exerciseName: exPerf.exerciseName,
+                        exerciseId: exPerf.exerciseId,
+                        stars: calculateExerciseStars(exPerf),
+                        seriesDone: exPerf.seriesDone.map((serie, index) => ({
+                            seriesNumber: index + 1,
+                            repsDone: serie.reps
+                        }))
+                    };
+                })
+            };
+            
+            console.log("Dados do treino a serem enviados para o Firestore:", workoutDataForFirestore);
+            showToast(`Salvando ${selectedWorkoutName} no Firebase...`);
 
-            performanceData.forEach(exercisePerf => {
-                exercisePerf.stars = calculateExerciseStars(exercisePerf); 
-
-                if (exercisePerf.seriesDone.length === 0) { 
-                     userProgressData.push({
-                        date: date, studentName: studentName, studentEmail: studentEmail,
-                        level: selectedLevel, workoutName: selectedWorkoutName,
-                        exerciseName: exercisePerf.exerciseName, exerciseId: exercisePerf.exerciseId,
-                        seriesNumber: 0, repsDone: "Pulado (Exercício)", stars: 0,
-                        workoutDurationSec: workoutDurationSec,
-                        pse: workoutPSE 
-                    });
-                } else {
-                    exercisePerf.seriesDone.forEach((seriesData, index) => {
-                        userProgressData.push({
-                            date: date, studentName: studentName, studentEmail: studentEmail,
-                            level: selectedLevel, workoutName: selectedWorkoutName,
-                            exerciseName: exercisePerf.exerciseName, exerciseId: exercisePerf.exerciseId,
-                            seriesNumber: index + 1, repsDone: seriesData.reps,
-                            stars: exercisePerf.stars, 
-                            workoutDurationSec: workoutDurationSec,
-                            pse: workoutPSE 
-                        });
-                    });
-                }
-            });
-
-            console.log("Dados a serem enviados para o Firestore:", userProgressData);
-            showToast(`Salvando ${selectedWorkoutName}...`);
-
-            const saveSuccess = await saveProgressToFirestore(userProgressData);
+            const saveSuccess = await saveProgressToFirestore(workoutDataForFirestore);
 
             if (saveSuccess) {
-                 showToast(`Treino ${selectedWorkoutName} salvo com sucesso!`);
+                 showToast(`Treino ${selectedWorkoutName} salvo com sucesso no Firebase!`);
             } else {
-                 showToast(`Erro ao salvar o treino ${selectedWorkoutName} no Firestore.`);
+                 showToast(`Erro ao salvar o treino ${selectedWorkoutName} no Firebase.`);
             }
             
             showScreen(Screens.HOME);
@@ -1332,32 +1287,33 @@
         }
 
 
-        // --- FUNÇÃO PARA SALVAR PROGRESSO NO FIRESTORE ---
-        async function saveProgressToFirestore(progressDataArray) {
+        // --- FUNÇÃO PARA SALVAR PROGRESSO NO FIRESTORE (DOCUMENTO ÚNICO) ---
+        async function saveProgressToFirestore(singleWorkoutData) {
             if (!db) {
                 showToast("Erro: Conexão com o banco de dados não estabelecida.", 5000);
                 console.error("Firestore 'db' instance is not available.");
                 return false;
             }
-            if (!progressDataArray || progressDataArray.length === 0) {
-                console.log("Nenhum dado de progresso para salvar.");
+            if (!singleWorkoutData) {
+                console.log("Nenhum dado de treino para salvar.");
                 return true; 
             }
 
             try {
-                const batch = db.batch();
-                
-                progressDataArray.forEach(progressEntry => {
-                    const progressDocRef = db.collection("workoutProgress").doc(); 
-                    batch.set(progressDocRef, progressEntry);
-                });
+                // Usaremos o email do usuário (se disponível) como parte do caminho para organizar os dados por usuário.
+                // Se não houver email, salvaremos em uma coleção mais genérica.
+                // É altamente recomendável implementar autenticação Firebase para ter um `currentUser.uid` confiável.
+                const userIdentifier = currentUser.email || "anonymous_users";
+                const collectionPath = `userWorkouts/${userIdentifier}/completed_workouts`;
 
-                await batch.commit();
-                console.log("Todas as entradas de progresso salvas no Firestore com sucesso.");
+                const workoutDocRef = db.collection(collectionPath).doc(); // Gera ID automático para o treino
+                await workoutDocRef.set(singleWorkoutData); 
+
+                console.log("Treino salvo no Firestore com sucesso. Caminho:", `${collectionPath}/${workoutDocRef.id}`);
                 return true;
 
             } catch (error) {
-                console.error("Erro ao salvar progresso no Firestore:", error);
+                console.error("Erro ao salvar treino no Firestore:", error);
                 showToast(`Erro ao salvar no Firestore: ${error.message}`, 5000);
                 return false;
             }
@@ -1395,7 +1351,7 @@
                 exerciseDiv.className = 'mb-3 p-3 bg-gray-800 rounded-md shadow-sm';
 
                 const repsTargetDisplay = `(Alvo: ${exPerf.repsTargetString})`;
-                const currentStars = exPerf.stars !== undefined ? exPerf.stars : calculateExerciseStars(exPerf);
+                const currentStars = calculateExerciseStars(exPerf); 
                 const starRatingHtml = getStarString(currentStars);
 
 
