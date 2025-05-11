@@ -266,19 +266,19 @@
         }
 
 
-        #seriesInputArea label, #loginScreen label, #pseInputArea label { /* Adicionado #pseInputArea label */
+        #seriesInputArea label, #loginScreen label, #pseInputArea label { 
             font-weight: 500;
             color: #B0B0B0;
         }
-        #repsInput, #loginName, #loginEmail, #pseInput { /* Adicionado #pseInput */
+        #repsInput, #loginName, #loginEmail, #pseInput { 
             background-color: #1E1E1E;
             color: #E0E0E0;
             border: 1px solid #444444;
         }
-        #repsInput::placeholder, #loginName::placeholder, #loginEmail::placeholder, #pseInput::placeholder { /* Adicionado #pseInput::placeholder */
+        #repsInput::placeholder, #loginName::placeholder, #loginEmail::placeholder, #pseInput::placeholder { 
             color: #888888;
         }
-        #repsInput:focus, #loginName:focus, #loginEmail:focus, #pseInput:focus { /* Adicionado #pseInput:focus */
+        #repsInput:focus, #loginName:focus, #loginEmail:focus, #pseInput:focus { 
             border-color: #A0A0A0;
             box-shadow: 0 0 0 2px rgba(160, 160, 160, 0.3);
         }
@@ -287,11 +287,11 @@
             padding-right: 0;
             margin-bottom: 0.75rem; 
         }
-        #pseInputArea { /* Estilos para a nova área de PSE */
+        #pseInputArea { 
             margin-top: 1rem;
             margin-bottom: 1rem;
             padding: 0.75rem;
-            background-color: #2C2C2C; /* Mesma cor do card de exercício para consistência */
+            background-color: #2C2C2C; 
             border-radius: 0.5rem;
         }
         #pseInputArea p {
@@ -321,7 +321,7 @@
             background-color: #641E16; 
         }
 
-        #finishWorkoutBtn {
+        #finishWorkoutBtn { 
             background-color: #7D3C98;
             color: #FFFFFF;
         }
@@ -368,7 +368,7 @@
          .star-rating .empty-star {
             color: #555555;
         }
-        #workoutSummaryContent h4, #workoutStats h3, #pseInputArea h4 { /* Adicionado #pseInputArea h4 */
+        #workoutSummaryContent h4, #workoutStats h3, #pseInputArea h4 { 
             color: #E0E0E0;
         }
         #workoutSummaryContent .bg-gray-800,
@@ -422,7 +422,7 @@
                     <span class="subtitle">por Pedro Dias</span> 
                 </h1>
             </div>
-            <h2 class="text-2xl font-bold text-gray-300 mb-6 text-center">Seja bem-vindo, identifique-se</h2>
+            <h2 class="text-2xl font-bold text-gray-300 mb-6 text-center">Seja bem-vindo,<br>identifique-se</h2>
             <div class="space-y-4">
                 <div>
                     <label for="loginName" class="block text-sm font-medium mb-1">Nome:</label>
@@ -517,12 +517,14 @@
                     <button id="skipExerciseBtn" onclick="confirmSkipExercise()" class="w-full max-w-xs skip-exercise-btn font-semibold py-2 px-4 rounded-lg shadow-md hover:shadow-lg action-button text-base mt-2">Pular Exercício Atual</button> 
                 </div>
 
-            </div> <button id="finishWorkoutBtn" onclick="finishWorkout()" class="w-full font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg mt-3 hidden action-button text-base">Finalizar Treino (Ver Resumo)</button>
-        </div>
+            </div> 
+            </div>
 
         <div id="summaryScreen" class="p-6 hidden text-center">
-            <div id="workoutSummaryContent" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left mt-6"> </div>
-            <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left"> </div>
+            <div id="workoutSummaryContent" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left mt-6"> 
+            </div>
+            <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left"> 
+            </div>
 
             <div id="pseInputArea" class="text-left mb-4">
                 <h4 class="text-lg font-semibold mb-1 text-gray-100">Percepção de Esforço (PSE)</h4>
@@ -534,8 +536,9 @@
                 <input type="number" id="pseInput" min="1" max="10" class="w-full p-2.5 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100 placeholder-gray-500 text-center" placeholder="Ex: 7">
             </div>
 
-            <p id="motivationalMessage" class="text-lg text-green-400 font-semibold mb-6"></p> <button onclick="showScreen(Screens.HOME); resetAppState(true);" class="nav-button mx-auto action-button"> <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                Voltar para Níveis
+            <p id="motivationalMessage" class="text-lg text-green-400 font-semibold mb-6"></p> 
+            <button id="saveSummaryAndGoHomeBtn" onclick="saveSummaryAndGoHome()" class="w-full max-w-md font-semibold py-3 px-6 rounded-lg shadow-md hover:shadow-lg action-button text-base bg-blue-600 hover:bg-blue-700 text-white">
+                Salvar Resumo e Voltar para Home
             </button>
         </div>
 
@@ -559,7 +562,7 @@
         let currentExerciseIndex = 0;
         let currentSeriesNumber = 1;
         let performanceData = [];
-        let workoutPSE = null; // Nova variável para armazenar PSE
+        let workoutPSE = null; 
 
         let restTimerInterval;
         let restTimerSeconds = 0;
@@ -585,7 +588,7 @@
             seriesInputAreaElement, summaryContentElement, statsDivElement,
             motivationalMessageElement, toastNotificationElement,
             loginNameInputElement, loginEmailInputElement, exerciseActionButtonsElement,
-            pseInputElement; // Nova referência para o input de PSE
+            pseInputElement; 
 
         let radius;
         let circumference;
@@ -607,7 +610,7 @@
             exerciseRepsElement = document.getElementById('exerciseReps'); 
             completeSeriesBtnElement = document.getElementById('completeSeriesBtn');
             skipExerciseBtnElement = document.getElementById('skipExerciseBtn');
-            finishWorkoutBtnElement = document.getElementById('finishWorkoutBtn');
+            finishWorkoutBtnElement = document.getElementById('finishWorkoutBtn'); 
             seriesInputAreaElement = document.getElementById('seriesInputArea');
             summaryContentElement = document.getElementById('workoutSummaryContent');
             statsDivElement = document.getElementById('workoutStats');
@@ -616,7 +619,7 @@
             loginNameInputElement = document.getElementById('loginName');
             loginEmailInputElement = document.getElementById('loginEmail');
             exerciseActionButtonsElement = document.getElementById('exerciseActionButtons');
-            pseInputElement = document.getElementById('pseInput'); // Inicializa referência do PSE
+            pseInputElement = document.getElementById('pseInput'); 
 
             // Configuração do anel de progresso do timer
             radius = progressRingElement?.getAttribute('r');
@@ -669,6 +672,9 @@
                     currentScreen = screenId; 
                     window.scrollTo(0, 0);
                     updateHeader(screenId);
+                    if (screenId === Screens.SUMMARY) { // Chama displaySummary quando a tela de resumo é mostrada
+                        displaySummary();
+                    }
                 }, ANIMATION_DURATION);
             } else { 
                 ALL_SCREENS.forEach(id_ => {
@@ -688,6 +694,9 @@
                 currentScreen = screenId; 
                 window.scrollTo(0, 0);
                 updateHeader(screenId);
+                if (screenId === Screens.SUMMARY) { // Chama displaySummary quando a tela de resumo é mostrada
+                    displaySummary();
+                }
             }
         }
 
@@ -742,8 +751,8 @@
             currentSeriesNumber = 1;
             performanceData = [];
             workoutStartTime = null;
-            workoutPSE = null; // Reseta PSE
-            if(pseInputElement) pseInputElement.value = ''; // Limpa campo PSE
+            workoutPSE = null; 
+            if(pseInputElement) pseInputElement.value = ''; 
 
             if (resetUser) {
                 currentUser = { name: null, email: null };
@@ -756,7 +765,7 @@
             if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
             if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
-            if (finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden');
+            // finishWorkoutBtnElement não é mais relevante na tela de execução
             if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden');
             if (repsInputElement) repsInputElement.value = '';
 
@@ -835,7 +844,7 @@
             if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
             if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
             if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
-            if (finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden');
+            // finishWorkoutBtnElement não é mais relevante na tela de execução
             if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden');
             if (repsInputElement) repsInputElement.value = '';
 
@@ -847,7 +856,7 @@
             console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel}`);
             selectedWorkoutName = workoutName;
             workoutStartTime = Date.now();
-            workoutPSE = null; // Reseta PSE ao carregar novo treino
+            workoutPSE = null; 
             if(pseInputElement) pseInputElement.value = '';
             
             const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec";
@@ -902,7 +911,6 @@
                     currentSeriesNumber = 1;  
                     displayCurrentExerciseAndSeries();
                     showScreen(Screens.WORKOUT_EXECUTION);
-                    if(finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden'); 
                 } else {
                     showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}).`);
                     workoutStartTime = null;
@@ -928,22 +936,7 @@
         // --- LÓGICA DE EXECUÇÃO DO TREINO ---
         function displayCurrentExerciseAndSeries() {
              if (!performanceData || currentExerciseIndex >= performanceData.length) {
-                if(exerciseNameElement) exerciseNameElement.textContent = "Treino Concluído!";
-                if(seriesProgressTextElement) seriesProgressTextElement.textContent = "Bom trabalho!";
-                if(exerciseRepsElement) exerciseRepsElement.textContent = "-";
-                if(videoPlayerContainerElement) videoPlayerContainerElement.innerHTML = `<p class="text-center text-gray-400 flex items-center justify-center h-full">Todos os exercícios finalizados. Clique em "Finalizar Treino".</p>`;
-
-                if(mediaDisplayAreaElement && !circularTimerWrapperElement.classList.contains('force-hidden')) {
-                    videoPlayerContainerElement.classList.remove('force-hidden'); 
-                    circularTimerWrapperElement.classList.add('force-hidden');    
-                }
-                if(seriesInputAreaElement) seriesInputAreaElement.classList.add('hidden');
-                if(exerciseActionButtonsElement) exerciseActionButtonsElement.classList.add('force-hidden'); 
-                if(completeSeriesBtnElement) completeSeriesBtnElement.classList.add('hidden');
-                if(skipExerciseBtnElement) skipExerciseBtnElement.classList.add('hidden');
-
-
-                if(finishWorkoutBtnElement) finishWorkoutBtnElement.classList.remove('hidden'); 
+                finishWorkout(); // Chama finishWorkout que agora transita para a tela de resumo
                 return;
             }
 
@@ -980,8 +973,7 @@
 
             if(completeSeriesBtnElement) completeSeriesBtnElement.classList.remove('hidden');
             if(skipExerciseBtnElement) skipExerciseBtnElement.classList.remove('hidden');
-            if(finishWorkoutBtnElement) finishWorkoutBtnElement.classList.add('hidden'); 
-
+            
             if(completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
             if(skipExerciseBtnElement) skipExerciseBtnElement.disabled = false;
 
@@ -1009,7 +1001,7 @@
             const isLastExerciseOverall = currentExerciseIndex === performanceData.length - 1;
 
             if (isLastSeriesOfCurrentExercise && isLastExerciseOverall) {
-                handleRestFinished();
+                finishWorkout(); // Vai para a tela de resumo
             } else {
                 startRestTimer(totalRestDuration);
             }
@@ -1148,18 +1140,24 @@
         }
 
 
-        // --- FINALIZAR TREINO E SALVAR PROGRESSO ---
-        async function finishWorkout() {
-            // Coleta o valor do PSE
-            const pseValue = pseInputElement?.value ? parseInt(pseInputElement.value) : null;
-            if (pseInputElement && pseValue !== null && (pseValue < 1 || pseValue > 10)) {
-                showToast("PSE inválido. Por favor, insira um valor entre 1 e 10.", 4000);
-                pseInputElement.focus();
-                return; // Impede o prosseguimento se o PSE for inválido
-            }
-            workoutPSE = pseValue; // Armazena o PSE globalmente para o treino
+        // --- FINALIZAR TREINO E IR PARA RESUMO ---
+        function finishWorkout() {
+            if(pseInputElement) pseInputElement.value = ''; // Limpa campo PSE para nova entrada
+            showScreen(Screens.SUMMARY); // Transita para a tela de resumo
+            // displaySummary() será chamado pelo showScreen se a próxima tela for SUMMARY
+        }
 
-            userProgressData = [];
+        // NOVA FUNÇÃO para ser chamada pelo botão "Salvar Resumo e Voltar para Home" na tela de resumo
+        async function saveSummaryAndGoHome() {
+            const pseValue = pseInputElement?.value ? parseInt(pseInputElement.value) : null;
+            if (pseInputElement && pseValue !== null && (pseValue < 1 || pseValue > 10 || isNaN(pseValue))) {
+                showToast("PSE inválido. Por favor, insira um valor numérico entre 1 e 10.", 4000);
+                pseInputElement.focus();
+                return; 
+            }
+            workoutPSE = pseValue;
+
+            userProgressData = []; // Garante que está limpo antes de popular
             const studentName = currentUser.name || "Convidado";
             const studentEmail = currentUser.email || "N/A";
             const date = new Date().toISOString();
@@ -1168,6 +1166,7 @@
             const workoutDurationSec = Math.floor(workoutDurationMs / 1000);
 
             performanceData.forEach(exercisePerf => {
+                // Recalcula estrelas aqui para garantir que estão atualizadas antes de salvar
                 exercisePerf.stars = calculateExerciseStars(exercisePerf); 
 
                 if (exercisePerf.seriesDone.length === 0) { 
@@ -1177,7 +1176,7 @@
                         exerciseName: exercisePerf.exerciseName, exerciseId: exercisePerf.exerciseId,
                         seriesNumber: 0, repsDone: "Pulado (Exercício)", stars: 0,
                         workoutDurationSec: workoutDurationSec,
-                        pse: workoutPSE // Adiciona PSE a cada entrada
+                        pse: workoutPSE 
                     });
                 } else {
                     exercisePerf.seriesDone.forEach((seriesData, index) => {
@@ -1188,26 +1187,27 @@
                             seriesNumber: index + 1, repsDone: seriesData.reps,
                             stars: exercisePerf.stars, 
                             workoutDurationSec: workoutDurationSec,
-                            pse: workoutPSE // Adiciona PSE a cada entrada
+                            pse: workoutPSE 
                         });
                     });
                 }
             });
 
-            console.log("Dados a serem enviados para a planilha:", userProgressData);
-            showToast(`Finalizando e salvando ${selectedWorkoutName}...`);
+            console.log("Dados a serem enviados para a planilha (após resumo):", userProgressData);
+            showToast(`Salvando ${selectedWorkoutName}...`);
 
             const saveSuccess = await saveProgressToSheet(userProgressData);
 
             if (saveSuccess) {
-                 showToast(`Resumo do ${selectedWorkoutName} gerado e salvo!`);
+                 showToast(`Treino ${selectedWorkoutName} salvo com sucesso!`);
             } else {
-                 showToast(`Resumo gerado. Erro ao salvar na planilha.`);
+                 showToast(`Erro ao salvar o treino ${selectedWorkoutName} na planilha.`);
             }
-
-            displaySummary(workoutDurationMs);
-            showScreen(Screens.SUMMARY);
+            
+            showScreen(Screens.HOME);
+            resetAppState(true); 
         }
+
 
         // --- FUNÇÃO PARA SALVAR PROGRESSO NA PLANILHA ---
         async function saveProgressToSheet(progressDataArray) {
@@ -1252,7 +1252,7 @@
             }
         }
 
-        function displaySummary(durationMs = 0) {
+        function displaySummary() { 
             if (!summaryContentElement || !statsDivElement || !motivationalMessageElement) {
                  console.error("Elementos da tela de resumo não encontrados.");
                  return;
@@ -1284,7 +1284,9 @@
                 exerciseDiv.className = 'mb-3 p-3 bg-gray-800 rounded-md shadow-sm';
 
                 const repsTargetDisplay = `(Alvo: ${exPerf.repsTargetString})`;
-                const starRatingHtml = getStarString(exPerf.stars !== undefined ? exPerf.stars : calculateExerciseStars(exPerf));
+                const currentStars = exPerf.stars !== undefined ? exPerf.stars : calculateExerciseStars(exPerf);
+                const starRatingHtml = getStarString(currentStars);
+
 
                 exerciseDiv.innerHTML = `
                     <div class="flex justify-between items-center">
@@ -1304,30 +1306,37 @@
                 }
                 summaryContentElement.appendChild(exerciseDiv);
             });
+            
+            const workoutEndTimeForDisplay = Date.now(); 
+            const workoutDurationMsForDisplay = workoutStartTime ? workoutEndTimeForDisplay - workoutStartTime : 0;
+            const durationSecondsForDisplay = Math.floor(workoutDurationMsForDisplay / 1000);
+            const durationFormattedForDisplay = formatTime(durationSecondsForDisplay);
 
-            let totalRepsOverall = 0;
-            userProgressData.forEach(entry => {
-                if (entry.repsDone !== "Pulado (Exercício)") {
-                    const repsNumeric = parseInt(entry.repsDone);
-                    if (!isNaN(repsNumeric)) {
-                        totalRepsOverall += repsNumeric;
+            let totalRepsOverallForDisplay = 0;
+            performanceData.forEach(ex => { 
+                ex.seriesDone.forEach(serie => {
+                    if (serie.reps !== "Pulado (Exercício)" && serie.reps !== "Pulado" && serie.reps !== "N/A") {
+                         const repsNumeric = parseInt(serie.reps);
+                        if (!isNaN(repsNumeric)) {
+                            totalRepsOverallForDisplay += repsNumeric;
+                        }
                     }
-                }
+                });
             });
+            
+            const registeredExercisesCountForDisplay = performanceData.filter(ex => ex.seriesDone.length > 0).length;
 
-            const registeredExercisesCount = performanceData.filter(ex => ex.seriesDone.length > 0).length;
-
-            const durationSeconds = Math.floor(durationMs / 1000);
-            const durationFormatted = formatTime(durationSeconds);
 
             statsDivElement.innerHTML = `
                 <h3 class="text-xl font-semibold mb-2 text-blue-400" style="font-family: 'Inter', sans-serif;">Estatísticas Gerais</h3>
-                <p><strong>Tempo Total de Treino:</strong> ${durationFormatted}</p>
-                <p><strong>Total de Repetições (numéricas):</strong> ${totalRepsOverall > 0 ? totalRepsOverall : (userProgressData.some(e => !isNaN(parseInt(e.repsDone)) && e.repsDone !== "Pulado (Exercício)") ? totalRepsOverall : "N/A")}</p>
-                <p><strong>Exercícios com séries registradas:</strong> ${registeredExercisesCount}</p>
-                ${workoutPSE !== null ? `<p><strong>PSE (1-10):</strong> ${workoutPSE}</p>` : ''} `;
+                <p><strong>Tempo Total de Treino:</strong> ${durationFormattedForDisplay}</p>
+                <p><strong>Total de Repetições (numéricas):</strong> ${totalRepsOverallForDisplay > 0 ? totalRepsOverallForDisplay : "N/A"}</p>
+                <p><strong>Exercícios com séries registradas:</strong> ${registeredExercisesCountForDisplay}</p>
+                `;
 
-            motivationalMessageElement.textContent = `Parabéns, ${studentName}! Você mandou bem no ${selectedWorkoutName || 'treino'}! Continue focado(a)!`;
+            motivationalMessageElement.textContent = `Parabéns, ${studentName}! Você mandou bem no ${selectedWorkoutName || 'treino'}! Revise seu resumo e adicione sua PSE.`;
+            
+            if(pseInputElement) pseInputElement.focus();
         }
 
         // --- TIMERS ---
