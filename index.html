@@ -6,157 +6,474 @@
     <title>Calistenia PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
-
+    <!-- Bibliotecas para Geração de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         /* --- PALETA DE CORES E ESTILOS GERAIS (PRETO E PRATA) --- */
         body {
             font-family: 'Inter', sans-serif;
             overscroll-behavior-y: contain;
-            background-color: #121212;
-            color: #E0E0E0;
-            overflow-x: hidden;
+            background-color: #121212; /* Preto principal */
+            color: #E0E0E0; /* Prata/Cinza claro para texto */
+            overflow-x: hidden; /* Prevenir scroll horizontal causado por animações de slide */
         }
         #appContainer {
-            background-color: #1E1E1E;
+            background-color: #1E1E1E; /* Cinza escuro para container principal */
             color: #E0E0E0;
-            position: relative; 
-            overflow-x: hidden; 
+            position: relative;
+            overflow-x: hidden;
         }
+
+        /* --- ESTILOS DAS TELAS PARA ANIMAÇÃO --- */
         #loginScreen, #homeScreen, #workoutListScreen, #workoutExecutionScreen, #summaryScreen {
             width: 100%;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-        @keyframes slideInFromRight { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
-        @keyframes slideOutToLeft { from { transform: translateX(0); opacity: 1; } to { transform: translateX(-100%); opacity: 0; } }
-        .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
-        .animate-fade-out { animation: fadeOut 0.3s ease-in forwards; }
-        .animate-slide-in-right { animation: slideInFromRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards; }
-        .animate-slide-out-left { animation: slideOutToLeft 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards; }
 
-        .app-header { background-color: #000000; color: #A0A0A0; padding: 1rem; text-align: center; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem; }
-        .app-header h1 { font-family: 'Archivo Black', sans-serif; font-size: 1.875rem; font-weight: 400; letter-spacing: 0.025em; text-transform: uppercase; line-height: 1.2; }
-        .pro-text-header { font-weight: 400; color: #FFFFFF; }
-        .app-header .subtitle { font-family: 'Inter', sans-serif; font-size: 0.8rem; font-weight: 500; color: #B0B0B0; margin-top: 0.1rem; letter-spacing: 0.025em; display: block; text-transform: none; }
-        
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1E1E1E; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb { background: #555555; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #777777; }
-        
-        .action-button { transition: all 0.15s ease-out; }
-        .action-button:active { transform: scale(0.97) translateY(1px); }
-        .button-3d { border-width: 1px; border-style: solid; box-shadow: 0 2px 0 var(--shadow-color-dark, #222), 0 3px 4px rgba(0,0,0,0.2); }
-        .button-3d:hover { box-shadow: 0 1px 0 var(--shadow-color-dark, #222), 0 2px 3px rgba(0,0,0,0.25); }
-        .button-3d:active { box-shadow: inset 0 1px 2px rgba(0,0,0,0.25); transform: translateY(2px) scale(0.98); }
 
-        .media-display-area { display: flex; align-items: center; justify-content: center; width: 100%; aspect-ratio: 16 / 9; border-radius: 0.5rem; background-color: #333333; overflow: hidden; margin-bottom: 0.5rem; }
-        .video-container, #circularTimerWrapper { width: 100%; height: 100%; flex-shrink: 0; }
-        .video-container { position: relative; }
-        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-        
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 12px 24px; background-color: #121212; color: #E0E0E0; border: 1px solid #333333; border-radius: 8px; z-index: 1000; opacity: 0; transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out; font-size: 0.9rem; }
-        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-        .toast.hide { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        /* --- ANIMAÇÕES PARA TRANSIÇÃO DE TELA --- */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+        @keyframes slideInFromRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOutToLeft {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(-100%); opacity: 0; }
+        }
 
-        #circularTimerWrapper { display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .timer-display-and-controls { display: flex; align-items: center; justify-content: center; gap: 1.5rem; width: 100%; padding: 0 1rem; }
-        #circularTimerContainer { width: 120px; height: 120px; margin: 0 0.5rem; }
-        #circularTimerText { font-size: 2.25rem; color: #E0E0E0; }
-        #progressRing { transition: stroke-dashoffset 0.3s linear; }
+        .animate-fade-in {
+            animation: fadeIn 0.3s ease-out forwards;
+        }
+        .animate-fade-out {
+            animation: fadeOut 0.3s ease-in forwards;
+        }
+        .animate-slide-in-right {
+            animation: slideInFromRight 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+        }
+        .animate-slide-out-left {
+            animation: slideOutToLeft 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards;
+        }
 
-        #pauseRestTimerBtn, #skipRestTimerBtn { padding: 0; font-size: 0.70rem; text-transform: uppercase; letter-spacing: 0.5px; border-radius: 9999px; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; font-weight: 600; border: none; }
-        #pauseRestTimerBtn { background-color: #B0B0B0; color: #121212; box-shadow: -4px -4px 8px rgba(180, 180, 180, 0.08), 4px  4px 8px rgba(0, 0, 0, 0.4); }
-        #pauseRestTimerBtn:hover { background-color: #A0A0A0; box-shadow: -5px -5px 10px rgba(180, 180, 180, 0.1), 5px  5px 10px rgba(0, 0, 0, 0.45); }
-        #pauseRestTimerBtn:active { background-color: #909090; box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.35), inset  3px  3px 6px rgba(180, 180, 180, 0.06); }
-        #skipRestTimerBtn { background-color: #4D4D4D; color: #E0E0E0; box-shadow: -4px -4px 8px rgba(90, 90, 90, 0.25), 4px  4px 8px rgba(0, 0, 0, 0.5); }
-        #skipRestTimerBtn:hover { background-color: #585858; box-shadow: -5px -5px 10px rgba(90, 90, 90, 0.3), 5px  5px 10px rgba(0, 0, 0, 0.55); }
-        #skipRestTimerBtn:active { background-color: #404040; box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.5), inset  3px  3px 6px rgba(90, 90, 90, 0.2); }
 
-        .exercise-card { background-color: #2C2C2C; color: #E0E0E0; padding: 1rem; border-radius: 0.75rem; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); margin-bottom: 1rem; }
-        .exercise-details-info { background-color: #1E1E1E; border: 1px solid #333333; color: #B0B0B0; padding: 0.5rem; border-radius: 0.5rem; margin-top: 0.75rem; margin-bottom: 0.75rem; }
-        .exercise-details-info strong { color: #E0E0E0; }
-        .series-display-text { font-size: 2rem; font-weight: 700; color: #CCCCCC; text-transform: uppercase; margin-bottom: 0.5rem !important; }
+        .app-header {
+            background-color: #000000;
+            color: #A0A0A0;
+            padding: 1rem;
+            text-align: center;
+            border-top-left-radius: 0.5rem;
+            border-top-right-radius: 0.5rem;
+        }
+        .app-header h1 {
+            font-family: 'Archivo Black', sans-serif;
+            font-size: 1.875rem; /* 30px */
+            font-weight: 400;
+            letter-spacing: 0.025em;
+            text-transform: uppercase;
+            line-height: 1.2;
+        }
+        .pro-text-header {
+            font-weight: 400;
+            color: #FFFFFF;
+        }
+        .app-header .subtitle { /* Estilo para "por Pedro Dias" */
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #B0B0B0;
+            margin-top: 0.1rem;
+            letter-spacing: 0.025em;
+            display: block;
+            text-transform: none;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1E1E1E;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #555555;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #777777;
+        }
+        .action-button { /* Classe base para botões com interação */
+            transition: all 0.15s ease-out;
+        }
+        .action-button:active {
+            transform: scale(0.97) translateY(1px);
+        }
 
-        #seriesInputArea label, #loginScreen label, #pseInputArea label { font-weight: 500; color: #B0B0B0; }
-        #repsInput, #loginName, #loginEmail, #pseInput { background-color: #1E1E1E; color: #E0E0E0; border: 1px solid #444444; }
-        #repsInput::placeholder, #loginName::placeholder, #loginEmail::placeholder, #pseInput::placeholder { color: #888888; }
-        #repsInput:focus, #loginName:focus, #loginEmail:focus, #pseInput:focus { border-color: #A0A0A0; box-shadow: 0 0 0 2px rgba(160, 160, 160, 0.3); }
-        #seriesInputArea { padding-left: 0; padding-right: 0; margin-bottom: 0.75rem; }
-        #pseInputArea { margin-top: 1rem; margin-bottom: 1rem; padding: 0.75rem; background-color: #2C2C2C; border-radius: 0.5rem; }
-        #pseInputArea p { font-size: 0.8rem; color: #A0A0A0; margin-bottom: 0.5rem; line-height: 1.4; }
+        /* Classe genérica para botões 3D */
+        .button-3d {
+            border-width: 1px;
+            border-style: solid;
+            /* A cor da borda e da sombra será definida por variáveis CSS ou especificamente */
+            box-shadow: 0 2px 0 var(--shadow-color-dark, #222), /* Sombra inferior principal com fallback */
+                        0 3px 4px rgba(0,0,0,0.2);    /* Sombra suave geral */
+        }
+        .button-3d:hover {
+            box-shadow: 0 1px 0 var(--shadow-color-dark, #222), /* Sombra inferior menor no hover */
+                        0 2px 3px rgba(0,0,0,0.25);
+        }
+        .button-3d:active {
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.25); /* Sombra interna ao pressionar */
+            transform: translateY(2px) scale(0.98);
+        }
+
+
+        .media-display-area {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 0.5rem;
+            background-color: #333333;
+            overflow: hidden;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 24px;
+            background-color: #121212;
+            color: #E0E0E0;
+            border: 1px solid #333333;
+            border-radius: 8px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out, transform 0.3s ease-in-out;
+            font-size: 0.9rem;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .toast.hide {
+            opacity: 0;
+            transform: translateX(-50%) translateY(20px);
+        }
+
+        .timer-display-and-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1.5rem;
+            width: 100%;
+            padding: 0 1rem;
+        }
+        #circularTimerContainer {
+            width: 180px;  /* Aumentado */
+            height: 180px; /* Aumentado */
+            margin: 0 0.5rem;
+        }
+        #circularTimerText {
+            font-size: 3rem; 
+            color: #E0E0E0;
+        }
+        #progressRing {
+            transition: stroke-dashoffset 0.3s linear;
+        }
+
+        #pauseRestTimerBtn, #skipRestTimerBtn {
+            padding: 0;
+            font-size: 0.70rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 9999px;
+            width: 60px;  
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            border: none;
+        }
+
+        #pauseRestTimerBtn {
+            background-color: #B0B0B0;
+            color: #121212;
+            box-shadow: -4px -4px 8px rgba(180, 180, 180, 0.08),
+                         4px  4px 8px rgba(0, 0, 0, 0.4);        
+        }
+        #pauseRestTimerBtn:hover {
+            background-color: #A0A0A0;
+             box-shadow: -5px -5px 10px rgba(180, 180, 180, 0.1),
+                         5px  5px 10px rgba(0, 0, 0, 0.45);
+        }
+        #pauseRestTimerBtn:active {
+            background-color: #909090;
+            box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.35),
+                        inset  3px  3px 6px rgba(180, 180, 180, 0.06);
+        }
+
+        #skipRestTimerBtn {
+            background-color: #4D4D4D;
+            color: #E0E0E0;
+            box-shadow: -4px -4px 8px rgba(90, 90, 90, 0.25),
+                         4px  4px 8px rgba(0, 0, 0, 0.5);    
+        }
+        #skipRestTimerBtn:hover {
+            background-color: #585858;
+            box-shadow: -5px -5px 10px rgba(90, 90, 90, 0.3),
+                         5px  5px 10px rgba(0, 0, 0, 0.55);
+        }
+        #skipRestTimerBtn:active {
+            background-color: #404040;
+            box-shadow: inset -3px -3px 6px rgba(0, 0, 0, 0.5),    
+                        inset  3px  3px 6px rgba(90, 90, 90, 0.2);
+        }
+
+
+        .exercise-card {
+            background-color: #2C2C2C;
+            color: #E0E0E0;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            margin-bottom: 1rem;
+        }
+        .exercise-details-info {
+            background-color: #1E1E1E;
+            border: 1px solid #333333;
+            color: #B0B0B0;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+        .exercise-details-info strong {
+            color: #E0E0E0;
+        }
+        .series-display-text {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #CCCCCC;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem !important;
+        }
+
+
+        #seriesInputArea label, #loginScreen label, #pseInputArea label, #observationInputArea label {
+            font-weight: 500;
+            color: #B0B0B0;
+        }
+        #repsInput, #loginName, #loginPassword, #pseInput, #observationInput, .superset-reps-input { 
+            background-color: #1E1E1E;
+            color: #E0E0E0;
+            border: 1px solid #444444;
+        }
+        #repsInput::placeholder, #loginName::placeholder, #loginPassword::placeholder, #pseInput::placeholder, #observationInput::placeholder, .superset-reps-input::placeholder { 
+            color: #888888;
+        }
+        #repsInput:focus, #loginName:focus, #loginPassword:focus, #pseInput:focus, #observationInput:focus, .superset-reps-input:focus { 
+            border-color: #A0A0A0;
+            box-shadow: 0 0 0 2px rgba(160, 160, 160, 0.3);
+        }
+        #seriesInputArea {
+            padding-left: 0;
+            padding-right: 0;
+            margin-bottom: 0.75rem;
+        }
+        #pseInputArea {
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            background-color: #2C2C2C;
+            border-radius: 0.5rem;
+        }
+        #pseInputArea p {
+            font-size: 0.8rem;
+            color: #A0A0A0;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
         
-        .alternative-exercise-buttons { margin-top: 0.5rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; gap: 0.5rem; }
-        .alternative-btn { background-color: #4A5568; color: #E2E8F0; padding: 0.5rem 0.75rem; border-radius: 0.375rem; font-size: 0.75rem; font-weight: 600; border: 1px solid #718096; line-height: 1; flex-grow: 1; text-align: center; }
-        .alternative-btn:hover { background-color: #2D3748; }
-        .alternative-btn.hidden { display: none !important; }
+        /* Botões 3D - Concluir Série e Pular Exercício */
+        #completeSeriesBtn {
+            background-color: #145A32;  
+            color: #FFFFFF;
+            border-color: #0B5345;
+            --shadow-color-dark: #0B5345;
+        }
+        #completeSeriesBtn:hover {
+            background-color: #0B5345;
+        }
+        #completeSeriesBtn:active {
+            background-color: #07352B;
+        }
+
+        .skip-exercise-btn {
+            background-color: #7B241C;  
+            color: white;
+            border-color: #641E16;
+            --shadow-color-dark: #641E16;
+        }
+        .skip-exercise-btn:hover {
+            background-color: #641E16;
+        }
+        .skip-exercise-btn:active {
+            background-color: #4B120E;
+        }
         
-        #completeSeriesBtn { background-color: #145A32; color: #FFFFFF; border-color: #0B5345; --shadow-color-dark: #0B5345; }
-        #completeSeriesBtn:hover { background-color: #0B5345; }
-        #completeSeriesBtn:active { background-color: #07352B; }
-        .skip-exercise-btn { background-color: #7B241C; color: white; border-color: #641E16; --shadow-color-dark: #641E16; }
-        .skip-exercise-btn:hover { background-color: #641E16; }
-        .skip-exercise-btn:active { background-color: #4B120E; }
-        
-        #loginButton, #googleSignInBtn { /* Estilo compartilhado para botões de login */
-            background-color: #1A5D1A; 
+        #loginButton {
+            background-color: #1A5D1A;
             color: #FFFFFF;
             border-color: #113C11;
             --shadow-color-dark: #113C11;
         }
-        #loginButton:hover, #googleSignInBtn:hover { 
+        #loginButton:hover {
              background-color: #113C11;
         }
-         #loginButton:active, #googleSignInBtn:active { 
+         #loginButton:active {
              background-color: #0A270A;
         }
-        #googleSignInBtn { /* Estilo específico para o botão Google se necessário */
-            background-color: #4285F4; /* Cor do Google */
-            border-color: #3578E5;
-            --shadow-color-dark: #3578E5;
-            display: inline-flex; /* Para alinhar ícone e texto */
-            align-items: center;
-            justify-content: center;
-        }
-        #googleSignInBtn:hover { background-color: #3578E5; }
-        #googleSignInBtn:active { background-color: #2A6ACF; }
-        #googleSignInBtn svg { width: 1.25rem; height: 1.25rem; margin-right: 0.75rem;}
-
 
         #homeScreen button,
-        #workoutButtonsContainer button { background-color: #374151; color: #F3F4F6; border: 1px solid #4B5563; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        #workoutButtonsContainer button {
+            background-color: #374151;
+            color: #F3F4F6;
+            border-color: #1F2937;
+            --shadow-color-dark: #1F2937;
+        }
         #homeScreen button:hover,
-        #workoutButtonsContainer button:hover { background-color: #4B5563; }
-        #homeScreen button:active,
-        #workoutButtonsContainer button:active { background-color: #1F2937; transform: scale(0.98); }
+        #workoutButtonsContainer button:hover {
+            background-color: #4B5563;
+        }
+         #homeScreen button:active,
+        #workoutButtonsContainer button:active {
+            background-color: #1F2937;
+        }
 
-        .nav-button { background-color: #4B5563; color: #E0E0E0; border: 1px solid #2D3748; padding: 0.6rem 1.1rem; border-radius: 0.5rem; font-weight: 600; display: inline-flex; align-items: center; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.1); }
-        .nav-button:hover { background-color: #2D3748; }
-        .nav-button:active { background-color: #1A202C; transform: scale(0.98); }
-        .nav-button svg { width: 1.25rem; height: 1.25rem; margin-right: 0.5rem; }
+        .nav-button {
+            background-color: #4B5563;
+            color: #E0E0E0;
+            border-color: #2D3748;
+            --shadow-color-dark: #1A202C;
+            padding: 0.6rem 1.1rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+        .nav-button:hover {
+            background-color: #2D3748;
+        }
+        .nav-button:active {
+            background-color: #1A202C;
+        }
+        .nav-button svg {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.5rem;
+        }
         
-        #saveSummaryAndGoHomeBtn { background-color: #B08D57; color: #FFFFFF; border-color: #8C6D41; --shadow-color-dark: #8C6D41; }
-        #saveSummaryAndGoHomeBtn:hover { background-color: #8C6D41; }
-        #saveSummaryAndGoHomeBtn:active { background-color: #79552B; }
+        /* Botão Salvar Resumo - Dourado Escuro */
+        #concludeAndGoHomeBtn { 
+            background-color: #B08D57; 
+            color: #FFFFFF; 
+            border-color: #8C6D41; 
+            --shadow-color-dark: #8C6D41; 
+        }
+        #concludeAndGoHomeBtn:hover {
+            background-color: #8C6D41;
+        }
+        #concludeAndGoHomeBtn:active {
+            background-color: #79552B;
+        }
 
-        .star-rating span { color: #F1C40F; font-size: 1.25rem; margin-right: 0.125rem; }
-        .star-rating .bonus-star { color: #E67E22; }
-        .star-rating .empty-star { color: #555555; }
-        #workoutSummaryContent h4, #workoutStats h3, #pseInputArea h4, #progressComparisonArea h4 { color: #E0E0E0; }
-        #workoutSummaryContent .bg-gray-800, #workoutStats .bg-gray-700, #progressComparisonArea { background-color: #2C2C2C; border-radius: 0.5rem; }
-        #workoutSummaryContent .bg-gray-800 strong, #workoutStats .bg-gray-700 strong { color: #E0E0E0; }
-        #motivationalMessage { color: #2ECC71; }
-        .force-hidden { display: none !important; }
-        #loadingOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(18, 18, 18, 0.7); display: flex; justify-content: center; align-items: center; z-index: 1050; color: white; font-size: 1.2rem; }
-        #exerciseActionButtons { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
-        #progressComparisonArea p { font-size: 0.875rem; color: #B0B0B0; margin-bottom: 0.25rem; }
-        .progress-increase { color: #34D399; } 
-        .progress-decrease { color: #F87171; } 
-        .progress-same { color: #A0A0A0; }    
+        /* Botão Download PDF - Azul */
+        #downloadPdfBtn {
+            background-color: #0284c7; 
+            color: #FFFFFF;
+            border-color: #0369a1; 
+            --shadow-color-dark: #075985; 
+        }
+        #downloadPdfBtn:hover {
+            background-color: #0369a1;
+        }
+        #downloadPdfBtn:active {
+            background-color: #075985;
+        }
 
+
+        #finishWorkoutBtn {
+            background-color: #7D3C98;
+            color: #FFFFFF;
+            border-color: #5B2C6F;
+            --shadow-color-dark: #5B2C6F;
+        }
+        #finishWorkoutBtn:hover {
+            background-color: #5B2C6F;
+        }
+         #finishWorkoutBtn:active {
+            background-color: #4A235A;
+        }
+
+
+        #workoutSummaryContent h4, #workoutStats h3, #pseInputArea h4 {
+            color: #E0E0E0;
+        }
+        #workoutSummaryContent .bg-gray-800,
+        #workoutStats .bg-gray-700 {
+            background-color: #1E1E1E;
+            color: #B0B0B0;
+        }
+        #workoutSummaryContent .bg-gray-800 strong,
+        #workoutStats .bg-gray-700 strong {
+            color: #E0E0E0;
+        }
+        #motivationalMessage {
+            color: #2ECC71;
+        }
+        .force-hidden {
+            display: none !important;
+        }
+        #loadingOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(18, 18, 18, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+            color: white;
+            font-size: 1.2rem;
+        }
+        #exerciseActionButtons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-200 flex flex-col items-center justify-start min-h-screen pt-4 px-2 sm:px-4">
@@ -167,167 +484,125 @@
              <h1>CALISTENIA <span class="pro-text-header">PRO</span></h1>
         </div>
 
-        <div id="loginScreen" class="p-6"> <div class="app-header mb-6"> 
-                <h1>CALISTENIA <span class="pro-text-header">PRO</span>
-                    <span class="subtitle">por Pedro Dias</span> 
-                </h1>
-            </div>
+        <div id="loginScreen" class="p-6 hidden">
+             <div class="app-header mb-6">
+                 <h1>CALISTENIA <span class="pro-text-header">PRO</span>
+                     <span class="subtitle">por Pedro Dias</span>
+                 </h1>
+             </div>
             <h2 class="text-2xl font-bold text-gray-300 mb-6 text-center">Seja bem-vindo,<br>identifique-se</h2>
             <div class="space-y-4">
-                <button id="googleSignInBtn" onclick="signInWithGoogle()" class="w-full font-semibold py-3 px-6 rounded-lg action-button button-3d text-base">
-                    <svg aria-hidden="true" class="native svg-icon" width="18" height="18" viewBox="0 0 18 18"><path d="M16.51 8.25H9.03V11.03H13.31C13.08 12.44 12.27 13.63 10.99 14.42V16.35H13.8C15.68 14.65 16.73 12.22 16.73 9.29C16.73 8.95 16.7 8.6 16.51 8.25Z" fill="#4285F4"></path><path d="M9.03 17.00C11.42 17.00 13.46 16.20 14.86 14.90L12.45 13.14C11.67 13.68 10.56 14.02 9.03 14.02C6.80 14.02 4.90 12.56 4.17 10.60H1.30V12.52C2.71 15.30 5.64 17.00 9.03 17.00Z" fill="#34A853"></path><path d="M4.17 10.60C3.99 10.07 3.88 9.50 3.88 8.91C3.88 8.32 3.99 7.75 4.17 7.22V5.30H1.30C0.48 6.91 0 8.48 0 10.13C0 11.78 0.48 13.35 1.30 14.96L4.17 12.52V10.60Z" fill="#FBBC05"></path><path d="M9.03 3.88C10.62 3.88 11.95 4.46 12.96 5.43L15.30 3.09C13.46 1.48 11.42 0.50 9.03 0.50C5.64 0.50 2.71 2.20 1.30 4.98L4.17 6.90C4.90 4.94 6.80 3.88 9.03 3.88Z" fill="#EA4335"></path></svg>
-                    Entrar com Google
-                </button>
+                <div>
+                    <label for="loginName" class="block text-sm font-medium mb-1">Nome:</label>
+                    <input type="text" id="loginName" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100" placeholder="Seu nome completo">
+                </div>
+                <div>
+                    <label for="loginPassword" class="block text-sm font-medium mb-1">Senha de Acesso:</label>
+                    <input type="password" id="loginPassword" class="w-full p-3 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100" placeholder="Senha do mês">
+                </div>
+                <button id="loginButton" onclick="loginUser()" class="w-full font-semibold py-3 px-6 rounded-lg action-button button-3d text-base mt-8">Entrar</button>
             </div>
         </div>
 
-        <div id="homeScreen" class="text-center hidden p-6"> <div class="app-header"> 
-                <h1 id="welcomeMessage" class="text-xl">Bem-vindo(a)!</h1>
+        <div id="homeScreen" class="text-center hidden">
+            <div class="app-header">
+                <h1>CALISTENIA <span class="pro-text-header">PRO</span>
+                </h1>
             </div>
-            <h2 id="workoutListTitle" class="text-2xl font-bold text-gray-300 my-4 text-center">Seus Treinos</h2>
-            <div id="workoutButtonsContainer" class="space-y-3 mt-4"> 
+            <div class="p-6">
+                <h2 class="text-2xl font-bold text-gray-300 my-6" style="font-family: 'Inter', sans-serif;">Escolha seu nível</h2>
+                <div class="space-y-4">
+                    <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
+                        Iniciante
+                        <span class="block text-sm font-normal opacity-80">(0 pull ups e 0 push ups)</span>
+                    </button>
+                    <button id="level-intermediario" onclick="selectLevel('intermediario')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
+                        Intermediário
+                        <span class="block text-sm font-normal opacity-80">(3 pull ups e 3 dips)</span>
+                    </button>
+                    <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
+                        Avançado
+                        <span class="block text-sm font-normal opacity-80">(10+ barras e 15+ dips)</span>
+                    </button>
                 </div>
-            <button onclick="signOutUser()" class="nav-button mt-6 mx-auto action-button button-3d">
-                Sair (Logout)
-            </button>
+            </div>
         </div>
 
         <div id="workoutListScreen" class="p-6 hidden">
-            <button onclick="showScreen(Screens.HOME);" class="nav-button mb-6 action-button">
+            <button onclick="showScreen(Screens.HOME); resetAppState(false);" class="nav-button mb-6 action-button button-3d">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                Voltar para Meus Treinos
+                Voltar para Níveis
             </button>
+            <div id="workoutButtonsContainer" class="space-y-3 mt-4">
             </div>
+        </div>
 
         <div id="workoutExecutionScreen" class="p-6 hidden">
-             <button onclick="confirmExitWorkout()" class="nav-button mb-4 action-button">
+             <button onclick="confirmExitWorkout()" class="nav-button mb-4 action-button button-3d">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
-                Voltar para Meus Treinos
+                Voltar para Treinos
             </button>
-
-            <div class="exercise-card"> 
-                <h3 id="exerciseName" class="text-2xl font-bold mb-1 text-center text-gray-100" style="font-family: 'Inter', sans-serif;">Nome do Exercício</h3>
-                <p id="seriesProgressText" class="series-display-text mb-2 text-center">SÉRIE X</p> 
-                <div id="mediaDisplayArea" class="media-display-area mb-3"> 
-                    <div id="videoPlayerContainer" class="video-container">
-                        <p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo do exercício</p>
-                    </div>
-                    <div id="circularTimerWrapper" class="force-hidden"> 
-                        <div class="timer-display-and-controls">
-                            <button id="skipRestTimerBtn" onclick="skipRest()" class="action-button">Pular</button>
-                            <div id="circularTimerContainer" class="relative">
-                                <svg class="w-full h-full" viewBox="0 0 100 100">
-                                    <circle class="text-gray-700" stroke-width="8" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50"/>
-                                    <circle id="progressRing"
-                                            class="text-sky-400" stroke-width="8"
-                                            stroke-linecap="round"
-                                            stroke="currentColor"
-                                            fill="transparent"
-                                            r="42" cx="50" cy="50"
-                                            style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
-                                </svg>
-                                <div id="circularTimerText" class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gray-100">
-                                    00:00
-                                </div>
-                            </div>
-                            <button id="pauseRestTimerBtn" onclick="pauseRestTimer()" class="action-button">Pausar</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="alternativeButtonsArea" class="alternative-exercise-buttons mb-3 hidden"> 
-                    <button id="showOriginalBtn" onclick="showOriginalExercise()" class="alternative-btn hidden">Ver Original</button>
-                    <button id="altEasyBtn" onclick="showAlternativeExercise('easy')" class="alternative-btn hidden">Alternativa + Fácil</button>
-                    <button id="altHardBtn" onclick="showAlternativeExercise('hard')" class="alternative-btn hidden">Alternativa + Difícil</button>
-                </div>
-
-                <div class="exercise-details-info text-center"> 
-                    <p class="text-base"><strong>Repetições alvo:</strong> <span id="exerciseReps" class="font-medium text-gray-100"></span></p> 
-                </div>
-
-                <div id="seriesInputArea" class="px-2"> 
-                    <label for="repsInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Sua performance (reps/tempo):</label> 
-                    <input type="text" id="repsInput" class="w-full p-2.5 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100 placeholder-gray-500 text-center" placeholder="Ex: 10 ou 30s (Opcional)">
-                </div>
             
-                <div id="exerciseActionButtons" class="mt-3"> <button id="completeSeriesBtn" onclick="completeSeries()" class="w-full max-w-xs font-semibold py-3 px-4 rounded-lg action-button button-3d text-base">Concluir Série</button>
-                    <button id="skipExerciseBtn" onclick="confirmSkipExercise()" class="w-full max-w-xs skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button button-3d text-base mt-2">Pular Exercício Atual</button> 
-                </div>
-
-            </div> 
+            <div id="exerciseContainer" class="exercise-card">
+                 <!-- CONTEÚDO SERÁ GERADO DINAMICAMENTE PELO JAVASCRIPT -->
             </div>
+        </div>
 
         <div id="summaryScreen" class="p-6 hidden text-center">
-            <div id="workoutSummaryContent" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left mt-6"> 
+            <div id="workoutSummaryContent" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left mt-6">
             </div>
-            <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left"> 
+            <div id="workoutStats" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left">
             </div>
-            <div id="progressComparisonArea" class="bg-gray-700 p-4 rounded-lg shadow-md mb-4 text-left hidden">
-                <h4 class="text-lg font-semibold mb-2 text-gray-100">Comparação com Último Treino:</h4>
-                <div id="comparisonDetails"></div>
-            </div>
-
 
             <div id="pseInputArea" class="text-left mb-4">
                 <h4 class="text-lg font-semibold mb-1 text-gray-100">Percepção de Esforço (PSE)</h4>
                 <p class="text-xs text-gray-400 mb-2">
-                    Numa escala de 1 (muito, muito leve) a 10 (esforço máximo absoluto), 
+                    Numa escala de 1 (muito, muito leve) a 10 (esforço máximo absoluto),
                     qual foi sua percepção geral de esforço para este treino?
                 </p>
                 <label for="pseInput" class="block text-sm font-medium text-gray-300 mb-1">Sua PSE (1-10):</label>
                 <input type="number" id="pseInput" min="1" max="10" class="w-full p-2.5 border border-gray-600 rounded-lg shadow-sm focus:ring-gray-500 focus:border-gray-500 text-base bg-gray-700 text-gray-100 placeholder-gray-500 text-center" placeholder="Ex: 7">
             </div>
 
-            <p id="motivationalMessage" class="text-lg text-green-400 font-semibold mb-6"></p> 
-            <button id="saveSummaryAndGoHomeBtn" onclick="saveSummaryAndGoHome()" class="w-full max-w-md font-semibold py-3 px-6 rounded-lg action-button button-3d text-base text-white">
-                Salvar Resumo e Voltar
-            </button>
+            <p id="motivationalMessage" class="text-lg text-green-400 font-semibold mb-4"></p> 
+            
+            <div class="mt-4 space-y-3 sm:space-y-0 sm:flex sm:space-x-3 justify-center"> 
+                <button id="downloadPdfBtn" class="w-full sm:w-auto flex items-center justify-center font-semibold py-3 px-6 rounded-lg action-button button-3d text-base">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-2">
+                        <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+                        <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+                    </svg>
+                    Salvar Resumo (PDF)
+                </button>
+                <button id="concludeAndGoHomeBtn" class="w-full sm:w-auto font-semibold py-3 px-6 rounded-lg action-button button-3d text-base">
+                    Concluir e Voltar para Home
+                </button>
+            </div>
+            <p class="text-sm text-gray-400 mt-4 text-center">Salve os dados de hoje e acompanhe sua melhora desde o último treino.</p>
         </div>
 
-        <div id="loadingOverlay" class="force-hidden"> Carregando Treino...
+        <div id="loadingOverlay" class="force-hidden">
+            Carregando Treino...
         </div>
     </div>
 
     <div id="toastNotification" class="toast">Mensagem!</div>
 
     <script>
-        // --- CONFIGURAÇÃO DO FIREBASE ---
-        // SUBSTITUA COM OS DADOS REAIS DO SEU PROJETO FIREBASE
-        const firebaseConfig = {
-            apiKey: "SUA_API_KEY_AQUI",
-            authDomain: "SEU_PROJECT_ID.firebaseapp.com",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_PROJECT_ID.appspot.com",
-            messagingSenderId: "SEU_SENDER_ID",
-            appId: "SEU_APP_ID",
-            measurementId: "SEU_MEASUREMENT_ID" // Opcional
-        };
-
-        // Inicializa o Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const auth = firebase.auth(); // Inicializa o Firebase Auth
-
-
         // --- CONSTANTES ---
         const ANIMATION_DURATION = 300; 
-        // A URL do Google Apps Script para carregar treinos NÃO é mais necessária se os treinos vêm do Firestore
-        // const SCRIPT_URL_LOAD_WORKOUT = "URL_DO_SEU_APPS_SCRIPT_PARA_CARREGAR_TREINOS_GENERICOS";
-
 
         // --- ESTADO DA APLICAÇÃO ---
-        let currentUser = { name: null, email: null, uid: null }; // Adicionado uid
-        let currentScreen = ''; 
-        // selectedLevel não é mais o foco principal, mas pode ser uma propriedade do treino personalizado
-        let selectedLevel = ''; 
+        let currentUser = { name: null, email: null }; 
+        let userProgressData = [];
+        let currentScreen = '';
+        let selectedLevel = '';
         let selectedWorkoutName = '';
-        let currentWorkout = []; // Array de exercícios do treino atual
-        let userAssignedWorkouts = []; // Array para armazenar os treinos personalizados do usuário
-        let currentExerciseIndex = 0;
+        let workoutFlow = []; // Array de exercícios e supersets
+        let currentStepIndex = 0; // Índice atual em workoutFlow
         let currentSeriesNumber = 1;
-        let performanceData = []; 
-        let workoutPSE = null; 
-        
+        let performanceData = []; // Mantém os dados individuais
+        let workoutPSE = null;
         let restTimerInterval;
         let restTimerSeconds = 0;
         let totalRestDuration = 0;
@@ -335,750 +610,762 @@
         let workoutStartTime = null;
 
         const Screens = {
-            LOGIN: 'loginScreen',
-            WORKOUT_LIST: 'workoutListScreen', // Antiga homeScreen agora é workoutListScreen
-            WORKOUT_EXECUTION: 'workoutExecutionScreen',
-            SUMMARY: 'summaryScreen'
+            LOGIN: 'loginScreen', HOME: 'homeScreen', WORKOUT_LIST: 'workoutListScreen',
+            WORKOUT_EXECUTION: 'workoutExecutionScreen', SUMMARY: 'summaryScreen'
         };
         const ALL_SCREENS = Object.values(Screens);
 
         // --- REFERÊNCIAS A ELEMENTOS DOM ---
-        let fixedHeaderElement, videoPlayerContainerElement, circularTimerWrapperElement,
-            progressRingElement, circularTimerTextElement, mediaDisplayAreaElement,
-            loadingOverlayElement, workoutButtonsContainerElement, repsInputElement,
-            exerciseNameElement, seriesProgressTextElement, exerciseRepsElement,
-            completeSeriesBtnElement, skipExerciseBtnElement, 
-            seriesInputAreaElement, summaryContentElement, statsDivElement,
-            motivationalMessageElement, toastNotificationElement,
-            // loginNameInputElement, loginEmailInputElement, // Removidos
-            exerciseActionButtonsElement,
-            pseInputElement, progressComparisonAreaElement, comparisonDetailsElement,
-            workoutListTitleElement, googleSignInBtnElement; // Adicionado googleSignInBtnElement
+        let fixedHeaderElement, loadingOverlayElement, workoutButtonsContainerElement, 
+            summaryContentElement, statsDivElement, motivationalMessageElement, 
+            toastNotificationElement, loginNameInputElement, loginPasswordInputElement,
+            pseInputElement, downloadPdfBtnElement, concludeAndGoHomeBtnElement, 
+            exerciseContainerElement; 
 
-        let radius;
-        let circumference;
 
         // --- FUNÇÕES DE INICIALIZAÇÃO ---
         document.addEventListener('DOMContentLoaded', () => {
             fixedHeaderElement = document.getElementById('fixedHeader');
-            videoPlayerContainerElement = document.getElementById('videoPlayerContainer');
-            circularTimerWrapperElement = document.getElementById('circularTimerWrapper');
-            progressRingElement = document.getElementById('progressRing');
-            circularTimerTextElement = document.getElementById('circularTimerText');
-            mediaDisplayAreaElement = document.getElementById('mediaDisplayArea');
             loadingOverlayElement = document.getElementById('loadingOverlay');
             workoutButtonsContainerElement = document.getElementById('workoutButtonsContainer');
-            repsInputElement = document.getElementById('repsInput');
-            exerciseNameElement = document.getElementById('exerciseName');
-            seriesProgressTextElement = document.getElementById('seriesProgressText');
-            exerciseRepsElement = document.getElementById('exerciseReps'); 
-            completeSeriesBtnElement = document.getElementById('completeSeriesBtn');
-            skipExerciseBtnElement = document.getElementById('skipExerciseBtn');
-            seriesInputAreaElement = document.getElementById('seriesInputArea');
+            exerciseContainerElement = document.getElementById('exerciseContainer');
             summaryContentElement = document.getElementById('workoutSummaryContent');
             statsDivElement = document.getElementById('workoutStats');
             motivationalMessageElement = document.getElementById('motivationalMessage');
             toastNotificationElement = document.getElementById('toastNotification');
-            // loginNameInputElement e loginEmailInputElement removidos
-            exerciseActionButtonsElement = document.getElementById('exerciseActionButtons');
+            loginNameInputElement = document.getElementById('loginName');
+            loginPasswordInputElement = document.getElementById('loginPassword');
             pseInputElement = document.getElementById('pseInput'); 
-            progressComparisonAreaElement = document.getElementById('progressComparisonArea');
-            comparisonDetailsElement = document.getElementById('comparisonDetails');
-            workoutListTitleElement = document.getElementById('workoutListTitle');
-            googleSignInBtnElement = document.getElementById('googleSignInBtn');
+            downloadPdfBtnElement = document.getElementById('downloadPdfBtn');
+            concludeAndGoHomeBtnElement = document.getElementById('concludeAndGoHomeBtn');
 
-
-            radius = progressRingElement?.getAttribute('r');
-            if (radius) {
-                radius = parseFloat(radius);
-                circumference = 2 * Math.PI * radius;
-                if (progressRingElement) { 
-                    progressRingElement.style.strokeDasharray = `${circumference} ${circumference}`;
-                    progressRingElement.style.strokeDashoffset = circumference;
-                }
-            } else {
-                console.error("Elemento 'progressRing' ou seu atributo 'r' não encontrado ou inválido.");
-            }
+            if (downloadPdfBtnElement) downloadPdfBtnElement.addEventListener('click', downloadSummaryAsPDF);
+            if (concludeAndGoHomeBtnElement) concludeAndGoHomeBtnElement.addEventListener('click', concludeWorkoutAndGoHome);
             
-            // --- FIREBASE AUTH ---
-            // Observador do estado de autenticação
-            auth.onAuthStateChanged(user => {
-                if (user) {
-                    // Usuário está logado
-                    console.log("Usuário já logado:", user);
-                    currentUser = {
-                        name: user.displayName,
-                        email: user.email,
-                        uid: user.uid // ID ÚNICO DO FIREBASE
-                    };
-                    loadUserWorkouts(); // Carrega treinos personalizados
-                } else {
-                    // Usuário está deslogado
-                    console.log("Nenhum usuário logado.");
-                    currentUser = { name: null, email: null, uid: null };
-                    resetAppState(true); // Garante que tudo seja resetado
-                    showScreen(Screens.LOGIN); // Mostra a tela de login
-                }
-            });
-            
-            // Não chama showScreen(Screens.LOGIN) aqui, pois o onAuthStateChanged vai lidar com isso.
-            console.log("Firebase SDKs carregados. App inicializado.");
+            currentScreen = Screens.LOGIN; 
+            showScreen(Screens.LOGIN); 
+            console.warn("IMPORTANTE: A integração com Google Sheets agora está ativa. Verifique se a função doPost no seu script está configurada e implantada para salvar o progresso.");
         });
 
-
-        // --- NAVEGAÇÃO E CONTROLE DE TELA (COM ANIMAÇÕES) ---
+        // --- NAVEGAÇÃO E CONTROLE DE TELA ---
         function showScreen(screenId) {
             const currentScreenElement = document.getElementById(currentScreen); 
             const nextScreenElement = document.getElementById(screenId);    
-
-            if (!nextScreenElement) {
-                console.error(`Tela com ID '${screenId}' não encontrada.`);
-                return;
-            }
-
-            if (currentScreenElement === nextScreenElement && !currentScreenElement.classList.contains('hidden')) {
-                updateHeader(screenId); 
-                return;
-            }
-
+            if (!nextScreenElement) { console.error(`Tela com ID '${screenId}' não encontrada.`); return; }
+            if (currentScreenElement === nextScreenElement && !currentScreenElement.classList.contains('hidden')) { updateHeader(screenId); return; }
             if (currentScreenElement && currentScreenElement !== nextScreenElement) {
                 currentScreenElement.classList.add('animate-slide-out-left');
-
                 setTimeout(() => {
-                    currentScreenElement.classList.add('hidden');
-                    currentScreenElement.classList.remove('animate-slide-out-left');
-
-                    nextScreenElement.classList.remove('hidden');
-                    nextScreenElement.classList.add('animate-slide-in-right');
-                    setTimeout(() => {
-                        nextScreenElement.classList.remove('animate-slide-in-right');
-                    }, ANIMATION_DURATION);
-
-                    currentScreen = screenId; 
-                    window.scrollTo(0, 0);
-                    updateHeader(screenId);
-                    if (screenId === Screens.SUMMARY) { 
-                        displaySummary();
-                    }
+                    currentScreenElement.classList.add('hidden'); currentScreenElement.classList.remove('animate-slide-out-left');
+                    nextScreenElement.classList.remove('hidden'); nextScreenElement.classList.add('animate-slide-in-right');
+                    setTimeout(() => { nextScreenElement.classList.remove('animate-slide-in-right'); }, ANIMATION_DURATION);
+                    currentScreen = screenId; window.scrollTo(0, 0); updateHeader(screenId);
+                    if (screenId === Screens.SUMMARY) { displaySummary(); }
                 }, ANIMATION_DURATION);
             } else { 
                 ALL_SCREENS.forEach(id_ => {
                     const el = document.getElementById(id_);
-                    if (el && id_ !== screenId) {
-                        el.classList.add('hidden');
-                        el.classList.remove('animate-fade-in', 'animate-slide-in-right', 'animate-slide-out-left', 'animate-fade-out');
-                    }
+                    if (el && id_ !== screenId) { el.classList.add('hidden'); el.classList.remove('animate-fade-in', 'animate-slide-in-right', 'animate-slide-out-left', 'animate-fade-out'); }
                 });
-
-                nextScreenElement.classList.remove('hidden');
-                nextScreenElement.classList.add('animate-fade-in');
-                setTimeout(() => {
-                    nextScreenElement.classList.remove('animate-fade-in');
-                }, ANIMATION_DURATION);
-
-                currentScreen = screenId; 
-                window.scrollTo(0, 0);
-                updateHeader(screenId);
-                if (screenId === Screens.SUMMARY) { 
-                    displaySummary();
-                }
+                nextScreenElement.classList.remove('hidden'); nextScreenElement.classList.add('animate-fade-in');
+                setTimeout(() => { nextScreenElement.classList.remove('animate-fade-in'); }, ANIMATION_DURATION);
+                currentScreen = screenId; window.scrollTo(0, 0); updateHeader(screenId);
+                if (screenId === Screens.SUMMARY) { displaySummary(); }
             }
         }
 
-
         function updateHeader(screenId) {
              if (!fixedHeaderElement) return;
-
             const fixedHeaderH1 = fixedHeaderElement.querySelector('h1');
-            if (!fixedHeaderH1) { 
-                const newH1 = document.createElement('h1');
-                fixedHeaderElement.appendChild(newH1);
-            }
-            
-            // Ajuste para o novo fluxo: header fixo não aparece no login nem na lista de treinos (antiga home)
-            if (screenId === Screens.LOGIN || screenId === Screens.WORKOUT_LIST) {
-                fixedHeaderElement.classList.add('hidden');
-            } else {
+            if (!fixedHeaderH1) { const newH1 = document.createElement('h1'); fixedHeaderElement.appendChild(newH1); }
+            if (screenId === Screens.LOGIN || screenId === Screens.HOME) { fixedHeaderElement.classList.add('hidden'); } 
+            else {
                 fixedHeaderElement.classList.remove('hidden');
                 let headerTitleText = `CALISTENIA <span class="pro-text-header">PRO</span>`; 
-
-                let displayLevelName = selectedLevel || "Personalizado"; 
-                 if (selectedLevel === 'avancado') displayLevelName = 'Avançado'; // Mantém se for usado
-                 else if (selectedLevel === 'intermediario') displayLevelName = 'Intermediário';
-                 else if (selectedLevel === 'iniciante') displayLevelName = 'Iniciante';
-
-
+                let displayLevelName = selectedLevel;
+                if (selectedLevel === 'avancado') displayLevelName = 'Avançado';
+                else if (selectedLevel === 'intermediario') displayLevelName = 'Intermediário';
+                else if (selectedLevel === 'iniciante') displayLevelName = 'Iniciante';
+                else if (selectedLevel) displayLevelName = selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1);
+                else displayLevelName = ''; 
                 if (screenId === Screens.WORKOUT_EXECUTION || screenId === Screens.SUMMARY) {
-                    if (selectedWorkoutName) { // Mostra apenas o nome do treino
-                        headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">${selectedWorkoutName}</span>`;
-                         if (selectedLevel && selectedLevel !== "Personalizado") { // Adiciona nível se não for "Personalizado"
-                             headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">${selectedWorkoutName} <span class="text-lg font-normal">(${displayLevelName})</span></span>`;
-                         }
-                    }
-                }
-                
+                    if (selectedWorkoutName && selectedLevel) { headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">${selectedWorkoutName} <span class="text-lg font-normal">(${displayLevelName})</span></span>`; } 
+                    else if (selectedWorkoutName) { headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">${selectedWorkoutName}</span>`; }
+                } else if (screenId === Screens.WORKOUT_LIST && selectedLevel) { headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">Nível ${displayLevelName}</span>`; }
                 const h1ToUpdate = fixedHeaderElement.querySelector('h1');
-                if (h1ToUpdate) {
-                    h1ToUpdate.innerHTML = headerTitleText;
-                }
+                if (h1ToUpdate) { h1ToUpdate.innerHTML = headerTitleText; }
             }
         }
 
         function resetAppState(resetUser = true) {
-            clearRestTimer(); 
-            selectedLevel = '';
-            selectedWorkoutName = '';
-            currentWorkout = [];
-            userAssignedWorkouts = [];
-            currentExerciseIndex = 0;
-            currentSeriesNumber = 1;
-            performanceData = [];
-            workoutStartTime = null;
-            workoutPSE = null; 
-            if(pseInputElement) pseInputElement.value = ''; 
-            if(progressComparisonAreaElement) progressComparisonAreaElement.classList.add('hidden');
-            if(comparisonDetailsElement) comparisonDetailsElement.innerHTML = '';
-
-            if (resetUser) {
-                currentUser = { name: null, email: null, uid: null };
-                // Não precisa limpar os campos de login, pois eles foram removidos
+            clearRestTimer(); selectedLevel = ''; selectedWorkoutName = ''; workoutFlow = []; currentStepIndex = 0;
+            currentSeriesNumber = 1; performanceData = []; workoutStartTime = null; workoutPSE = null; 
+            if(document.getElementById('pseInput')) document.getElementById('pseInput').value = '';
+            if (resetUser) { 
+                currentUser = { name: null, email: null }; 
+                if(loginNameInputElement) loginNameInputElement.value = '';
+                if(loginPasswordInputElement) loginPasswordInputElement.value = '';
             }
-
-            if (completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
-            if (circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden');
-            if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
-            if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
-            if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
-            if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden');
-            if (repsInputElement) repsInputElement.value = '';
         }
 
-        // --- LÓGICA DE LOGIN COM GOOGLE ---
-        function signInWithGoogle() {
-            const provider = new firebase.auth.GoogleAuthProvider();
-            auth.signInWithPopup(provider)
-                .then((result) => {
-                    const user = result.user;
-                    currentUser = {
-                        name: user.displayName,
-                        email: user.email,
-                        uid: user.uid
-                    };
-                    console.log("Usuário logado com Google:", currentUser);
-                    showToast(`Bem-vindo(a), ${currentUser.name}!`);
-                    loadUserWorkouts(); // Carrega treinos personalizados após login bem-sucedido
-                })
-                .catch((error) => {
-                    console.error("Erro no login com Google:", error);
-                    let errorMessage = "Erro ao tentar login com Google.";
-                    if (error.code === 'auth/popup-closed-by-user') {
-                        errorMessage = "Login cancelado pelo usuário.";
-                    } else if (error.code === 'auth/network-request-failed') {
-                        errorMessage = "Erro de rede. Verifique sua conexão.";
-                    }
-                    showToast(errorMessage);
-                });
+        function getCurrentPassword() {
+            return "FORCA24"; 
         }
 
-        function signOutUser() {
-            auth.signOut().then(() => {
-                console.log("Usuário deslogado.");
-                // onAuthStateChanged cuidará de redirecionar para a tela de login
-            }).catch((error) => {
-                console.error("Erro ao deslogar:", error);
-                showToast("Erro ao tentar sair.");
-            });
-        }
+        function loginUser() {
+            const name = loginNameInputElement?.value.trim();
+            const password = loginPasswordInputElement?.value.trim();
 
-
-        // --- LÓGICA DE CARREGAMENTO DE TREINOS PERSONALIZADOS DO FIRESTORE ---
-        async function loadUserWorkouts() {
-            if (!currentUser.uid) { // Usa UID para buscar, ou email como fallback se UID não estiver disponível
-                showToast("ID do usuário não encontrado para carregar treinos.");
-                showScreen(Screens.LOGIN); 
+            if (!name || !password) {
+                showToast("Por favor, preencha seu nome e a senha de acesso.");
                 return;
             }
-            showLoadingIndicator();
-            try {
-                // A coleção agora é 'user_assigned_workouts' e o ID do documento é o email do usuário
-                const userWorkoutDocRef = db.collection("user_assigned_workouts").doc(currentUser.email);
-                const docSnap = await userWorkoutDocRef.get();
 
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    userAssignedWorkouts = data.workouts || []; 
-                    console.log("Treinos carregados para o usuário:", userAssignedWorkouts);
-                    populateWorkoutList(); // Popula a lista de treinos
-                    showScreen(Screens.WORKOUT_LIST); // Mostra a lista de treinos
-                } else {
-                    console.log("Nenhum treino personalizado encontrado para este usuário.");
-                    showToast("Nenhum treino atribuído a você no momento.");
-                    if(workoutButtonsContainerElement) workoutButtonsContainerElement.innerHTML = '<p class="text-center text-gray-400">Nenhum treino atribuído. Entre em contato com seu instrutor.</p>';
-                    showScreen(Screens.WORKOUT_LIST); 
-                }
-            } catch (error) {
-                console.error("Erro ao carregar treinos do usuário do Firestore:", error);
-                showToast("Erro ao carregar seus treinos. Tente novamente.", 5000);
-            } finally {
-                hideLoadingIndicator();
+            if (password !== getCurrentPassword()) {
+                showToast("Senha de acesso incorreta. Verifique a senha do mês.");
+                return;
             }
+
+            currentUser.name = name;
+            currentUser.email = null; 
+            console.log("Usuário logado:", currentUser);
+            showToast(`Bem-vindo(a), ${name}!`);
+            showScreen(Screens.HOME); 
         }
 
-        function populateWorkoutList() {
-            if (!workoutButtonsContainerElement) return;
+        function selectLevel(level) {
+            console.log(`Nível selecionado: ${level}`); selectedLevel = level;
+            if (!workoutButtonsContainerElement) { console.error("Elemento workoutButtonsContainer não encontrado."); return; }
             workoutButtonsContainerElement.innerHTML = ''; 
-
-            if (userAssignedWorkouts.length === 0) {
-                workoutButtonsContainerElement.innerHTML = '<p class="text-center text-gray-400">Você ainda não tem treinos atribuídos.</p>';
-                return;
-            }
-            
-            if(workoutListTitleElement && currentUser.name) {
-                 workoutListTitleElement.textContent = `Treinos de ${currentUser.name.split(" ")[0]}`;
-            } else if (workoutListTitleElement) {
-                 workoutListTitleElement.textContent = `Seus Treinos`;
-            }
-
-
-            userAssignedWorkouts.forEach((workout, index) => {
+            const availableWorkouts = ['Treino A', 'Treino B', 'Treino C', 'Treino D', 'Treino E'];
+            availableWorkouts.forEach(workoutName => {
                 const button = document.createElement('button');
                 button.className = 'w-full font-semibold py-3 px-4 rounded-lg action-button button-3d'; 
-                let buttonText = workout.workoutName || `Treino ${index + 1}`;
-                if (workout.level && workout.level !== "Personalizado") { // Mostra nível se não for "Personalizado"
-                    buttonText += `<span class="block text-sm font-normal opacity-80">(${workout.level})</span>`;
-                }
-                button.innerHTML = buttonText;
-                button.addEventListener('click', () => startSpecificWorkout(workout));
+                button.textContent = workoutName; button.addEventListener('click', () => loadWorkout(workoutName));
                 workoutButtonsContainerElement.appendChild(button);
             });
+            showScreen(Screens.WORKOUT_LIST); 
+        }
+
+        function confirmExitWorkout() {
+            const hasStartedWorkout = performanceData.some(ex => ex.seriesDone.length > 0);
+            if (hasStartedWorkout && currentScreen === Screens.WORKOUT_EXECUTION) {
+                showToast("Progresso do treino será perdido ao voltar.", 3000);
+                goBackToWorkoutListScreenClean();
+            } else { 
+                goBackToWorkoutListScreenClean();
+            }
+        }
+
+        function goBackToWorkoutListScreenClean() {
+            clearRestTimer(); 
+            workoutFlow = []; 
+            currentStepIndex = 0; 
+            currentSeriesNumber = 1; 
+            performanceData = [];
+            workoutStartTime = null; 
+            workoutPSE = null; 
+            if(document.getElementById('pseInput')) document.getElementById('pseInput').value = '';
+            showScreen(Screens.WORKOUT_LIST);
+        }
+
+        async function loadWorkout(workoutName) {
+            console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel}`); selectedWorkoutName = workoutName;
+            workoutStartTime = Date.now(); workoutPSE = null; if(document.getElementById('pseInput')) document.getElementById('pseInput').value = '';
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec";
+            if (SCRIPT_URL === "COLOQUE_O_ID_DA_SUA_PLANILHA_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
+                showToast("Erro: URL do Script inválida ou não configurada.", 5000); console.error("URL do Script inválida ou não configurada:", SCRIPT_URL);
+                workoutStartTime = null; selectedWorkoutName = ''; return;
+            }
+            const url = `${SCRIPT_URL}?level=${encodeURIComponent(selectedLevel)}&workout=${encodeURIComponent(workoutName)}`;
+            showLoadingIndicator();
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    let errorMsg = `Erro HTTP: ${response.status}`;
+                    try { const errorData = await response.json(); errorMsg = errorData.error || errorMsg; } catch (parseError) { /* Ignora */ }
+                    throw new Error(errorMsg);
+                }
+                const rawWorkoutData = await response.json();
+                if (!Array.isArray(rawWorkoutData)) {
+                     if (rawWorkoutData && rawWorkoutData.error) { throw new Error(rawWorkoutData.error); }
+                     throw new Error("Resposta da API não é um array de exercícios.");
+                }
+                processWorkoutData(rawWorkoutData);
+                hideLoadingIndicator();
+                if (workoutFlow.length > 0) {
+                    currentStepIndex = 0; currentSeriesNumber = 1; 
+                    displayCurrentStep(); 
+                    showScreen(Screens.WORKOUT_EXECUTION);
+                } else { showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}).`); workoutStartTime = null; selectedWorkoutName = ''; }
+            } catch (error) {
+                hideLoadingIndicator(); console.error("Erro ao carregar treino:", error);
+                showToast(`Erro ao carregar treino: ${error.message}`, 5000); workoutStartTime = null; selectedWorkoutName = ''; 
+            }
         }
         
-        function logoutAndReturnToLogin() {
-            signOutUser(); // Chama a função de logout do Firebase
-        }
-
-
-        // --- LÓGICA DE SELEÇÃO DE TREINO ESPECÍFICO ---
-        function startSpecificWorkout(workoutData) {
-            console.log(`Iniciando treino: ${workoutData.workoutName}`);
-            selectedWorkoutName = workoutData.workoutName;
-            selectedLevel = workoutData.level || "Personalizado"; // Nível do treino específico
-            workoutStartTime = Date.now();
-            workoutPSE = null; 
-            if(pseInputElement) pseInputElement.value = '';
-            
-            currentWorkout = workoutData.exercises || []; 
-            
-            performanceData = currentWorkout.map(ex => ({
+        function processWorkoutData(rawWorkoutData) {
+            performanceData = rawWorkoutData.map(ex => ({
                 exerciseId: ex.exercise_id || `exid_${Math.random().toString(36).substr(2, 9)}`, 
                 exerciseName: ex.exercise_name || "Exercício Desconhecido", 
                 seriesTargetCount: parseInt(ex.series) || 0,       
-                repsTargetString: String(ex.reps || "N/A"),         
-                restTimeString: String(ex.rest || "60"),            
+                repsTargetString: String(ex.reps || "N/A"), 
+                restTimeString: String(ex.rest || "60"), 
                 embedUrl: ex.embed_url || "",                       
-                loadInfo: ex.load || "",     
+                supersetId: ex.superset_id !== undefined ? String(ex.superset_id) : null, 
                 seriesDone: []                                      
             }));
+            workoutFlow = [];
+            const supersetGroups = {};
+            performanceData.forEach((ex) => {
+                if (ex.supersetId) {
+                    if (!supersetGroups[ex.supersetId]) {
+                        supersetGroups[ex.supersetId] = [];
+                    }
+                    supersetGroups[ex.supersetId].push(ex);
+                } else {
+                    workoutFlow.push(ex); 
+                }
+            });
+            Object.values(supersetGroups).forEach(group => {
+                workoutFlow.push(group);
+            });
+        }
 
-            if (currentWorkout.length > 0) {
-                currentExerciseIndex = 0; 
-                currentSeriesNumber = 1;  
-                displayCurrentExerciseAndSeries();
-                showScreen(Screens.WORKOUT_EXECUTION);
-            } else {
-                showToast(`Nenhum exercício encontrado para ${selectedWorkoutName}.`);
+        function showLoadingIndicator() { if(loadingOverlayElement) loadingOverlayElement.classList.remove('force-hidden'); }
+        function hideLoadingIndicator() { if(loadingOverlayElement) loadingOverlayElement.classList.add('force-hidden'); }
+
+        function displayCurrentStep() {
+            if (!workoutFlow || currentStepIndex >= workoutFlow.length) { finishWorkout(); return; }
+            exerciseContainerElement.innerHTML = ''; 
+            const currentStep = workoutFlow[currentStepIndex];
+            if(Array.isArray(currentStep)) { 
+                renderSuperset(currentStep);
+            } else { 
+                renderSingleExercise(currentStep);
             }
         }
 
-
-        function showLoadingIndicator() {
-            if(loadingOverlayElement) loadingOverlayElement.classList.remove('force-hidden');
+        function renderSuperset(supersetGroup) {
+            const isWarmup = supersetGroup[0]?.supersetId === '0';
+            const title = isWarmup ? "AQUECIMENTO" : "SUPERSET";
+            const mainButtonText = isWarmup ? "Aquecimento Concluído" : "Descansar";
+            
+            let html = `<div class="text-center">
+                            <h3 class="text-2xl font-bold text-gray-100 uppercase" style="font-family: 'Archivo Black', sans-serif; line-height: 1;">${title}</h3>
+                            <p class="series-display-text text-2xl mb-4">SÉRIE ${currentSeriesNumber}</p>
+                        </div>
+                        <div id="supersetExercisesContainer" class="space-y-8">`;
+            supersetGroup.forEach((exercise, index) => {
+                html += `
+                    <div class="superset-exercise-block">
+                        <p class="font-semibold text-lg text-white mb-2 text-center">${exercise.exerciseName}</p>
+                        <div class="media-display-area mb-3">
+                           <div class="video-container">
+                                <iframe src="${exercise.embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                           </div>
+                        </div>
+                        <div class="text-center !my-2">
+                            <p class="text-base text-gray-200">Repetições alvo: <strong class="font-bold">${exercise.repsTargetString}</strong></p>
+                        </div>
+                        ${!isWarmup ? `
+                        <div class="px-2">
+                             <label class="block text-sm font-medium text-gray-400 mb-1 text-center">Sua performance (reps/tempo):</label>
+                            <input type="text" class="w-full p-2.5 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-gray-100 placeholder-gray-500 text-center superset-reps-input" placeholder="Ex: 10 ou 30s (Opcional)" data-exercise-id="${exercise.exerciseId}">
+                        </div>` : ''}
+                    </div>
+                    ${index < supersetGroup.length - 1 ? '<hr class="border-gray-700 my-6">' : ''}
+                `;
+            });
+            html += `</div>`;
+            if (!isWarmup) {
+                 html += ` <div id="observationInputArea" class="px-2 mt-6">
+                            <label for="observationInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Observações da Série (Opcional):</label>
+                            <textarea id="observationInput" class="w-full p-2.5 border border-gray-600 rounded-lg bg-gray-700 text-gray-100 placeholder-gray-500 text-center" rows="2"></textarea>
+                        </div>`;
+            }
+            html += `<div id="exerciseActionButtons" class="mt-4 text-center">
+                        <button id="completeSeriesBtn" onclick="completeStep()" class="w-full max-w-xs mx-auto font-semibold py-3 px-4 rounded-lg action-button button-3d text-base">${mainButtonText}</button>
+                        <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button button-3d text-base mt-2">Pular Passo Atual</button>
+                    </div>`;
+            exerciseContainerElement.innerHTML = html;
         }
-        function hideLoadingIndicator() {
-             if(loadingOverlayElement) loadingOverlayElement.classList.add('force-hidden');
+
+        function renderSingleExercise(exercise) {
+             let html = `<div class="text-center">
+                            <h3 class="series-display-text text-2xl uppercase">${exercise.exerciseName}</h3>
+                            <p class="series-display-text text-2xl mb-4">SÉRIE ${currentSeriesNumber}</p>
+                         </div>
+                         <div class="media-display-area mb-3">
+                           <div class="video-container">
+                                <iframe src="${exercise.embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+                           </div>
+                        </div>
+                        <div class="exercise-details-info text-center !my-2">
+                            <p class="text-base">Repetições alvo: <strong>${exercise.repsTargetString}</strong></p>
+                        </div>
+                        <p id="currentExerciseTotalReps" class="text-center text-gray-300 text-sm mt-1 mb-2 font-semibold"></p>
+                        <div id="seriesInputArea" class="px-2">
+                            <label for="repsInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Sua performance (reps/tempo):</label>
+                            <input type="text" id="repsInput" class="w-full p-2.5 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-gray-100 placeholder-gray-500 text-center" placeholder="Ex: 10 ou 30s (Opcional)">
+                        </div>
+                        <div id="observationInputArea" class="px-2 mt-3">
+                            <label for="observationInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Observações da Série (Opcional):</label>
+                            <textarea id="observationInput" class="w-full p-2.5 border border-gray-600 rounded-lg bg-gray-700 text-gray-100 placeholder-gray-500 text-center" rows="2"></textarea>
+                        </div>
+                        <div id="exerciseActionButtons" class="mt-4 text-center">
+                            <button id="completeSeriesBtn" onclick="completeStep()" class="w-full max-w-xs mx-auto font-semibold py-3 px-4 rounded-lg action-button button-3d text-base">Concluir Série</button>
+                            <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button button-3d text-base mt-2">Pular Exercício Atual</button>
+                        </div>`;
+            exerciseContainerElement.innerHTML = html;
+            displayCurrentExerciseTotalReps();
         }
 
-        // --- LÓGICA DE EXECUÇÃO DO TREINO ---
-        function displayCurrentExerciseAndSeries() {
-             if (!performanceData || currentExerciseIndex >= performanceData.length) {
-                finishWorkout(); 
+
+        function displayCurrentExerciseTotalReps() {
+            const totalRepsElement = document.getElementById('currentExerciseTotalReps');
+            if (!totalRepsElement) return;
+
+            const currentStep = workoutFlow[currentStepIndex];
+            if(Array.isArray(currentStep)) { 
+                totalRepsElement.classList.add('hidden');
                 return;
             }
 
-            const exercisePerf = performanceData[currentExerciseIndex];
-            if (!exercisePerf) {
-                console.error("Dados de performance do exercício atual são inválidos.");
-                finishWorkout(); 
+            const currentExPerf = currentStep;
+            if (!currentExPerf || !Array.isArray(currentExPerf.seriesDone)) {
+                totalRepsElement.classList.add('hidden');
                 return;
             }
             
-            if(exerciseNameElement) exerciseNameElement.textContent = "Exercício: " + exercisePerf.exerciseName;
-            
-            let displayUrl = exercisePerf.embedUrl;
-            console.log("Tentando carregar URL do vídeo:", displayUrl); 
-            let videoHTML = '';
-            if (displayUrl) {
-                let finalEmbedUrl = displayUrl;
-                if (displayUrl.includes("youtube.com/watch?v=")) { 
-                    const videoIdMatch = displayUrl.match(/[?&]v=([^&]+)/);
-                    if (videoIdMatch && videoIdMatch[1]) {
-                        finalEmbedUrl = `https://www.youtube.com/embed/${videoIdMatch[1]}`;
-                    } else {
-                        console.warn("Não foi possível extrair ID do vídeo do YouTube de (watch):", displayUrl);
-                    }
-                } else if (displayUrl.includes("youtu.be/")) { 
-                    const videoIdMatch = displayUrl.match(/youtu\.be\/([^?&]+)/);
-                     if (videoIdMatch && videoIdMatch[1]) {
-                        finalEmbedUrl = `https://www.youtube.com/embed/${videoIdMatch[1]}`;
-                    } else {
-                         console.warn("Não foi possível extrair ID do vídeo do YouTube de (youtu.be):", displayUrl);
+            let totalReps = 0;
+            let hasAnyNumericReps = false;
+
+            currentExPerf.seriesDone.forEach(serie => {
+                if (serie && typeof serie.reps === 'string') {
+                    const repsTrimmed = serie.reps.trim();
+                    const repsNum = parseInt(repsTrimmed);
+                    if (!isNaN(repsNum) && String(repsNum) === repsTrimmed) { 
+                        totalReps += repsNum;
+                        hasAnyNumericReps = true;
                     }
                 }
-                
-                if (finalEmbedUrl.startsWith("http://")) {
-                     finalEmbedUrl = finalEmbedUrl.replace("http://", "https://");
-                }
+            });
 
-
-                let allowAttributes = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"; 
-                if (finalEmbedUrl.includes("pandavideo.com")) { 
-                    allowAttributes = "autoplay; fullscreen; picture-in-picture; encrypted-media"; 
-                }
-                videoHTML = `<iframe src="${finalEmbedUrl}" frameborder="0" allow="${allowAttributes}" allowfullscreen style="width: 100%; height: 100%;"></iframe>`;
+            if (hasAnyNumericReps) {
+                totalRepsElement.textContent = `Total de Reps no Exercício: ${totalReps}`;
+                totalRepsElement.classList.remove('hidden');
             } else {
-                videoHTML = '<p class="text-center text-gray-400 flex items-center justify-center h-full">Vídeo indisponível.</p>';
+                totalRepsElement.textContent = '';
+                totalRepsElement.classList.add('hidden');
             }
-            if(videoPlayerContainerElement) videoPlayerContainerElement.innerHTML = videoHTML;
-
-
-            if (seriesProgressTextElement) seriesProgressTextElement.textContent = `SÉRIE ${currentSeriesNumber}`;
-            if (exerciseRepsElement) exerciseRepsElement.textContent = exercisePerf.repsTargetString; 
-
-            const altButtonsArea = document.getElementById('alternativeButtonsArea');
-            if (altButtonsArea) altButtonsArea.classList.add('hidden'); // Mantém escondido por enquanto
-
-
-            if (mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
-            if (videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
-            if (circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden'); 
-            if (seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
-            if (exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden');
-
-
-            if (repsInputElement) {
-                repsInputElement.value = ''; 
-                repsInputElement.focus();
-            }
-
-            if(completeSeriesBtnElement) completeSeriesBtnElement.classList.remove('hidden');
-            if(skipExerciseBtnElement) skipExerciseBtnElement.classList.remove('hidden');
-            
-            if(completeSeriesBtnElement) completeSeriesBtnElement.disabled = false;
-            if(skipExerciseBtnElement) skipExerciseBtnElement.disabled = false;
-
-            clearRestTimer(); 
         }
-        
-        function completeSeries() {
-            if (!repsInputElement) return;
-            let repsValue = repsInputElement.value.trim();
-            if (repsValue === "") {
-                repsValue = "N/A";
+
+
+        function completeStep() {
+            const currentStep = workoutFlow[currentStepIndex];
+            const isWarmup = Array.isArray(currentStep) && currentStep[0].supersetId === '0';
+            
+            if (!isWarmup) {
+                 const observationValue = exerciseContainerElement.querySelector('#observationInput')?.value.trim() || "";
+
+                if (Array.isArray(currentStep)) { 
+                    const repsInputs = exerciseContainerElement.querySelectorAll('.superset-reps-input');
+                    repsInputs.forEach(input => {
+                        const exerciseId = input.dataset.exerciseId;
+                        const performanceEntry = performanceData.find(ex => ex.exerciseId === exerciseId);
+                        if (performanceEntry) {
+                            let repsValue = input.value.trim();
+                            if (repsValue === "") { repsValue = "N/A"; }
+                            performanceEntry.seriesDone.push({ reps: repsValue, observation: observationValue });
+                        }
+                    });
+
+                } else { 
+                    const repsInput = exerciseContainerElement.querySelector('#repsInput');
+                    let repsValue = repsInput.value.trim();
+                    if (repsValue === "") { repsValue = "N/A"; }
+                    currentStep.seriesDone.push({ reps: repsValue, observation: observationValue });
+                    displayCurrentExerciseTotalReps();
+                }
             }
-
-            if (!performanceData || !performanceData[currentExerciseIndex]) return;
-            const currentExercisePerformance = performanceData[currentExerciseIndex];
-            currentExercisePerformance.seriesDone.push({ reps: repsValue }); 
-
-            if(exerciseActionButtonsElement) exerciseActionButtonsElement.classList.add('force-hidden');
-            if(seriesInputAreaElement) seriesInputAreaElement.classList.add('hidden');
-
-            const restTimeString = currentExercisePerformance.restTimeString;
+            
+            const lastExerciseInStep = Array.isArray(currentStep) ? currentStep[currentStep.length - 1] : currentStep;
+            const restTimeString = lastExerciseInStep.restTimeString;
             totalRestDuration = parseRestTime(restTimeString);
 
-            const isLastSeriesOfCurrentExercise = currentSeriesNumber >= currentExercisePerformance.seriesTargetCount;
-            const isLastExerciseOverall = currentExerciseIndex === performanceData.length - 1;
+            const isLastSeries = currentSeriesNumber >= lastExerciseInStep.seriesTargetCount;
+            const isLastStep = currentStepIndex === workoutFlow.length - 1;
 
-            if (isLastSeriesOfCurrentExercise && isLastExerciseOverall) {
-                finishWorkout(); 
+            if (isLastSeries && isLastStep) {
+                finishWorkout();
+            } else if (isWarmup) {
+                handleRestFinished(); // Pula direto para o próximo passo sem descanso
             } else {
                 startRestTimer(totalRestDuration);
             }
         }
-
+        
         function handleRestFinished() {
-            if (!performanceData[currentExerciseIndex]) {
-                console.error("Tentando finalizar descanso sem dados de exercício.");
-                return;
-            }
+            const currentStep = workoutFlow[currentStepIndex];
+            const seriesCount = Array.isArray(currentStep) ? currentStep[0].seriesTargetCount : currentStep.seriesTargetCount;
+            
             currentSeriesNumber++;
-            const currentExercisePerformance = performanceData[currentExerciseIndex];
-
-            if(mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
-            if(videoPlayerContainerElement) videoPlayerContainerElement.classList.remove('force-hidden');
-            if(circularTimerWrapperElement) circularTimerWrapperElement.classList.add('force-hidden');
-            if(exerciseActionButtonsElement) exerciseActionButtonsElement.classList.remove('force-hidden');
-            if(seriesInputAreaElement) seriesInputAreaElement.classList.remove('hidden');
-            if(skipExerciseBtnElement) skipExerciseBtnElement.disabled = false;
-
-
-            if (currentSeriesNumber <= currentExercisePerformance.seriesTargetCount) {
-                displayCurrentExerciseAndSeries();
-            } else {
-                currentExerciseIndex++;
-                currentSeriesNumber = 1; 
-                displayCurrentExerciseAndSeries(); 
+            
+            if (currentSeriesNumber > seriesCount) {
+                currentStepIndex++;
+                currentSeriesNumber = 1;
             }
+            
+            displayCurrentStep();
         }
 
-        function confirmSkipExercise() {
-            if (confirm("Tem certeza que deseja pular todas as séries restantes deste exercício?")) {
-                skipExercise(true); 
-            }
-        }
-
-        function skipExercise(manualSkip) {
-            clearRestTimer(); 
-            if (!performanceData || !performanceData[currentExerciseIndex]) return;
-
-            const currentExPerf = performanceData[currentExerciseIndex];
-            if (manualSkip) {
-                const seriesTarget = currentExPerf.seriesTargetCount;
-                while (currentExPerf.seriesDone.length < seriesTarget) {
-                    currentExPerf.seriesDone.push({ reps: "Pulado" });
+        function skipStep() {
+            // Removido o confirm()
+            
+            const currentStep = workoutFlow[currentStepIndex];
+            const observationText = "Exercício pulado";
+            
+            const processSkip = (exercise) => {
+                 while (exercise.seriesDone.length < exercise.seriesTargetCount) {
+                    exercise.seriesDone.push({ reps: "Pulado", observation: observationText });
                 }
-                showToast(`${currentExPerf.exerciseName} pulado.`); 
-            }
-            currentExerciseIndex++; 
-            currentSeriesNumber = 1; 
+            };
 
-            displayCurrentExerciseAndSeries(); 
+            if(Array.isArray(currentStep)) { 
+                currentStep.forEach(processSkip);
+                showToast(`Superset pulado.`);
+            } else { 
+                processSkip(currentStep);
+                showToast(`${currentStep.exerciseName} pulado.`);
+            }
+            
+            const isLastStep = currentStepIndex === workoutFlow.length - 1;
+            if(isLastStep) {
+                finishWorkout();
+            } else {
+                currentStepIndex++;
+                currentSeriesNumber = 1;
+                displayCurrentStep();
+            }
         }
-
-        // --- LÓGICA DE PONTUAÇÃO DE ESTRELAS ---
-        function parseRepsTarget(repsString) {
-            if (!repsString || typeof repsString !== 'string') return { type: 'invalid' };
-            repsString = repsString.toLowerCase().trim();
-
-            const rangeMatch = repsString.match(/^(\d+)\s*-\s*(\d+)/);
-            if (rangeMatch) {
-                return { type: 'range', min: parseInt(rangeMatch[1]), max: parseInt(rangeMatch[2]) };
-            }
-            const fixedMatch = repsString.match(/^(\d+)$/);
-            if (fixedMatch && !repsString.includes('-') && !repsString.includes('seg') && !repsString.includes('s') && !repsString.includes('"')) {
-                return { type: 'fixed', value: parseInt(fixedMatch[1]) };
-            }
-            if (repsString.includes('hold') || repsString.includes('seg') || repsString.includes('s') || repsString.includes('"')) {
-                const timeMatch = repsString.match(/(\d+)/);
-                return timeMatch ? { type: 'hold', duration: parseInt(timeMatch[1]) } : { type: 'text' };
-            }
-            if (repsString === 'amrap' || repsString.includes('max')) {
-                return { type: 'amrap' };
-            }
-            return { type: 'text' }; 
-        }
-
-        function calculateExerciseStars(exercisePerfEntry) {
-             if (!exercisePerfEntry || !exercisePerfEntry.repsTargetString) return 0;
-            const targetStr = exercisePerfEntry.repsTargetString; 
-            const parsedTarget = parseRepsTarget(targetStr);
-
-            if (parsedTarget.type !== 'range' && parsedTarget.type !== 'fixed') {
-                return 0;
-            }
-
-            let totalRepsDoneNum = 0;
-            let numericSeriesCount = 0;
-            if (exercisePerfEntry.seriesDone && Array.isArray(exercisePerfEntry.seriesDone)) {
-                exercisePerfEntry.seriesDone.forEach(serie => {
-                    if (serie.reps !== "Pulado" && serie.reps !== "N/A") {
-                        const repsNum = parseInt(serie.reps);
-                        if (!isNaN(repsNum)) {
-                            totalRepsDoneNum += repsNum;
-                            numericSeriesCount++;
-                        }
+        
+        function updateSummaryStats() {
+            if (!statsDivElement) return;
+            const workoutEndTimeForDisplay = Date.now();
+            const workoutDurationMsForDisplay = workoutStartTime ? workoutEndTimeForDisplay - workoutStartTime : 0;
+            const durationSecondsForDisplay = Math.floor(workoutDurationMsForDisplay / 1000);
+            const durationFormattedForDisplay = formatTime(durationSecondsForDisplay);
+            let totalRepsOverallForDisplay = 0;
+            const filteredData = performanceData.filter(ex => ex.supersetId !== '0');
+            
+            filteredData.forEach(ex => {
+                ex.seriesDone.forEach(serie => {
+                    if (serie.reps !== "Pulado (Exercício)" && serie.reps !== "Pulado" && serie.reps !== "N/A") {
+                        const repsNumeric = parseInt(serie.reps);
+                        if (!isNaN(repsNumeric)) { totalRepsOverallForDisplay += repsNumeric; }
                     }
                 });
-            } else {
-                 return 0;
-            }
-
-            if (numericSeriesCount === 0) return 0; 
-
-            const avgRepsDonePerSeries = totalRepsDoneNum / numericSeriesCount;
-
-            if (parsedTarget.type === 'range') {
-                const { min, max } = parsedTarget;
-                if (avgRepsDonePerSeries > max) return 4;    
-                if (avgRepsDonePerSeries >= max) return 3;   
-                if (avgRepsDonePerSeries >= min) return 2;    
-                if (avgRepsDonePerSeries > 0) return 1;      
-                return 0;
-            } else if (parsedTarget.type === 'fixed') {
-                const targetVal = parsedTarget.value;
-                if (avgRepsDonePerSeries > targetVal) return 4;  
-                if (avgRepsDonePerSeries >= targetVal) return 3; 
-                if (avgRepsDonePerSeries >= targetVal * 0.75) return 2; 
-                if (avgRepsDonePerSeries > 0) return 1;      
-                return 0;
-            }
-            return 0;
+            });
+            const registeredExercisesCountForDisplay = filteredData.filter(ex => ex.seriesDone.length > 0).length;
+            statsDivElement.innerHTML = `
+                <h3 class="text-xl font-semibold mb-2 text-blue-400" style="font-family: 'Inter', sans-serif;">Estatísticas Gerais</h3>
+                <p><strong>Tempo Total de Treino:</strong> ${durationFormattedForDisplay}</p>
+                <p><strong>Total de Repetições (numéricas):</strong> ${totalRepsOverallForDisplay > 0 ? totalRepsOverallForDisplay : "N/A"}</p>
+                <p><strong>Exercícios com séries registradas:</strong> ${registeredExercisesCountForDisplay}</p>
+            `;
         }
 
-        function getStarString(starCount) {
-            let starsHtml = '';
-            const totalDisplayStars = 3;
-            for (let i = 1; i <= totalDisplayStars; i++) {
-                starsHtml += `<span class="${(i <= starCount || starCount === 4) ? '' : 'empty-star'}">★</span>`;
+        function handleSummaryRepChange(event) {
+            const inputElement = event.target;
+            const exerciseId = inputElement.dataset.exerciseId;
+            const seriesIndex = parseInt(inputElement.dataset.seriesIndex);
+            const fieldType = inputElement.dataset.fieldType; 
+            const newValue = inputElement.value.trim();
+            
+            const exerciseToUpdate = performanceData.find(ex => ex.exerciseId === exerciseId);
+
+            if (exerciseToUpdate && exerciseToUpdate.seriesDone[seriesIndex]) {
+                if (fieldType === 'reps') {
+                    exerciseToUpdate.seriesDone[seriesIndex].reps = newValue === "" ? "N/A" : newValue;
+                    showToast(`Repetições da Série ${seriesIndex + 1} do Exercício "${exerciseToUpdate.exerciseName}" atualizadas para ${newValue}.`, 2500);
+                } else if (fieldType === 'observation') {
+                    exerciseToUpdate.seriesDone[seriesIndex].observation = newValue;
+                     showToast(`Observação da Série ${seriesIndex + 1} do Exercício "${exerciseToUpdate.exerciseName}" atualizada.`, 2500);
+                }
+                updateSummaryStats(); 
             }
-            if (starCount === 4) { 
-                starsHtml += `<span class="bonus-star">⭐</span>`;
-            }
-            return `<div class="star-rating inline-block">${starsHtml}</div>`;
         }
 
 
-        // --- FINALIZAR TREINO E IR PARA RESUMO ---
-        function finishWorkout() {
-            if(pseInputElement) pseInputElement.value = ''; 
-            showScreen(Screens.SUMMARY); 
-        }
+        function finishWorkout() { if(document.getElementById('pseInput')) document.getElementById('pseInput').value = ''; showScreen(Screens.SUMMARY); }
 
-        // NOVA FUNÇÃO para ser chamada pelo botão "Salvar Resumo e Voltar para Home" na tela de resumo
-        async function saveSummaryAndGoHome() {
-            const pseValue = pseInputElement?.value ? parseInt(pseInputElement.value) : null;
-            if (pseInputElement && pseValue !== null && (pseValue < 1 || pseValue > 10 || isNaN(pseValue))) {
+        async function concludeWorkoutAndGoHome() {
+            const pseValue = document.getElementById('pseInput')?.value ? parseInt(document.getElementById('pseInput').value) : null;
+            if (document.getElementById('pseInput') && pseValue !== null && (pseValue < 1 || pseValue > 10 || isNaN(pseValue))) {
                 showToast("PSE inválido. Por favor, insira um valor numérico entre 1 e 10.", 4000);
-                pseInputElement.focus();
-                return; 
+                document.getElementById('pseInput').focus(); return; 
             }
-            workoutPSE = pseValue;
-
-            // Construir o objeto único do treino para Firestore
-            const workoutDataForFirestore = {
-                studentName: currentUser.name || "Convidado",
-                studentEmail: currentUser.email || "N/A",
-                level: selectedLevel, // Mantém o nível original do treino selecionado
-                workoutName: selectedWorkoutName,
-                date: new Date().toISOString(),
-                workoutDurationSec: workoutStartTime ? Math.floor((Date.now() - workoutStartTime) / 1000) : 0,
-                pse: workoutPSE,
-                exercises: performanceData.map(exPerf => ({
-                    exerciseName: exPerf.exerciseName, 
-                    exerciseId: exPerf.exerciseId,
-                    stars: calculateExerciseStars(exPerf),
-                    seriesDone: exPerf.seriesDone.map((serie, index) => ({
-                        seriesNumber: index + 1,
-                        repsDone: serie.reps
-                    }))
-                }))
-            };
+            workoutPSE = pseValue; userProgressData = []; 
+            const studentName = currentUser.name || "Convidado"; const studentEmail = currentUser.email || "N/A"; 
+            const date = new Date().toISOString(); const workoutEndTime = Date.now();
+            const workoutDurationMs = workoutStartTime ? workoutEndTime - workoutStartTime : 0;
+            const workoutDurationSec = Math.floor(workoutDurationMs / 1000);
             
-            console.log("Dados do treino a serem enviados para o Firestore:", workoutDataForFirestore);
-            showToast(`Salvando ${selectedWorkoutName} no Firebase...`);
-            const firestoreSaveSuccess = await saveProgressToFirestore(workoutDataForFirestore);
-
-            if (firestoreSaveSuccess) {
-                 showToast(`Treino salvo com sucesso!`); 
-            } else {
-                 showToast(`Erro ao salvar o treino ${selectedWorkoutName} no Firebase.`);
+            const filteredData = performanceData.filter(ex => ex.supersetId !== '0');
+            filteredData.forEach(exercisePerf => {
+                if (exercisePerf.seriesDone.length === 0) { 
+                    userProgressData.push({
+                        date: date, studentName: studentName, studentEmail: studentEmail,
+                        level: selectedLevel, workoutName: selectedWorkoutName,
+                        exerciseName: exercisePerf.exerciseName, exerciseId: exercisePerf.exerciseId,
+                        seriesNumber: 0, repsDone: "Pulado (Exercício)", observation: "", 
+                        workoutDurationSec: workoutDurationSec, pse: workoutPSE 
+                    });
+                } else {
+                    exercisePerf.seriesDone.forEach((seriesData, index) => {
+                        userProgressData.push({
+                            date: date, studentName: studentName, studentEmail: studentEmail,
+                            level: selectedLevel, workoutName: selectedWorkoutName,
+                            exerciseName: exercisePerf.exerciseName, exerciseId: exercisePerf.exerciseId,
+                            seriesNumber: index + 1, repsDone: seriesData.reps,
+                            observation: seriesData.observation || "", 
+                            workoutDurationSec: workoutDurationSec, pse: workoutPSE 
+                        });
+                    });
+                }
+            });
+            console.log("Dados a serem enviados para a planilha (após concluir):", userProgressData);
+            showToast(`Salvando ${selectedWorkoutName} na planilha...`);
+            const saveSuccess = await saveProgressToSheet(userProgressData);
+            if (saveSuccess) { 
+                showToast(`Treino ${selectedWorkoutName} salvo na planilha com sucesso!`); 
             }
-            
-            // Volta para a lista de treinos do usuário (antiga homeScreen)
-            showScreen(Screens.WORKOUT_LIST); 
-            resetAppState(false); // Não reseta o usuário, apenas o estado do treino
+            showScreen(Screens.HOME); resetAppState(true); 
         }
+        
+        async function downloadSummaryAsPDF() {
+            const { jsPDF } = window.jspdf; 
+            
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.fontFamily = "'Inter', sans-serif";
+            pdfContainer.style.backgroundColor = '#ffffff'; 
+            pdfContainer.style.color = '#333333'; 
+            pdfContainer.style.padding = '20px';
+            pdfContainer.style.width = '210mm'; 
+            pdfContainer.style.boxSizing = 'border-box';
 
+            let pdfHtml = `<div style="text-align: center; margin-bottom: 20px;">
+                                <h1 style="font-family: 'Archivo Black', sans-serif; font-size: 24px; color: #121212; margin-bottom: 5px;">CALISTENIA PRO - RESUMO DO TREINO</h1>
+                                <p style="font-size: 14px; color: #555555; margin-bottom: 3px;"><strong>Aluno:</strong> ${currentUser.name || "Convidado"}</p>
+                                <p style="font-size: 14px; color: #555555; margin-bottom: 3px;"><strong>Treino:</strong> ${selectedWorkoutName || "N/A"} (${selectedLevel ? selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1) : 'N/A'})</p>
+                                <p style="font-size: 14px; color: #555555;"><strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
+                           </div>`;
+            
+            pdfHtml += `<hr style="border-top: 1px solid #ccc; margin: 15px 0;">`;
+            pdfHtml += `<h2 style="font-size: 18px; color: #121212; margin-bottom: 10px; font-weight: bold;">Desempenho Detalhado:</h2>`;
+            const filteredDataForPdf = performanceData.filter(ex => ex.supersetId !== '0');
 
-        // --- FUNÇÃO PARA SALVAR PROGRESSO NO FIRESTORE (DOCUMENTO ÚNICO) ---
-        async function saveProgressToFirestore(singleWorkoutData) {
-            if (!db) {
-                showToast("Erro: Conexão com o banco de dados não estabelecida.", 5000);
-                console.error("Firestore 'db' instance is not available.");
-                return false;
+            filteredDataForPdf.forEach(exPerf => {
+                let exerciseTotalReps = 0;
+                let allSeriesAreNumericOrSpecialForPdf = true; 
+                let hasAnyNumericRepsForPdf = false; 
+
+                exPerf.seriesDone.forEach(serie => {
+                    if (serie && typeof serie.reps === 'string') {
+                        const repsTrimmed = serie.reps.trim();
+                        const repsNum = parseInt(repsTrimmed);
+                        if (!isNaN(repsNum) && String(repsNum) === repsTrimmed) {
+                            exerciseTotalReps += repsNum;
+                            hasAnyNumericRepsForPdf = true;
+                        } else if (repsTrimmed !== "Pulado" && repsTrimmed !== "N/A" && repsTrimmed !== "") {
+                            allSeriesAreNumericOrSpecialForPdf = false; 
+                        }
+                    } else if (serie) { 
+                        allSeriesAreNumericOrSpecialForPdf = false;
+                    }
+                });
+
+                let totalForExerciseBlock = "";
+                if (allSeriesAreNumericOrSpecialForPdf && hasAnyNumericRepsForPdf) {
+                    totalForExerciseBlock = `<p style="font-size: 15px; color: #333333; font-weight: bold; white-space: nowrap; margin-left: 10px;">Total: ${exerciseTotalReps}</p>`;
+                }
+
+                pdfHtml += `<div style="margin-bottom: 15px; padding: 10px; background-color: #f9f9f9; border: 1px solid #eeeeee; border-radius: 5px;">`;
+                pdfHtml +=    `<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">`;
+                pdfHtml +=        `<h3 style="font-size: 16px; color: #333333; font-weight: bold; flex-grow: 1;">${exPerf.exerciseName} <span style="font-size: 12px; color: #777777; font-weight: normal;">(Alvo: ${exPerf.repsTargetString})</span></h3>`;
+                pdfHtml +=        totalForExerciseBlock; 
+                pdfHtml +=    `</div>`; 
+                
+                if (exPerf.seriesDone.length > 0) {
+                    pdfHtml += `<ul style="list-style-type: none; padding-left: 0; margin-top: 0px;">`;
+                    exPerf.seriesDone.forEach((serie, index) => {
+                        pdfHtml += `<li style="font-size: 15px; color: #555555; margin-bottom: 4px;"><strong>Série ${index + 1}:</strong> ${serie.reps}`;
+                        if(serie.observation && serie.observation.trim() !== "") {
+                            pdfHtml += ` <em style="font-size: 13px; color: #777777;">(${serie.observation})</em>`;
+                        }
+                        pdfHtml += `</li>`;
+                    });
+                    pdfHtml += `</ul>`;
+                } else {
+                    pdfHtml += `<p style="font-size: 15px; color: #777777; margin-top: 5px;">Nenhuma série registrada.</p>`;
+                }
+                pdfHtml += `</div>`;
+            });
+            
+            pdfHtml += `<hr style="border-top: 1px solid #ccc; margin: 15px 0;">`;
+            pdfHtml += `<h2 style="font-size: 18px; color: #121212; margin-bottom: 10px; font-weight: bold;">Estatísticas Gerais:</h2>`;
+             const workoutEndTime = Date.now();
+             const workoutDurationMs = workoutStartTime ? workoutEndTime - workoutStartTime : 0;
+             const durationSeconds = Math.floor(workoutDurationMs / 1000);
+             const durationFormatted = formatTime(durationSeconds);
+             let totalRepsOverall = 0;
+             filteredDataForPdf.forEach(ex => { ex.seriesDone.forEach(serie => { if (serie.reps !== "Pulado (Exercício)" && serie.reps !== "Pulado" && serie.reps !== "N/A") { const repsNum = parseInt(serie.reps); if (!isNaN(repsNum)) { totalRepsOverall += repsNum; } } }); });
+             const registeredExercisesCount = filteredDataForPdf.filter(ex => ex.seriesDone.length > 0).length;
+
+            pdfHtml += `<div style="font-size: 14px; color: #555555; line-height: 1.6;">
+                            <p><strong>Tempo Total de Treino:</strong> ${durationFormatted}</p>
+                            <p><strong>Total de Repetições (numéricas):</strong> ${totalRepsOverall > 0 ? totalRepsOverall : "N/A"}</p>
+                            <p><strong>Exercícios com séries registradas:</strong> ${registeredExercisesCount}</p>
+                        </div>`;
+
+            const pseValueForPdf = document.getElementById('pseInput')?.value;
+            if (pseValueForPdf && pseValueForPdf.trim() !== "") {
+                 pdfHtml += `<hr style="border-top: 1px solid #ccc; margin: 15px 0;">`;
+                 pdfHtml += `<h2 style="font-size: 18px; color: #121212; margin-bottom: 10px; font-weight: bold;">Percepção de Esforço (PSE):</h2>`;
+                 pdfHtml += `<p style="font-size: 15px; color: #555555;"><strong>Sua PSE (1-10):</strong> ${pseValueForPdf}</p>`;
             }
-            if (!singleWorkoutData) {
-                console.log("Nenhum dado de treino para salvar no Firestore.");
-                return true; 
-            }
+
+            pdfContainer.innerHTML = pdfHtml;
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.left = '-9999px'; 
+            document.body.appendChild(pdfContainer);
+
+            showToast("Gerando PDF...", 2000);
 
             try {
-                // Usar o UID do usuário para criar um caminho de coleção específico para ele
-                // e um ID de documento automático para cada treino salvo.
-                const userWorkoutCollectionPath = `userWorkouts/${currentUser.uid}/completed_workouts`;
-                const workoutDocRef = db.collection(userWorkoutCollectionPath).doc(); // ID automático
-                
-                await workoutDocRef.set(singleWorkoutData); 
-
-                console.log("Treino salvo no Firestore com sucesso. Caminho:", `${userWorkoutCollectionPath}/${workoutDocRef.id}`);
-                return true;
-
+                const canvas = await html2canvas(pdfContainer, {
+                    scale: 2, useCORS: true, logging: false, backgroundColor: '#ffffff' 
+                });
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = pdf.internal.pageSize.getHeight();
+                const margin = 15; 
+                const contentWidth = pdfWidth - (2 * margin);
+                const imgProps = pdf.getImageProperties(imgData);
+                const imgRatio = imgProps.width / imgProps.height;
+                let newImgHeight = contentWidth / imgRatio;
+                let newImgWidth = contentWidth;
+                if (newImgHeight > (pdfHeight - (2*margin))) {
+                    newImgHeight = pdfHeight - (2*margin); newImgWidth = newImgHeight * imgRatio;
+                }
+                pdf.addImage(imgData, 'PNG', margin, margin, newImgWidth, newImgHeight);
+                pdf.save(`resumo_treino_${selectedWorkoutName.replace(/\s+/g, '_')}_${currentUser.name.replace(/\s+/g, '_')}_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.pdf`);
+                showToast("PDF gerado com sucesso!", 3000);
             } catch (error) {
-                console.error("Erro ao salvar treino no Firestore:", error);
-                showToast(`Erro ao salvar no Firestore: ${error.message}`, 5000);
+                console.error("Erro ao gerar PDF:", error);
+                showToast("Erro ao gerar PDF. Verifique o console.", 4000);
+            } finally {
+                document.body.removeChild(pdfContainer); 
+            }
+        }
+
+
+        async function saveProgressToSheet(progressDataArray) {
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec"; 
+            if (SCRIPT_URL === "COLOQUE_O_ID_DA_SUA_PLANILHA_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
+                console.error("URL do Script inválida ou não configurada para salvar."); return false;
+            }
+            if (!progressDataArray || progressDataArray.length === 0) { console.log("Nenhum dado de progresso para salvar."); return true; }
+            try {
+                for (const progressEntry of progressDataArray) {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'POST', mode: 'cors', cache: 'no-cache',
+                        headers: { 'Content-Type': 'application/json', },
+                        redirect: 'follow', body: JSON.stringify(progressEntry)
+                    });
+                    if (response.type === 'error' || (response.status !== 200 && response.status !== 302 && response.status !== 0) ) { 
+                        let errorMsg = `Erro ao salvar dados. Status: ${response.status}`;
+                        try { const errorData = await response.json(); errorMsg = errorData.message || errorData.error || errorMsg;} catch(e) { /* ignora */ }
+                        console.error("Falha ao salvar progresso:", errorMsg, "Entrada:", progressEntry);
+                    }
+                    await new Promise(resolve => setTimeout(resolve, 50)); 
+                }
+                console.log("Todas as entradas de progresso foram enviadas (ou tentativas foram feitas)."); return true;
+            } catch (error) {
+                console.error("Erro de rede ou na função saveProgressToSheet:", error);
+                // showToast(`Erro de rede ao salvar: ${error.message}`, 5000); // Removido
                 return false;
             }
         }
 
         function displaySummary() { 
-            if (!summaryContentElement || !statsDivElement || !motivationalMessageElement || !progressComparisonAreaElement || !comparisonDetailsElement) {
-                 console.error("Um ou mais elementos da tela de resumo não encontrados.");
-                 return;
+            if (!summaryContentElement || !statsDivElement || !motivationalMessageElement) {
+                 console.error("Elementos da tela de resumo não encontrados."); return;
             }
-            const studentName = currentUser.name || "Convidado";
-            const studentFirstName = studentName.split(" ")[0]; 
-            const date = new Date().toLocaleDateString('pt-BR');
+            const studentName = currentUser.name || "Convidado"; const date = new Date().toLocaleDateString('pt-BR');
             let displayLevelName = selectedLevel;
-             if (selectedLevel === 'avancado') displayLevelName = 'Avançado';
-             else if (selectedLevel === 'intermediario') displayLevelName = 'Intermediário';
-             else if (selectedLevel === 'iniciante') displayLevelName = 'Iniciante';
-             else if (selectedLevel) displayLevelName = selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1);
-             else displayLevelName = 'N/A';
-
-            // Array de mensagens motivacionais
-            const motivationalMessages = [
-                `Parabéns, ${studentFirstName}! Mandou bem!`,
-                `Excelente treino, ${studentFirstName}! Continue assim!`,
-                `Mais um pra conta, ${studentFirstName}! Orgulho!`,
-                `Impressionante, ${studentFirstName}! A evolução não para!`,
-                `Que performance, ${studentFirstName}! Continue focado(a)!`
-            ];
-            const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
-            motivationalMessageElement.textContent = randomMessage;
-
+            if (selectedLevel === 'avancado') displayLevelName = 'Avançado';
+            else if (selectedLevel === 'intermediario') displayLevelName = 'Intermediário';
+            else if (selectedLevel === 'iniciante') displayLevelName = 'Iniciante';
+            else if (selectedLevel) displayLevelName = selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1);
+            else displayLevelName = 'N/A';
 
             summaryContentElement.innerHTML = `
-                <p><strong>Aluno:</strong> ${currentUser.name || "Convidado"}</p>
+                <p><strong>Aluno:</strong> ${studentName}</p>
                 <p><strong>Data:</strong> ${date}</p>
                 <p><strong>Nível:</strong> ${displayLevelName}</p>
                 <p><strong>Treino:</strong> ${selectedWorkoutName || 'N/A'}</p>
-                <hr class="my-3 border-gray-600"> <h4 class="font-semibold mb-2 text-xl text-gray-200" style="font-family: 'Inter', sans-serif;">Desempenho Detalhado:</h4>
+                <hr class="my-3 border-gray-600">
+                <h4 class="font-semibold mb-2 text-xl text-gray-200" style="font-family: 'Inter', sans-serif;">Desempenho Detalhado:</h4>
             `;
+            const filteredData = performanceData.filter(ex => ex.supersetId !== '0');
 
-            if (performanceData.length === 0) {
-                 summaryContentElement.innerHTML += `<p class="text-gray-400">Nenhum exercício foi carregado ou realizado.</p>`;
+            if (filteredData.length === 0) {
+                 summaryContentElement.innerHTML += `<p class="text-gray-400">Nenhum exercício foi registrado neste treino.</p>`;
             }
-
-            performanceData.forEach(exPerf => {
+            filteredData.forEach((exPerf) => {
                 const exerciseDiv = document.createElement('div');
                 exerciseDiv.className = 'mb-3 p-3 bg-gray-800 rounded-md shadow-sm';
-
                 const repsTargetDisplay = `(Alvo: ${exPerf.repsTargetString})`;
-                const currentStars = calculateExerciseStars(exPerf); 
-                const starRatingHtml = getStarString(currentStars);
-
-
                 exerciseDiv.innerHTML = `
                     <div class="flex justify-between items-center">
                         <p class="font-medium text-gray-100">${exPerf.exerciseName} <span class="text-sm text-gray-400">${repsTargetDisplay}</span></p>
-                        ${starRatingHtml}
                     </div>`;
-
                 if (exPerf.seriesDone.length > 0) {
                     const seriesList = document.createElement('ul');
-                    seriesList.className = 'list-disc list-inside ml-4 text-sm text-gray-300 mt-1';
-                    exPerf.seriesDone.forEach((serie, index) => {
-                        seriesList.innerHTML += `<li>Série ${index + 1}: ${serie.reps}</li>`;
+                    seriesList.className = 'mt-2 space-y-2'; 
+                    exPerf.seriesDone.forEach((serie, seriesIndex) => {
+                        const seriesItemLi = document.createElement('div');
+                        seriesItemLi.className = 'flex items-center space-x-2'
+                        
+                        const seriesLabel = document.createElement('span');
+                        seriesLabel.className = 'text-sm text-gray-300 w-16';
+                        seriesLabel.textContent = `Série ${seriesIndex + 1}:`;
+                        seriesItemLi.appendChild(seriesLabel);
+                        
+                        const repInput = document.createElement('input');
+                        repInput.type = 'text'; repInput.value = serie.reps;
+                        repInput.className = 'p-1.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 w-24 text-center text-sm shadow-sm focus:ring-sky-500 focus:border-sky-500 placeholder-gray-500';
+                        repInput.dataset.exerciseId = exPerf.exerciseId; 
+                        repInput.dataset.seriesIndex = seriesIndex;
+                        repInput.dataset.fieldType = "reps"; 
+                        repInput.placeholder = "Reps"; repInput.addEventListener('change', handleSummaryRepChange);
+                        seriesItemLi.appendChild(repInput);
+
+                        const obsInput = document.createElement('textarea');
+                        obsInput.value = serie.observation || "";
+                        obsInput.className = 'flex-grow p-1.5 border border-gray-600 rounded-md bg-gray-700 text-gray-100 text-sm placeholder-gray-500 focus:ring-sky-500 focus:border-sky-500';
+                        obsInput.rows = "1";
+                        obsInput.placeholder = "Observação (opcional)";
+                        obsInput.dataset.exerciseId = exPerf.exerciseId;
+                        obsInput.dataset.seriesIndex = seriesIndex;
+                        obsInput.dataset.fieldType = "observation"; 
+                        obsInput.addEventListener('change', handleSummaryRepChange);
+                        seriesItemLi.appendChild(obsInput);
+                        
+                        seriesList.appendChild(seriesItemLi);
                     });
                     exerciseDiv.appendChild(seriesList);
                 } else {
@@ -1086,122 +1373,18 @@
                 }
                 summaryContentElement.appendChild(exerciseDiv);
             });
-            
-            const workoutEndTimeForDisplay = Date.now(); 
-            const workoutDurationMsForDisplay = workoutStartTime ? workoutEndTimeForDisplay - workoutStartTime : 0;
-            const durationSecondsForDisplay = Math.floor(workoutDurationMsForDisplay / 1000);
-            const durationFormattedForDisplay = formatTime(durationSecondsForDisplay);
-
-            let totalRepsOverallForDisplay = 0;
-            performanceData.forEach(ex => { 
-                ex.seriesDone.forEach(serie => {
-                    if (serie.reps !== "Pulado (Exercício)" && serie.reps !== "Pulado" && serie.reps !== "N/A") {
-                         const repsNumeric = parseInt(serie.reps);
-                        if (!isNaN(repsNumeric)) {
-                            totalRepsOverallForDisplay += repsNumeric;
-                        }
-                    }
-                });
-            });
-            
-            const registeredExercisesCountForDisplay = performanceData.filter(ex => ex.seriesDone.length > 0).length;
-
-
-            statsDivElement.innerHTML = `
-                <h3 class="text-xl font-semibold mb-2 text-blue-400" style="font-family: 'Inter', sans-serif;">Estatísticas Gerais</h3>
-                <p><strong>Tempo Total de Treino:</strong> ${durationFormattedForDisplay}</p>
-                <p><strong>Total de Repetições (numéricas):</strong> ${totalRepsOverallForDisplay > 0 ? totalRepsOverallForDisplay : "N/A"}</p>
-                <p><strong>Exercícios com séries registradas:</strong> ${registeredExercisesCountForDisplay}</p>
-                `;
-            
-            comparisonDetailsElement.innerHTML = '';
-            progressComparisonAreaElement.classList.add('hidden');
-            loadAndDisplayProgressComparison();
-            
-            if(pseInputElement) pseInputElement.focus();
+            updateSummaryStats(); 
+            motivationalMessageElement.textContent = `Parabéns, ${studentName}! Você mandou bem no ${selectedWorkoutName || 'treino'}! Revise seu resumo e adicione sua PSE.`;
+            if(pseInputElement) pseInputElement.focus(); 
         }
-        
-        async function loadAndDisplayProgressComparison() {
-            if (!currentUser.uid || !selectedWorkoutName || !db) { // Usa UID para a query
-                console.log("Dados insuficientes para buscar comparação de progresso (UID do usuário, nome do treino ou db ausente).");
-                return;
-            }
-
-            try {
-                 // Busca o último treino SALVO com os mesmos critérios, mas para o UID do usuário
-                const querySnapshot = await db.collection("completedWorkouts") // Coleção onde os treinos finalizados são salvos
-                    .where("studentEmail", "==", currentUser.email) // Mantém filtro por email para compatibilidade, mas UID seria melhor
-                    .where("workoutName", "==", selectedWorkoutName)
-                    // .where("level", "==", selectedLevel) // O nível pode variar se for um treino personalizado
-                    .orderBy("date", "desc") 
-                    .limit(1) 
-                    .get();
-
-                let previousWorkoutData = null;
-                if (!querySnapshot.empty) {
-                    previousWorkoutData = querySnapshot.docs[0].data();
-                }
-
-
-                if (previousWorkoutData && previousWorkoutData.exercises) {
-                    comparisonDetailsElement.innerHTML = ''; 
-                    let comparisonHtml = '';
-                    let hasComparison = false;
-
-                    performanceData.forEach(currentExercise => {
-                        const prevExercise = previousWorkoutData.exercises.find(pe => pe.exerciseName === currentExercise.exerciseName);
-                        
-                        let currentTotalReps = 0;
-                        currentExercise.seriesDone.forEach(s => { 
-                            const reps = parseInt(s.repsDone);
-                            if(!isNaN(reps)) currentTotalReps += reps;
-                        });
-
-                        if (prevExercise && prevExercise.seriesDone) {
-                            let prevTotalReps = 0;
-                            prevExercise.seriesDone.forEach(s => {
-                                const reps = parseInt(s.repsDone);
-                                if(!isNaN(reps)) prevTotalReps += reps;
-                            });
-
-                            if (currentTotalReps > 0 || prevTotalReps > 0) { 
-                                hasComparison = true;
-                                let diff = currentTotalReps - prevTotalReps;
-                                let diffClass = diff > 0 ? 'progress-increase' : (diff < 0 ? 'progress-decrease' : 'progress-same');
-                                let diffSymbol = diff > 0 ? '+' : (diff < 0 ? '' : ''); 
-                                comparisonHtml += `<p><strong>${currentExercise.exerciseName}:</strong> ${currentTotalReps} reps (anterior: ${prevTotalReps} reps) <span class="${diffClass}">(${diffSymbol}${diff} reps)</span></p>`;
-                            }
-                        }
-                    });
-
-                    if (hasComparison) {
-                        comparisonDetailsElement.innerHTML = comparisonHtml;
-                        progressComparisonAreaElement.classList.remove('hidden');
-                    } else {
-                        comparisonDetailsElement.innerHTML = '<p>Nenhum dado comparável com o último treino.</p>';
-                        progressComparisonAreaElement.classList.remove('hidden');
-                    }
-                } else {
-                    comparisonDetailsElement.innerHTML = '<p>Primeira vez realizando este treino ou nenhum dado anterior encontrado.</p>';
-                    progressComparisonAreaElement.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error("Erro ao buscar comparação de progresso:", error);
-                comparisonDetailsElement.innerHTML = '<p>Erro ao carregar comparação.</p>';
-                progressComparisonAreaElement.classList.remove('hidden');
-            }
-        }
-
 
         // --- TIMERS ---
         function parseRestTime(restString) {
-            if (!restString || typeof restString !== 'string') return 60;
+            if (!restString || typeof restString !== 'string') return 60; 
             restString = restString.trim();
-
             const minSecMatch = restString.match(/^(?:(\d+)')?(?:(\d+)"?)?$/);
             if (minSecMatch) {
-                const minutes = parseInt(minSecMatch[1]) || 0;
-                const seconds = parseInt(minSecMatch[2]) || 0;
+                const minutes = parseInt(minSecMatch[1]) || 0; const seconds = parseInt(minSecMatch[2]) || 0;
                 if (minutes > 0 || seconds > 0) return (minutes * 60) + seconds;
             }
             const rangeMinMatch = restString.match(/^(\d+)\s*-\s*(\d+)\s*'/);
@@ -1210,7 +1393,7 @@
                 return Math.round(((minM * 60) + (maxM * 60)) / 2);
             }
             const rangeSecMatch = restString.match(/^(\d+)\s*-\s*(\d+)\s*"/);
-             if (rangeSecMatch) {
+            if (rangeSecMatch) {
                 const minS = parseInt(rangeSecMatch[1]); const maxS = parseInt(rangeSecMatch[2]);
                 return Math.round((minS + maxS) / 2);
             }
@@ -1219,44 +1402,54 @@
             return 60;
         }
 
-
         function formatTime(totalSeconds) {
-            const minutes = Math.floor(totalSeconds / 60);
-            const seconds = totalSeconds % 60;
+            const minutes = Math.floor(totalSeconds / 60); const seconds = totalSeconds % 60;
             return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
         function setProgress(percent) {
-             if (circumference && progressRingElement) {
+             const progressRing = document.getElementById('progressRing');
+             if (progressRing) {
+                const radius = progressRing.r.baseVal.value;
+                const circumference = 2 * Math.PI * radius;
+                progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
                 const offset = circumference - (percent / 100) * circumference;
-                progressRingElement.style.strokeDashoffset = offset;
-             } else if (!circumference && progressRingElement) {
-                // console.warn("Circumference for progress ring is not set.");
+                progressRing.style.strokeDashoffset = offset;
              }
         }
 
         function startRestTimer(durationInSeconds) {
             clearRestTimer();
             restTimerSeconds = durationInSeconds;
-            totalRestDuration = durationInSeconds; 
+            totalRestDuration = durationInSeconds;
             restTimerRunning = true;
 
-            if(mediaDisplayAreaElement) mediaDisplayAreaElement.classList.remove('hidden');
-            if(videoPlayerContainerElement) videoPlayerContainerElement.classList.add('force-hidden');
-            if(circularTimerWrapperElement) circularTimerWrapperElement.classList.remove('force-hidden');
-            if(seriesProgressTextElement) seriesProgressTextElement.textContent = "DESCANSO";
-
-            const pauseBtn = document.getElementById('pauseRestTimerBtn');
-            const skipBtn = document.getElementById('skipRestTimerBtn');
-            if(pauseBtn) { pauseBtn.textContent = 'Pausar'; pauseBtn.disabled = false; }
-            if(skipBtn) skipBtn.disabled = false;
-
-            if(circularTimerTextElement) circularTimerTextElement.textContent = formatTime(restTimerSeconds);
+            const timerHtml = `
+                <div class="text-center">
+                    <h3 class="series-display-text text-2xl mb-4">DESCANSO</h3>
+                </div>
+                <div class="flex items-center justify-center">
+                    <div class="timer-display-and-controls">
+                        <button id="skipRestTimerBtn" onclick="skipRest()" class="action-button">Pular</button>
+                        <div id="circularTimerContainer" class="relative">
+                            <svg class="w-full h-full" viewBox="0 0 100 100">
+                                <circle class="text-gray-700" stroke-width="8" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50"/>
+                                <circle id="progressRing" class="text-sky-400" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50" style="transform: rotate(-90deg); transform-origin: 50% 50%;"/>
+                            </svg>
+                            <div id="circularTimerText" class="absolute inset-0 flex items-center justify-center text-3xl font-bold text-gray-100"></div>
+                        </div>
+                        <button id="pauseRestTimerBtn" onclick="pauseRestTimer()" class="action-button">Pausar</button>
+                    </div>
+                </div>`;
+            
+            exerciseContainerElement.innerHTML = timerHtml;
+            const circularTimerTextElement = document.getElementById('circularTimerText');
+            circularTimerTextElement.textContent = formatTime(restTimerSeconds);
             setProgress(0); 
 
             restTimerInterval = setInterval(() => {
                 restTimerSeconds--;
-                if(circularTimerTextElement) circularTimerTextElement.textContent = formatTime(restTimerSeconds);
+                if (circularTimerTextElement) circularTimerTextElement.textContent = formatTime(restTimerSeconds);
 
                 const percentCompleted = totalRestDuration > 0 ? ((totalRestDuration - restTimerSeconds) / totalRestDuration) * 100 : 0;
                 setProgress(percentCompleted);
@@ -1264,65 +1457,43 @@
                 if (restTimerSeconds < 0) {
                     clearRestTimer();
                     showToast("Descanso finalizado!");
-                    handleRestFinished(); 
+                    handleRestFinished();
                 }
             }, 1000);
         }
 
         function pauseRestTimer() {
-            const pauseBtn = document.getElementById('pauseRestTimerBtn');
-            if (!pauseBtn) return;
-
+            const pauseBtn = document.getElementById('pauseRestTimerBtn'); if (!pauseBtn) return;
             if (restTimerRunning) {
-                restTimerRunning = false;
-                clearInterval(restTimerInterval);
-                pauseBtn.textContent = 'Retomar';
+                restTimerRunning = false; clearInterval(restTimerInterval); pauseBtn.textContent = 'Retomar';
             } else {
                 if (restTimerSeconds >= 0) { 
-                    restTimerRunning = true;
-                    pauseBtn.textContent = 'Pausar';
-                     restTimerInterval = setInterval(() => {
-                        restTimerSeconds--;
+                    restTimerRunning = true; pauseBtn.textContent = 'Pausar';
+                    restTimerInterval = setInterval(() => {
+                        restTimerSeconds--; 
+                        const circularTimerTextElement = document.getElementById('circularTimerText');
                         if(circularTimerTextElement) circularTimerTextElement.textContent = formatTime(restTimerSeconds);
                         const percentCompleted = totalRestDuration > 0 ? ((totalRestDuration - restTimerSeconds) / totalRestDuration) * 100 : 0;
                         setProgress(percentCompleted);
-                        if (restTimerSeconds < 0) {
-                            clearRestTimer();
-                            showToast("Descanso finalizado!");
-                            handleRestFinished();
-                        }
+                        if (restTimerSeconds < 0) { clearRestTimer(); showToast("Descanso finalizado!"); handleRestFinished(); }
                     }, 1000);
                 }
             }
         }
 
-        function skipRest() {
-            clearRestTimer();
-            showToast("Descanso pulado.");
-            handleRestFinished();
-        }
-
-        function clearRestTimer() {
-            clearInterval(restTimerInterval);
-            restTimerRunning = false;
-            setProgress(0);
-        }
+        function skipRest() { clearRestTimer(); showToast("Descanso pulado."); handleRestFinished(); }
+        function clearRestTimer() { clearInterval(restTimerInterval); restTimerRunning = false; }
 
         // --- UTILITÁRIOS ---
         function showToast(message, duration = 3000) {
              if (!toastNotificationElement) return;
             toastNotificationElement.textContent = message;
-            toastNotificationElement.classList.remove('hide'); 
-            toastNotificationElement.classList.add('show');
-            if (toastNotificationElement.toastTimeout) {
-                clearTimeout(toastNotificationElement.toastTimeout);
-            }
+            toastNotificationElement.classList.remove('hide'); toastNotificationElement.classList.add('show');
+            if (toastNotificationElement.toastTimeout) { clearTimeout(toastNotificationElement.toastTimeout); }
             toastNotificationElement.toastTimeout = setTimeout(() => {
-                toastNotificationElement.classList.remove('show');
-                toastNotificationElement.classList.add('hide');
+                toastNotificationElement.classList.remove('show'); toastNotificationElement.classList.add('hide');
             }, duration);
         }
-
     </script>
 </body>
 </html>
