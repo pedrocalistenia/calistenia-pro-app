@@ -26,7 +26,7 @@
         }
 
         /* --- ESTILOS DAS TELAS PARA ANIMAÇÃO --- */
-        #loginScreen, #homeScreen, #workoutListScreen, #workoutExecutionScreen, #summaryScreen {
+        #loginScreen, #homeScreen, #workoutListScreen, #workoutPreviewScreen, #workoutExecutionScreen, #summaryScreen {
             width: 100%;
         }
 
@@ -537,6 +537,15 @@
             </div>
         </div>
 
+        <div id="workoutPreviewScreen" class="p-6 hidden">
+            <button onclick="showScreen(Screens.WORKOUT_LIST);" class="nav-button mb-6 action-button button-3d">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
+                Voltar
+            </button>
+            <div id="previewContent" class="space-y-4"></div>
+            <button id="startWorkoutBtn" class="w-full mt-6 font-semibold py-3 px-6 rounded-lg action-button button-3d text-base" style="background-color: #1A5D1A; color: #FFFFFF; border-color: #113C11; --shadow-color-dark: #113C11;">Iniciar Treino</button>
+        </div>
+
         <div id="workoutExecutionScreen" class="p-6 hidden">
              <button onclick="confirmExitWorkout()" class="nav-button mb-4 action-button button-3d">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" /></svg>
@@ -611,6 +620,7 @@
 
         const Screens = {
             LOGIN: 'loginScreen', HOME: 'homeScreen', WORKOUT_LIST: 'workoutListScreen',
+            WORKOUT_PREVIEW: 'workoutPreviewScreen', // Nova tela de prévia
             WORKOUT_EXECUTION: 'workoutExecutionScreen', SUMMARY: 'summaryScreen'
         };
         const ALL_SCREENS = Object.values(Screens);
@@ -638,9 +648,9 @@
             pseInputElement = document.getElementById('pseInput'); 
             downloadPdfBtnElement = document.getElementById('downloadPdfBtn');
             concludeAndGoHomeBtnElement = document.getElementById('concludeAndGoHomeBtn');
-
-            if (downloadPdfBtnElement) downloadPdfBtnElement.addEventListener('click', downloadSummaryAsPDF);
-            if (concludeAndGoHomeBtnElement) concludeAndGoHomeBtnElement.addEventListener('click', concludeWorkoutAndGoHome);
+            
+            const startWorkoutBtn = document.getElementById('startWorkoutBtn');
+            if(startWorkoutBtn) startWorkoutBtn.addEventListener('click', startWorkout);
             
             currentScreen = Screens.LOGIN; 
             showScreen(Screens.LOGIN); 
@@ -688,7 +698,7 @@
                 else if (selectedLevel === 'iniciante') displayLevelName = 'Iniciante';
                 else if (selectedLevel) displayLevelName = selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1);
                 else displayLevelName = ''; 
-                if (screenId === Screens.WORKOUT_EXECUTION || screenId === Screens.SUMMARY) {
+                if (screenId === Screens.WORKOUT_EXECUTION || screenId === Screens.SUMMARY || screenId === Screens.WORKOUT_PREVIEW) {
                     if (selectedWorkoutName && selectedLevel) { headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">${selectedWorkoutName} <span class="text-lg font-normal">(${displayLevelName})</span></span>`; } 
                     else if (selectedWorkoutName) { headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">${selectedWorkoutName}</span>`; }
                 } else if (screenId === Screens.WORKOUT_LIST && selectedLevel) { headerTitleText = `<span style="font-family: 'Inter', sans-serif; color: #cbd5e0; font-weight: 600; text-transform: none;">Nível ${displayLevelName}</span>`; }
@@ -709,7 +719,7 @@
         }
 
         function getCurrentPassword() {
-            return "junho"; 
+            return "FORCA24"; 
         }
 
         function loginUser() {
@@ -771,11 +781,11 @@
 
         async function loadWorkout(workoutName) {
             console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel}`); selectedWorkoutName = workoutName;
-            workoutStartTime = Date.now(); workoutPSE = null; if(document.getElementById('pseInput')) document.getElementById('pseInput').value = '';
+            
             const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec";
             if (SCRIPT_URL === "COLOQUE_O_ID_DA_SUA_PLANILHA_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
                 showToast("Erro: URL do Script inválida ou não configurada.", 5000); console.error("URL do Script inválida ou não configurada:", SCRIPT_URL);
-                workoutStartTime = null; selectedWorkoutName = ''; return;
+                return;
             }
             const url = `${SCRIPT_URL}?level=${encodeURIComponent(selectedLevel)}&workout=${encodeURIComponent(workoutName)}`;
             showLoadingIndicator();
@@ -794,13 +804,12 @@
                 processWorkoutData(rawWorkoutData);
                 hideLoadingIndicator();
                 if (workoutFlow.length > 0) {
-                    currentStepIndex = 0; currentSeriesNumber = 1; 
-                    displayCurrentStep(); 
-                    showScreen(Screens.WORKOUT_EXECUTION);
-                } else { showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}).`); workoutStartTime = null; selectedWorkoutName = ''; }
+                    renderWorkoutPreview();
+                    showScreen(Screens.WORKOUT_PREVIEW);
+                } else { showToast(`Nenhum exercício encontrado para ${workoutName} (${selectedLevel}).`); }
             } catch (error) {
                 hideLoadingIndicator(); console.error("Erro ao carregar treino:", error);
-                showToast(`Erro ao carregar treino: ${error.message}`, 5000); workoutStartTime = null; selectedWorkoutName = ''; 
+                showToast(`Erro ao carregar treino: ${error.message}`, 5000);
             }
         }
         
@@ -831,6 +840,39 @@
                 workoutFlow.push(group);
             });
         }
+        
+        function renderWorkoutPreview() {
+            const previewContent = document.getElementById('previewContent');
+            previewContent.innerHTML = `<h3 class="text-2xl font-bold mb-4 text-center text-gray-100">Prévia do Treino</h3>`;
+            
+            workoutFlow.forEach(step => {
+                if (Array.isArray(step)) { // É um superset
+                    const isWarmup = step[0]?.supersetId === '0';
+                    const title = isWarmup ? "Aquecimento" : "Superset";
+                    let supersetHtml = `<div class="p-3 bg-gray-800 rounded-lg mb-3">
+                                            <p class="font-bold text-lg text-sky-400">${title}</p>
+                                            <ul class="list-disc list-inside ml-4 mt-1 text-gray-300">`;
+                    step.forEach(ex => {
+                        supersetHtml += `<li>${ex.seriesTargetCount}x ${ex.exerciseName} (${ex.repsTargetString})</li>`;
+                    });
+                    supersetHtml += `</ul></div>`;
+                    previewContent.innerHTML += supersetHtml;
+                } else { // Exercício único
+                     previewContent.innerHTML += `<div class="p-3 bg-gray-800 rounded-lg mb-3">
+                                                    <p class="font-bold text-lg">${step.exerciseName}</p>
+                                                    <p class="text-gray-300 ml-4">${step.seriesTargetCount}x ${step.repsTargetString}</p>
+                                                </div>`;
+                }
+            });
+        }
+
+        function startWorkout() {
+            workoutStartTime = Date.now();
+            currentStepIndex = 0; 
+            currentSeriesNumber = 1; 
+            displayCurrentStep(); 
+            showScreen(Screens.WORKOUT_EXECUTION);
+        }
 
         function showLoadingIndicator() { if(loadingOverlayElement) loadingOverlayElement.classList.remove('force-hidden'); }
         function hideLoadingIndicator() { if(loadingOverlayElement) loadingOverlayElement.classList.add('force-hidden'); }
@@ -849,7 +891,7 @@
         function renderSuperset(supersetGroup) {
             const isWarmup = supersetGroup[0]?.supersetId === '0';
             const title = isWarmup ? "AQUECIMENTO" : "SUPERSET";
-            const mainButtonText = isWarmup ? "Aquecimento Concluído" : "Descansar";
+            const mainButtonText = isWarmup ? "Aquecimento concluído" : "Descansar";
             
             let html = `<div class="text-center">
                             <h3 class="text-2xl font-bold text-gray-100 uppercase" style="font-family: 'Archivo Black', sans-serif; line-height: 1;">${title}</h3>
@@ -1325,7 +1367,7 @@
             if (filteredData.length === 0) {
                  summaryContentElement.innerHTML += `<p class="text-gray-400">Nenhum exercício foi registrado neste treino.</p>`;
             }
-            filteredData.forEach((exPerf) => {
+            filteredData.forEach((exPerf, exercisePerfIndex) => {
                 const exerciseDiv = document.createElement('div');
                 exerciseDiv.className = 'mb-3 p-3 bg-gray-800 rounded-md shadow-sm';
                 const repsTargetDisplay = `(Alvo: ${exPerf.repsTargetString})`;
