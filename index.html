@@ -722,7 +722,7 @@
         }
 
         function getCurrentPassword() {
-            return "FORCA24"; 
+            return "junho"; 
         }
 
         function loginUser() {
@@ -747,70 +747,45 @@
         }
 
         function selectLevel(level) {
-            console.log(`Buscando treinos para o nível: ${level}`);
-            selectedLevel = level;
-        
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_Hd7QqEfOO9_2k4abL-tyCiyQZzwVxEN63kluZkjNilgfsnhc6_HI-rjtNxdpcFYvFw/exec";
-            const url = `${SCRIPT_URL}?action=getWorkouts&level=${encodeURIComponent(level)}`;
-        
-            showLoadingIndicator();
-        
-            fetch(url, {
-                method: 'GET',
-                mode: 'cors',
-                redirect: 'follow'
-            })
-            .then(response => {
-                if (!response.ok) { throw new Error(`Erro de rede: ${response.statusText}. Verifique as permissões do script.`); }
-                return response.json();
-            })
-            .then(data => {
-                if (data.error) {
-                    throw new Error(data.error);
-                }
-                displayWorkoutButtons(data);
-            })
-            .catch(error => {
-                hideLoadingIndicator();
-                console.error("Erro ao buscar lista de treinos:", error);
-                showToast(error.message, 5000);
-                workoutButtonsContainerElement.innerHTML = `<p class="text-center text-gray-400">Não foi possível carregar os treinos. Verifique a conexão e as permissões do script.</p>`;
-                showScreen(Screens.WORKOUT_LIST);
-            });
-        }
-
-        function displayWorkoutButtons(workouts) {
-             if (!Array.isArray(workouts) || workouts.length === 0) {
-                showToast(`Nenhum treino encontrado para o nível ${selectedLevel}.`);
-                workoutButtonsContainerElement.innerHTML = `<p class="text-center text-gray-400">Nenhum treino cadastrado para este nível.</p>`;
-                hideLoadingIndicator();
-                showScreen(Screens.WORKOUT_LIST);
-                return;
-            }
-
-            if (!workoutButtonsContainerElement) {
-                console.error("Elemento workoutButtonsContainer não encontrado.");
-                hideLoadingIndicator();
-                return;
-            }
+            console.log(`Nível selecionado: ${level}`); selectedLevel = level;
+            if (!workoutButtonsContainerElement) { console.error("Elemento workoutButtonsContainer não encontrado."); return; }
             workoutButtonsContainerElement.innerHTML = ''; 
-
-            workouts.forEach(workoutName => {
+            const availableWorkouts = ['Treino A', 'Treino B', 'Treino C', 'Treino D', 'Treino E'];
+            availableWorkouts.forEach(workoutName => {
                 const button = document.createElement('button');
                 button.className = 'w-full font-semibold py-3 px-4 rounded-lg action-button button-3d'; 
-                button.textContent = workoutName;
-                button.addEventListener('click', () => loadWorkout(workoutName));
+                button.textContent = workoutName; button.addEventListener('click', () => loadWorkout(workoutName));
                 workoutButtonsContainerElement.appendChild(button);
             });
-            
-            hideLoadingIndicator();
             showScreen(Screens.WORKOUT_LIST); 
         }
-        
+
+        function confirmExitWorkout() {
+            const hasStartedWorkout = performanceData.some(ex => ex.seriesDone.length > 0);
+            if (hasStartedWorkout && currentScreen === Screens.WORKOUT_EXECUTION) {
+                showToast("Progresso do treino será perdido ao voltar.", 3000);
+                goBackToWorkoutListScreenClean();
+            } else { 
+                goBackToWorkoutListScreenClean();
+            }
+        }
+
+        function goBackToWorkoutListScreenClean() {
+            clearRestTimer(); 
+            workoutFlow = []; 
+            currentStepIndex = 0; 
+            currentSeriesNumber = 1; 
+            performanceData = [];
+            workoutStartTime = null; 
+            workoutPSE = null; 
+            if(document.getElementById('pseInput')) document.getElementById('pseInput').value = '';
+            showScreen(Screens.WORKOUT_LIST);
+        }
+
         async function loadWorkout(workoutName) {
             console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel}`); selectedWorkoutName = workoutName;
             
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec";
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjrr8YUrSFCbsuFzsE0jKJb9Kk-_PO_2ZPM_J043Qb-Ui3sIclqi-TjoHO8r2e6ophCw/exec";
             if (SCRIPT_URL === "COLOQUE_O_ID_DA_SUA_PLANILHA_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
                 showToast("Erro: URL do Script inválida ou não configurada.", 5000); console.error("URL do Script inválida ou não configurada:", SCRIPT_URL);
                 return;
@@ -922,7 +897,7 @@
             const mainButtonText = isWarmup ? "Aquecimento Concluído" : "Descansar";
             
             let html = `<div class="text-center">
-                            <h3 class="series-display-text text-2xl uppercase">${title}</h3>
+                            <h3 class="text-2xl font-bold text-gray-100 uppercase" style="font-family: 'Archivo Black', sans-serif; line-height: 1;">${title}</h3>
                             <p class="series-display-text text-2xl mb-4">SÉRIE ${currentSeriesNumber}</p>
                         </div>
                         <div id="supersetExercisesContainer" class="space-y-8">`;
@@ -1342,7 +1317,7 @@
 
 
         async function saveProgressToSheet(progressDataArray) {
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwwkxK_TGT2u5ngiSxcKTIFJJFePZZMX90QE05DBoNQv1l8Ak_LcO1A9xddsvusl1r63Q/exec"; 
+            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwNoVWfvR6iKcZ3iBIrPwOPH6ig9pF5uOitMceply-9EmLsI4nyfMYoMCBVVauARf1ukw/exec"; 
             if (SCRIPT_URL === "COLOQUE_O_ID_DA_SUA_PLANILHA_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
                 console.error("URL do Script inválida ou não configurada para salvar."); return false;
             }
