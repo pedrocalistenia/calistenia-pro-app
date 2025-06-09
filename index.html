@@ -518,7 +518,7 @@
                     </button>
                     <button id="level-intermediario" onclick="selectLevel('intermediario')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
                         Intermediário
-                        <span class="block text-sm font-normal opacity-80">(3 pull ups e 3 dips)</span>
+                        <span class="block text-sm font-normal opacity-80">(1+ pull ups e 1+ dips)</span>
                     </button>
                     <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full font-semibold py-4 px-6 rounded-lg action-button button-3d">
                         Avançado
@@ -648,6 +648,9 @@
             pseInputElement = document.getElementById('pseInput'); 
             downloadPdfBtnElement = document.getElementById('downloadPdfBtn');
             concludeAndGoHomeBtnElement = document.getElementById('concludeAndGoHomeBtn');
+
+            if (downloadPdfBtnElement) downloadPdfBtnElement.addEventListener('click', downloadSummaryAsPDF);
+            if (concludeAndGoHomeBtnElement) concludeAndGoHomeBtnElement.addEventListener('click', concludeWorkoutAndGoHome);
             
             const startWorkoutBtn = document.getElementById('startWorkoutBtn');
             if(startWorkoutBtn) startWorkoutBtn.addEventListener('click', startWorkout);
@@ -719,7 +722,7 @@
         }
 
         function getCurrentPassword() {
-            return "junho"; 
+            return "FORCA24"; 
         }
 
         function loginUser() {
@@ -891,7 +894,7 @@
         function renderSuperset(supersetGroup) {
             const isWarmup = supersetGroup[0]?.supersetId === '0';
             const title = isWarmup ? "AQUECIMENTO" : "SUPERSET";
-            const mainButtonText = isWarmup ? "Aquecimento concluído" : "Descansar";
+            const mainButtonText = isWarmup ? "Aquecimento Concluído" : "Descansar";
             
             let html = `<div class="text-center">
                             <h3 class="text-2xl font-bold text-gray-100 uppercase" style="font-family: 'Archivo Black', sans-serif; line-height: 1;">${title}</h3>
@@ -928,7 +931,7 @@
             }
             html += `<div id="exerciseActionButtons" class="mt-4 text-center">
                         <button id="completeSeriesBtn" onclick="completeStep()" class="w-full max-w-xs mx-auto font-semibold py-3 px-4 rounded-lg action-button button-3d text-base">${mainButtonText}</button>
-                        <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button button-3d text-base mt-2">Pular passo atual</button>
+                        <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button button-3d text-base mt-2">Pular Passo Atual</button>
                     </div>`;
             exerciseContainerElement.innerHTML = html;
         }
@@ -1063,8 +1066,6 @@
         }
 
         function skipStep() {
-            // Removido o confirm()
-            
             const currentStep = workoutFlow[currentStepIndex];
             const observationText = "Exercício pulado";
             
@@ -1089,6 +1090,7 @@
                 currentStepIndex++;
                 currentSeriesNumber = 1;
                 displayCurrentStep();
+                window.scrollTo(0, 0); 
             }
         }
         
