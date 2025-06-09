@@ -785,7 +785,7 @@
         async function loadWorkout(workoutName) {
             console.log(`Carregando treino: ${workoutName} para nível ${selectedLevel}`); selectedWorkoutName = workoutName;
             
-            const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyjrr8YUrSFCbsuFzsE0jKJb9Kk-_PO_2ZPM_J043Qb-Ui3sIclqi-TjoHO8r2e6ophCw/exec";
+            const SCRIPT_URL = "https://script.google.com/macros/library/d/16fUhHtIheGkZ-15YnrE28iswfQTmH5W7gDNPTRVkZuNZhzH49MaBSkYD/11";
             if (SCRIPT_URL === "COLOQUE_O_ID_DA_SUA_PLANILHA_AQUI" || !SCRIPT_URL.startsWith("https://script.google.com/")) {
                 showToast("Erro: URL do Script inválida ou não configurada.", 5000); console.error("URL do Script inválida ou não configurada:", SCRIPT_URL);
                 return;
