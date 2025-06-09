@@ -901,6 +901,24 @@
             displayCurrentStep(); 
             showScreen(Screens.WORKOUT_EXECUTION);
         }
+function confirmExitWorkout() {
+            // Exibe uma caixa de diálogo para confirmar a ação do usuário.
+            // A mensagem avisa que o progresso não salvo será perdido.
+            const userConfirmed = confirm("Você tem certeza que deseja sair? Todo o progresso deste treino será perdido.");
+
+            // Verifica se o usuário clicou em "OK" (confirmou a saída).
+            if (userConfirmed) {
+                // Se o usuário confirmou, exibe uma notificação.
+                showToast("Treino cancelado.");
+
+                // Redireciona o usuário de volta para a tela com a lista de treinos.
+                showScreen(Screens.WORKOUT_LIST); 
+                
+                // Reinicia o estado do aplicativo relacionado ao treino (sem deslogar o usuário).
+                resetAppState(false); 
+            }
+            // Se o usuário clicar em "Cancelar", a função não faz nada e ele permanece na tela atual.
+        }
 
         function showLoadingIndicator() { if(loadingOverlayElement) loadingOverlayElement.classList.remove('force-hidden'); }
         function hideLoadingIndicator() { if(loadingOverlayElement) loadingOverlayElement.classList.add('force-hidden'); }
