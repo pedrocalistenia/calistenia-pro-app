@@ -1019,6 +1019,7 @@
                 const isOriginalActive = exercise.currentVariation === 'original';
                 const isEasyActive = exercise.currentVariation === 'easy';
                 const isHardActive = exercise.currentVariation === 'hard';
+                const anyAlternativeAvailable = easierAvailable || harderAvailable;
 
                 html += `
                     <div class="superset-exercise-block">
@@ -1036,6 +1037,7 @@
                              <label class="block text-sm font-medium text-gray-400 mb-1 text-center">Sua performance (reps/tempo):</label>
                             <input type="text" class="w-full p-2.5 border border-gray-600 rounded-lg shadow-sm bg-gray-700 text-gray-100 placeholder-gray-500 text-center superset-reps-input" placeholder="Ex: 10 ou 30s (Opcional)" data-exercise-id="${exercise.exerciseId}">
                         </div>
+                        ${anyAlternativeAvailable ? `
                         <div class="flex justify-center w-full max-w-sm mx-auto space-x-2 mt-3">
                             <div class="flex-1">
                                 <button ${!easierAvailable ? 'style="visibility: hidden;"' : ''} ${isEasyActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'easy')" class="w-full font-semibold button-3d alternative-button alternative-button-easy ${isEasyActive ? 'alternative-button-active' : ''}">
@@ -1043,7 +1045,7 @@
                                 </button>
                             </div>
                              <div class="flex-1">
-                                <button ${isOriginalActive ? 'style="visibility: hidden;"' : ''} onclick="swapExercise('${exercise.exerciseId}', 'original')" class="w-full font-semibold button-3d alternative-button alternative-button-original ${isOriginalActive ? 'alternative-button-active' : ''}">
+                                <button ${isOriginalActive ? 'style="visibility: hidden;"' : ''} onclick="swapExercise('${exercise.exerciseId}', 'original')" class="w-full font-semibold button-3d alternative-button alternative-button-original">
                                     Original
                                 </button>
                             </div>
@@ -1053,6 +1055,7 @@
                                 </button>
                             </div>
                          </div>
+                        ` : ''}
                         ` : ''}
                     </div>
                     ${index < supersetGroup.length - 1 ? '<hr class="border-gray-700 my-6">' : ''}
@@ -1078,7 +1081,8 @@
             const isOriginalActive = exercise.currentVariation === 'original';
             const isEasyActive = exercise.currentVariation === 'easy';
             const isHardActive = exercise.currentVariation === 'hard';
-            
+            const anyAlternativeAvailable = easierAvailable || harderAvailable;
+
              let html = `<div class="text-center">
                             <h3 class="series-display-text text-2xl uppercase">${exercise.exerciseName}</h3>
                             <p class="series-display-text text-2xl mb-4">SÉRIE ${currentSeriesNumber}</p>
@@ -1103,6 +1107,7 @@
                          <div id="exerciseActionButtons" class="mt-4 text-center">
                              <button id="completeSeriesBtn" onclick="completeStep()" class="w-full max-w-xs mx-auto font-semibold py-3 px-4 rounded-lg action-button button-3d text-base">Concluir Série</button>
                              
+                            ${anyAlternativeAvailable ? `
                             <div class="flex justify-center w-full max-w-sm mx-auto space-x-2 mt-3">
                                 <div class="flex-1">
                                     <button ${!easierAvailable ? 'style="visibility: hidden;"' : ''} ${isEasyActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'easy')" class="w-full font-semibold button-3d alternative-button alternative-button-easy ${isEasyActive ? 'alternative-button-active' : ''}">
@@ -1120,6 +1125,7 @@
                                     </button>
                                 </div>
                             </div>
+                            ` : ''}
 
                              <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button button-3d text-base mt-3">Pular Exercício Atual</button>
                          </div>`;
@@ -1761,4 +1767,4 @@
         }
     </script>
 </body>
-</html>
+</ht
