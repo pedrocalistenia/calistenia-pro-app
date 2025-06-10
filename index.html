@@ -239,6 +239,47 @@
         #concludeAndGoHomeBtn { background-color: #b45309; border-color: #d97706; color: white; }
         #concludeAndGoHomeBtn:hover { background-color: #92400e; }
 
+        /* --- BOTÕES DE ALTERNATIVA --- */
+        .alternative-button {
+            font-size: 0.8rem;
+            padding: 0.5rem;
+            transition: all 0.15s ease-out;
+            border: 1px solid;
+            border-radius: 0.375rem; /* rounded-md */
+        }
+        .alternative-button:disabled:not(.alternative-button-active) {
+            background-color: #4B5563;
+            color: #9CA3AF;
+            cursor: not-allowed;
+            opacity: 0.6;
+            box-shadow: none;
+            transform: none;
+        }
+        .alternative-button-active {
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5) !important;
+            transform: translateY(1px) scale(0.98) !important;
+            filter: brightness(0.9);
+            cursor: default;
+        }
+        .alternative-button-easy {
+            background-color: #1D4ED8; color: white; border-color: #1E40AF;
+        }
+        .alternative-button-easy:hover:not(:disabled) { background-color: #1E40AF; }
+        .alternative-button-easy:active:not(:disabled), .alternative-button-easy.button-active { background-color: #1E3A8A; }
+
+        .alternative-button-original {
+            background-color: #6B7280; color: white; border-color: #4B5563;
+        }
+        .alternative-button-original:hover:not(:disabled) { background-color: #4B5563; }
+        .alternative-button-original:active:not(:disabled), .alternative-button-original.button-active { background-color: #374151; }
+
+        .alternative-button-hard {
+            background-color: #9333EA; color: white; border-color: #7E22CE;
+        }
+        .alternative-button-hard:hover:not(:disabled) { background-color: #7E22CE; }
+        .alternative-button-hard:active:not(:disabled), .alternative-button-hard.button-active { background-color: #6B21A8; }
+
+
         /* --- EXERCISE SCREEN --- */
         .exercise-card {
             background-color: rgba(26, 26, 26, 0.5);
@@ -831,6 +872,44 @@
                 renderSingleExercise(currentStep);
             }
         }
+        
+        function swapExercise(exerciseIdToSwap, targetType) {
+            let exerciseToModify;
+            const currentStep = workoutFlow[currentStepIndex];
+            if (Array.isArray(currentStep)) {
+                exerciseToModify = currentStep.find(ex => ex.exerciseId === exerciseIdToSwap);
+            } else {
+                if (currentStep.exerciseId === exerciseIdToSwap) {
+                    exerciseToModify = currentStep;
+                }
+            }
+
+            if (!exerciseToModify) { return; }
+
+            const currentVariation = exerciseToModify.currentVariation;
+            if (targetType === currentVariation) { return; }
+            
+            let newName, newUrl;
+            if (targetType === 'original') {
+                newName = exerciseToModify.initialName; newUrl = exerciseToModify.initialUrl;
+            } else if (targetType === 'easy') {
+                newName = exerciseToModify.altEasyName; newUrl = exerciseToModify.altEasyUrl;
+            } else if (targetType === 'hard') {
+                newName = exerciseToModify.altHardName; newUrl = exerciseToModify.altHardUrl;
+            }
+
+            if (!newName || !newUrl) {
+                showToast("Alternativa não disponível.", 2000);
+                return;
+            }
+
+            exerciseToModify.exerciseName = newName;
+            exerciseToModify.embedUrl = newUrl;
+            exerciseToModify.currentVariation = targetType;
+            exerciseToModify.seriesDone = []; 
+            showToast(`Trocado por: ${newName}`);
+            displayCurrentStep(); 
+        }
 
         function renderSuperset(supersetGroup) {
             const isWarmup = supersetGroup[0]?.supersetId === '0';
@@ -843,6 +922,13 @@
                         </div>
                         <div id="supersetExercisesContainer" class="space-y-8">`;
             supersetGroup.forEach((exercise, index) => {
+                const easierAvailable = exercise.altEasyName && exercise.altEasyUrl;
+                const harderAvailable = exercise.altHardName && exercise.altHardUrl;
+                const isOriginalActive = exercise.currentVariation === 'original';
+                const isEasyActive = exercise.currentVariation === 'easy';
+                const isHardActive = exercise.currentVariation === 'hard';
+                const anyAlternativeAvailable = easierAvailable || harderAvailable;
+
                 html += `
                     <div class="superset-exercise-block">
                         <p class="font-semibold text-xl text-white mb-2 text-center">${exercise.exerciseName}</p>
@@ -859,6 +945,25 @@
                              <label class="block text-sm font-medium text-gray-400 mb-1 text-center">Sua performance:</label>
                             <input type="text" class="w-full p-2.5 rounded-lg shadow-sm text-center superset-reps-input" placeholder="Reps / Tempo" data-exercise-id="${exercise.exerciseId}">
                         </div>
+                        ${anyAlternativeAvailable ? `
+                        <div class="flex justify-center w-full max-w-sm mx-auto space-x-2 mt-3">
+                            <div class="flex-1">
+                                <button ${!easierAvailable ? 'style="visibility: hidden;"' : ''} ${isEasyActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'easy')" class="w-full font-semibold alternative-button alternative-button-easy ${isEasyActive ? 'alternative-button-active' : ''} action-button">
+                                    + Fácil
+                                </button>
+                            </div>
+                            <div class="flex-1">
+                                <button ${isOriginalActive ? 'style="visibility: hidden;"' : ''} onclick="swapExercise('${exercise.exerciseId}', 'original')" class="w-full font-semibold alternative-button alternative-button-original action-button">
+                                    Original
+                                </button>
+                            </div>
+                            <div class="flex-1">
+                                <button ${!harderAvailable ? 'style="visibility: hidden;"' : ''} ${isHardActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'hard')" class="w-full font-semibold alternative-button alternative-button-hard ${isHardActive ? 'alternative-button-active' : ''} action-button">
+                                    + Difícil
+                                </button>
+                            </div>
+                        </div>
+                        ` : ''}
                         ` : ''}
                     </div>
                     ${index < supersetGroup.length - 1 ? '<hr class="border-gray-700 my-6">' : ''}
@@ -879,6 +984,13 @@
         }
 
         function renderSingleExercise(exercise) {
+            const easierAvailable = exercise.altEasyName && exercise.altEasyUrl;
+            const harderAvailable = exercise.altHardName && exercise.altHardUrl;
+            const isOriginalActive = exercise.currentVariation === 'original';
+            const isEasyActive = exercise.currentVariation === 'easy';
+            const isHardActive = exercise.currentVariation === 'hard';
+            const anyAlternativeAvailable = easierAvailable || harderAvailable;
+
             let html = `<div class="text-center">
                             <h3 class="font-bold text-2xl uppercase text-silver">${exercise.exerciseName}</h3>
                             <p class="font-bold text-2xl text-silver-dark mb-4">SÉRIE ${currentSeriesNumber}</p>
@@ -900,6 +1012,25 @@
                               <label for="observationInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Observações (Opcional):</label>
                               <textarea id="observationInput" class="w-full p-2.5 rounded-lg" rows="2"></textarea>
                          </div>
+                         ${anyAlternativeAvailable ? `
+                        <div class="flex justify-center w-full max-w-sm mx-auto space-x-2 mt-4">
+                            <div class="flex-1">
+                                <button ${!easierAvailable ? 'style="visibility: hidden;"' : ''} ${isEasyActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'easy')" class="w-full font-semibold alternative-button alternative-button-easy ${isEasyActive ? 'alternative-button-active' : ''} action-button">
+                                    + Fácil
+                                </button>
+                            </div>
+                            <div class="flex-1">
+                                <button ${isOriginalActive ? 'style="visibility: hidden;"' : ''} onclick="swapExercise('${exercise.exerciseId}', 'original')" class="w-full font-semibold alternative-button alternative-button-original action-button">
+                                    Original
+                                </button>
+                            </div>
+                            <div class="flex-1">
+                                <button ${!harderAvailable ? 'style="visibility: hidden;"' : ''} ${isHardActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'hard')" class="w-full font-semibold alternative-button alternative-button-hard ${isHardActive ? 'alternative-button-active' : ''} action-button">
+                                    + Difícil
+                                </button>
+                            </div>
+                        </div>
+                        ` : ''}
                          <div id="exerciseActionButtons" class="mt-4 text-center space-y-3">
                               <button id="completeSeriesBtn" onclick="completeStep()" class="w-full max-w-xs mx-auto py-3 px-4 rounded-lg action-button text-base">Concluir Série</button>
                              <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button text-base">Pular Exercício</button>
