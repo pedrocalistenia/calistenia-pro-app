@@ -21,10 +21,10 @@
 
         @keyframes pulse {
             0%, 100% {
-                text-shadow: 0 0 5px var(--color-silver), 0 0 12px var(--color-silver-dark);
+                text-shadow: 0 0 6px rgba(255,255,255,0.9), 0 0 12px rgba(255,255,255,0.7), 0 0 20px rgba(192, 192, 192, 0.5);
             }
             50% {
-                text-shadow: 0 0 8px var(--color-silver), 0 0 18px var(--color-silver-dark);
+                text-shadow: 0 0 10px rgba(255,255,255,1), 0 0 20px rgba(255,255,255,0.8), 0 0 35px rgba(192, 192, 192, 0.6);
             }
         }
         
@@ -35,19 +35,20 @@
 
         @keyframes moveGrid {
             from { background-position: 0 0; }
-            to { background-position: -50rem -50rem; }
+            /* Movimento para esquerda (50rem) e para cima (-13.4rem), simulando um ângulo de 15 graus */
+            to { background-position: 50rem -13.4rem; } 
         }
 
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--color-black);
             color: var(--color-light-gray);
-            /* Fundo com grade cyberpunk animada e mais visível */
-            background-image: 
-                linear-gradient(rgba(192, 192, 192, 0.08) 1px, transparent 1px), 
-                linear-gradient(to right, rgba(192, 192, 192, 0.08) 1px, transparent 1px);
+            /* Fundo com grade cyberpunk reta */
+            background-image:
+                linear-gradient(rgba(192, 192, 192, 0.18) 1px, transparent 1px),
+                linear-gradient(to right, rgba(192, 192, 192, 0.18) 1px, transparent 1px);
             background-size: 2.5rem 2.5rem;
-            animation: moveGrid 200s linear infinite;
+            animation: moveGrid 40s linear infinite;
             position: relative;
             overflow-x: hidden;
             overscroll-behavior-y: contain;
@@ -119,8 +120,8 @@
         }
         
         .pro-text-header {
-            color: var(--color-silver);
-            animation: pulse 3s infinite ease-in-out;
+            color: #FFF; /* Cor branca para o PRO */
+            animation: pulse 2s infinite ease-in-out;
         }
         .app-header .subtitle {
             font-family: 'Inter', sans-serif;
@@ -378,7 +379,7 @@
         <div id="loginScreen" class="flex flex-col hidden">
             <header class="app-header">
                 <h1>Calistenia <span class="pro-text-header">Pro</span>
-                   <span class="subtitle">por Pedro Dias</span>
+                    <span class="subtitle">por Pedro Dias</span>
                 </h1>
             </header>
             <main class="p-8 pb-10">
@@ -407,6 +408,9 @@
             <div class="p-6">
                 <h2 class="text-2xl font-bold text-gray-300 my-6">Escolha seu nível</h2>
                 <div class="space-y-4">
+                    <button id="level-Adaptação" onclick="selectLevel('Adaptação')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
+                        Adaptação <span class="block text-sm font-normal opacity-80">(Saia do sedentarismo)</span>
+                    </button>
                     <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
                         Iniciante <span class="block text-sm font-normal opacity-80">(0 pull ups e 0 push ups)</span>
                     </button>
@@ -415,6 +419,9 @@
                     </button>
                     <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
                         Avançado <span class="block text-sm font-normal opacity-80">(10+ barras e 15+ dips)</span>
+                    </button>
+                    <button id="level-Sem equipamentos" onclick="selectLevel('Sem equipamentos')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
+                        Sem equipamentos <span class="block text-sm font-normal opacity-80">(Treino em casa)</span>
                     </button>
                 </div>
             </div>
@@ -785,7 +792,7 @@
         function processWorkoutData(rawWorkoutData) {
             performanceData = rawWorkoutData.map(ex => ({
                 exerciseId: ex.exercise_id || `exid_${Math.random().toString(36).substr(2, 9)}`, 
-                seriesTargetCount: parseInt(ex.series) || 0,       
+                seriesTargetCount: parseInt(ex.series) || 0,        
                 repsTargetString: String(ex.reps || "N/A"), 
                 restTimeString: String(ex.rest || "60"), 
                 supersetId: ex.superset_id !== undefined ? String(ex.superset_id) : null, 
@@ -835,8 +842,8 @@
                     const isWarmup = step[0]?.supersetId === '0';
                     const title = isWarmup ? "Aquecimento" : "Superset";
                     let supersetHtml = `<div class="p-3 bg-dark-gray rounded-lg mb-3">
-                                            <p class="font-bold text-lg text-silver">${title}</p>
-                                            <ul class="list-disc list-inside ml-4 mt-1 text-gray-300">`;
+                                                <p class="font-bold text-lg text-silver">${title}</p>
+                                                <ul class="list-disc list-inside ml-4 mt-1 text-gray-300">`;
                     step.forEach(ex => {
                         supersetHtml += `<li>${ex.seriesTargetCount}x ${ex.exerciseName} (${ex.repsTargetString})</li>`;
                     });
@@ -974,12 +981,12 @@
                  html += ` <div id="observationInputArea" class="px-2 mt-6">
                              <label for="observationInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Observações Gerais (Opcional):</label>
                              <textarea id="observationInput" class="w-full p-2.5 rounded-lg" rows="2" placeholder="Ex: Cansaço, boa forma..."></textarea>
-                         </div>`;
+                           </div>`;
             }
             html += `<div id="exerciseActionButtons" class="mt-4 text-center space-y-3">
-                        <button id="completeSeriesBtn" onclick="completeStep()" class="w-full max-w-xs mx-auto py-3 px-4 rounded-lg action-button text-base">${mainButtonText}</button>
-                        <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button text-base">Pular Passo</button>
-                     </div>`;
+                         <button id="completeSeriesBtn" onclick="completeStep()" class="w-full max-w-xs mx-auto py-3 px-4 rounded-lg action-button text-base">${mainButtonText}</button>
+                         <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button text-base">Pular Passo</button>
+                       </div>`;
             exerciseContainerElement.innerHTML = html;
         }
 
@@ -1001,39 +1008,39 @@
                              </div>
                          </div>
                          <div class="text-center !my-2">
-                              <p class="text-base">Alvo: <strong>${exercise.repsTargetString}</strong></p>
+                               <p class="text-base">Alvo: <strong>${exercise.repsTargetString}</strong></p>
                          </div>
                          <p id="currentExerciseTotalReps" class="text-center text-gray-300 text-sm mt-1 mb-2 font-semibold"></p>
                          <div id="seriesInputArea" class="px-2">
-                              <label for="repsInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Sua performance:</label>
-                              <input type="text" id="repsInput" class="w-full p-2.5 rounded-lg text-center" placeholder="Reps / Tempo">
+                               <label for="repsInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Sua performance:</label>
+                               <input type="text" id="repsInput" class="w-full p-2.5 rounded-lg text-center" placeholder="Reps / Tempo">
                          </div>
                          <div id="observationInputArea" class="px-2 mt-3">
-                              <label for="observationInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Observações (Opcional):</label>
-                              <textarea id="observationInput" class="w-full p-2.5 rounded-lg" rows="2"></textarea>
+                               <label for="observationInput" class="block text-sm font-medium text-gray-300 mb-1 text-center">Observações (Opcional):</label>
+                               <textarea id="observationInput" class="w-full p-2.5 rounded-lg" rows="2"></textarea>
                          </div>
                          ${anyAlternativeAvailable ? `
-                        <div class="flex justify-center w-full max-w-sm mx-auto space-x-2 mt-4">
-                            <div class="flex-1">
-                                <button ${!easierAvailable ? 'style="visibility: hidden;"' : ''} ${isEasyActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'easy')" class="w-full font-semibold alternative-button alternative-button-easy ${isEasyActive ? 'alternative-button-active' : ''} action-button">
-                                    + Fácil
-                                </button>
-                            </div>
-                            <div class="flex-1">
-                                <button ${isOriginalActive ? 'style="visibility: hidden;"' : ''} onclick="swapExercise('${exercise.exerciseId}', 'original')" class="w-full font-semibold alternative-button alternative-button-original action-button">
-                                    Original
-                                </button>
-                            </div>
-                            <div class="flex-1">
-                                <button ${!harderAvailable ? 'style="visibility: hidden;"' : ''} ${isHardActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'hard')" class="w-full font-semibold alternative-button alternative-button-hard ${isHardActive ? 'alternative-button-active' : ''} action-button">
-                                    + Difícil
-                                </button>
-                            </div>
-                        </div>
-                        ` : ''}
+                         <div class="flex justify-center w-full max-w-sm mx-auto space-x-2 mt-4">
+                             <div class="flex-1">
+                                 <button ${!easierAvailable ? 'style="visibility: hidden;"' : ''} ${isEasyActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'easy')" class="w-full font-semibold alternative-button alternative-button-easy ${isEasyActive ? 'alternative-button-active' : ''} action-button">
+                                     + Fácil
+                                 </button>
+                             </div>
+                             <div class="flex-1">
+                                 <button ${isOriginalActive ? 'style="visibility: hidden;"' : ''} onclick="swapExercise('${exercise.exerciseId}', 'original')" class="w-full font-semibold alternative-button alternative-button-original action-button">
+                                     Original
+                                 </button>
+                             </div>
+                             <div class="flex-1">
+                                 <button ${!harderAvailable ? 'style="visibility: hidden;"' : ''} ${isHardActive ? 'disabled' : ''} onclick="swapExercise('${exercise.exerciseId}', 'hard')" class="w-full font-semibold alternative-button alternative-button-hard ${isHardActive ? 'alternative-button-active' : ''} action-button">
+                                     + Difícil
+                                 </button>
+                             </div>
+                         </div>
+                         ` : ''}
                          <div id="exerciseActionButtons" class="mt-4 text-center space-y-3">
-                              <button id="completeSeriesBtn" onclick="completeStep()" class="w-full max-w-xs mx-auto py-3 px-4 rounded-lg action-button text-base">Concluir Série</button>
-                             <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button text-base">Pular Exercício</button>
+                               <button id="completeSeriesBtn" onclick="completeStep()" class="w-full max-w-xs mx-auto py-3 px-4 rounded-lg action-button text-base">Concluir Série</button>
+                              <button id="skipExerciseBtn" onclick="skipStep()" class="w-full max-w-xs mx-auto skip-exercise-btn font-semibold py-2 px-4 rounded-lg action-button text-base">Pular Exercício</button>
                          </div>`;
             exerciseContainerElement.innerHTML = html;
             displayCurrentExerciseTotalReps();
@@ -1351,7 +1358,7 @@
                                  <p style="font-size: 14px; color: #555555; margin-bottom: 3px;"><strong>Aluno:</strong> ${currentUser.name || "Convidado"}</p>
                                  <p style="font-size: 14px; color: #555555; margin-bottom: 3px;"><strong>Treino:</strong> ${selectedWorkoutName || "N/A"} (${selectedLevel ? selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1) : 'N/A'})</p>
                                  <p style="font-size: 14px; color: #555555;"><strong>Data:</strong> ${new Date().toLocaleDateString('pt-BR')}</p>
-                             </div>`;
+                               </div>`;
             
             pdfHtml += `<hr style="border-top: 1px solid #ccc; margin: 15px 0;">`;
             pdfHtml += `<h2 style="font-size: 18px; color: #121212; margin-bottom: 10px; font-weight: bold;">Desempenho:</h2>`;
@@ -1388,10 +1395,10 @@
               const registeredExercisesCount = filteredDataForPdf.filter(ex => ex.seriesDone.length > 0).length;
 
             pdfHtml += `<div style="font-size: 14px; color: #555555; line-height: 1.6;">
-                              <p><strong>Tempo Total:</strong> ${durationFormatted}</p>
-                              <p><strong>Total de Reps:</strong> ${totalRepsOverall > 0 ? totalRepsOverall : "N/A"}</p>
-                              <p><strong>Exercícios Registrados:</strong> ${registeredExercisesCount}</p>
-                          </div>`;
+                                  <p><strong>Tempo Total:</strong> ${durationFormatted}</p>
+                                  <p><strong>Total de Reps:</strong> ${totalRepsOverall > 0 ? totalRepsOverall : "N/A"}</p>
+                                  <p><strong>Exercícios Registrados:</strong> ${registeredExercisesCount}</p>
+                              </div>`;
 
             const pseValueForPdf = document.getElementById('pseInput')?.value;
             if (pseValueForPdf && pseValueForPdf.trim() !== "") {
