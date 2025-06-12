@@ -6,9 +6,10 @@
     <title>Desafio Calistenia PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
-    <!-- Bibliotecas para Geração de PDF -->
+    <!-- Bibliotecas para Geração de PDF e Áudio -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
     <style>
         /* --- TEMA CYBERPUNK PRETO E PRATEADO --- */
         :root {
@@ -35,7 +36,6 @@
 
         @keyframes moveGrid {
             from { background-position: 0 0; }
-            /* Movimento para esquerda (50rem) e para cima (-13.4rem), simulando um ângulo de 15 graus */
             to { background-position: 50rem -13.4rem; } 
         }
 
@@ -43,7 +43,6 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--color-black);
             color: var(--color-light-gray);
-            /* Fundo com grade cyberpunk reta */
             background-image:
                 linear-gradient(rgba(192, 192, 192, 0.18) 1px, transparent 1px),
                 linear-gradient(to right, rgba(192, 192, 192, 0.18) 1px, transparent 1px);
@@ -120,7 +119,7 @@
         }
         
         .pro-text-header {
-            color: #FFF; /* Cor branca para o PRO */
+            color: #FFF;
             animation: pulse 2s infinite ease-in-out;
         }
         .app-header .subtitle {
@@ -246,7 +245,7 @@
             padding: 0.5rem;
             transition: all 0.15s ease-out;
             border: 1px solid;
-            border-radius: 0.375rem; /* rounded-md */
+            border-radius: 0.375rem;
         }
         .alternative-button:disabled:not(.alternative-button-active) {
             background-color: #4B5563;
@@ -262,21 +261,13 @@
             filter: brightness(0.9);
             cursor: default;
         }
-        .alternative-button-easy {
-            background-color: #1D4ED8; color: white; border-color: #1E40AF;
-        }
+        .alternative-button-easy { background-color: #1D4ED8; color: white; border-color: #1E40AF; }
         .alternative-button-easy:hover:not(:disabled) { background-color: #1E40AF; }
         .alternative-button-easy:active:not(:disabled), .alternative-button-easy.button-active { background-color: #1E3A8A; }
-
-        .alternative-button-original {
-            background-color: #6B7280; color: white; border-color: #4B5563;
-        }
+        .alternative-button-original { background-color: #6B7280; color: white; border-color: #4B5563; }
         .alternative-button-original:hover:not(:disabled) { background-color: #4B5563; }
         .alternative-button-original:active:not(:disabled), .alternative-button-original.button-active { background-color: #374151; }
-
-        .alternative-button-hard {
-            background-color: #9333EA; color: white; border-color: #7E22CE;
-        }
+        .alternative-button-hard { background-color: #9333EA; color: white; border-color: #7E22CE; }
         .alternative-button-hard:hover:not(:disabled) { background-color: #7E22CE; }
         .alternative-button-hard:active:not(:disabled), .alternative-button-hard.button-active { background-color: #6B21A8; }
 
@@ -305,25 +296,53 @@
         }
         .video-container iframe {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             border: 0;
         }
-        #circularTimerContainer { width: 150px; height: 150px; }
-        #progressRing { color: var(--color-silver); }
-        #circularTimerText { font-size: 2.5rem; color: var(--color-light-gray); }
-        #pauseRestTimerBtn, #skipRestTimerBtn {
+        
+        /* --- ESTILOS DO TIMER DE DESCANSO (ANEL DIGITAL) --- */
+        .rest-timer-display-area { 
+            width: 200px; 
+            height: 200px; 
+            margin: 1.5rem auto; 
+            position: relative; 
+        }
+        .rest-timer-text { 
+            font-family: 'Orbitron', sans-serif; 
+            font-size: 3rem; 
+            color: var(--color-light-gray); 
+        }
+        .rest-progress-ring { 
+            transform: rotate(-90deg); /* Faz o ponto inicial ser no topo (12h) */
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 0.5s linear; 
+        }
+        .rest-progress-ring__background { 
+            stroke: rgba(192, 192, 192, 0.2); 
+            stroke-dasharray: 2, 4; /* Riscos mais finos e espaçados */
+        }
+        .rest-progress-ring__progress { 
+            stroke: var(--color-silver); 
+            filter: drop-shadow(0 0 4px var(--color-silver));
+            stroke-linecap: round; /* Pontas arredondadas */
+        }
+        .rest-timer-button {
             font-family: 'Orbitron', sans-serif;
-            border: 1px solid var(--color-silver-dark);
-            background-color: transparent;
-            color: var(--color-silver);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.2s;
+            padding: 0.75rem 1.5rem;
+            border-radius: 999px;
+            font-weight: 600;
+            background-color: var(--color-silver-dark); 
+            color: white; 
         }
-        #pauseRestTimerBtn:hover, #skipRestTimerBtn:hover {
-            background-color: var(--color-silver-dark);
-            color: var(--color-black);
+        .rest-timer-button:hover { 
+            background-color: var(--color-silver); 
+            color: var(--color-black); 
         }
+
 
         /* --- LOADING OVERLAY --- */
         #loadingOverlay, #confirmationModal {
@@ -338,16 +357,13 @@
             align-items: center;
             z-index: 1050;
         }
-        #confirmationModal {
-            z-index: 1100;
-        }
+        #confirmationModal { z-index: 1100; }
         .modal-content {
             background-color: rgba(10, 10, 10, 0.7);
             border: 1px solid rgba(192, 192, 192, 0.25);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
-
         .loader {
             border: 4px solid var(--color-dark-gray);
             border-top: 4px solid var(--color-silver);
@@ -364,6 +380,113 @@
             color: var(--color-silver);
             border: 1px solid var(--color-silver-dark);
             box-shadow: 0 0 15px rgba(192, 192, 192, 0.2);
+        }
+
+        /* --- Estilos do Timer Pop-up de Exercício --- */
+        #timerModal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(5, 5, 5, 0.8);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1050;
+        }
+        .timer-modal-content {
+            background-color: rgba(10, 10, 10, 0.85);
+            border: 1px solid rgba(192, 192, 192, 0.25);
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(192, 192, 192, 0.1);
+        }
+        #timerDisplayContainer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* CORREÇÃO */
+            margin: 1rem 0;
+        }
+        #timerDisplay {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.25rem;
+            color: var(--color-light-gray);
+            letter-spacing: 0.05em;
+            text-align: center;
+            flex-grow: 1; /* CORREÇÃO */
+        }
+        .timer-adjust-btn {
+            background: transparent;
+            border: 1px solid var(--color-silver-dark);
+            color: var(--color-silver);
+            width: 2.75rem;
+            height: 2.75rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .timer-adjust-btn:hover {
+            background-color: var(--color-silver-dark);
+            color: var(--color-black);
+        }
+        .timer-adjust-btn svg {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        .timer-button {
+            font-family: 'Orbitron', sans-serif;
+            border: 1px solid var(--color-silver-dark);
+            background-color: transparent;
+            color: var(--color-silver);
+            padding: 0.6rem 1rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s;
+            flex-grow: 1;
+        }
+        .timer-button:hover {
+            background-color: var(--color-silver-dark);
+            color: var(--color-black);
+        }
+        .timer-button-primary {
+            background-color: var(--color-silver);
+            color: var(--color-black);
+            border-color: var(--color-silver);
+            box-shadow: 0 0 10px rgba(192, 192, 192, 0.4);
+            font-weight: bold;
+            padding: 0.8rem 1rem;
+            width: 100%;
+        }
+        .timer-button-primary:hover {
+            background-color: #fff;
+            border-color: #fff;
+            color: var(--color-black);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+        }
+        .open-timer-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(192,192,192,0.1);
+            border: 1px solid rgba(192,192,192,0.3);
+            border-radius: 9999px;
+            width: 2rem;
+            height: 2rem;
+            margin-left: 0.5rem;
+            transition: all 0.2s;
+        }
+        .open-timer-btn:hover {
+            background-color: rgba(192,192,192,0.3);
+            border-color: var(--color-silver);
+        }
+        .open-timer-btn svg {
+            width: 1rem;
+            height: 1rem;
+            color: var(--color-silver);
         }
     </style>
 </head>
@@ -408,8 +531,8 @@
             <div class="p-6">
                 <h2 class="text-2xl font-bold text-gray-300 my-6">Escolha seu nível</h2>
                 <div class="space-y-4">
-                    <button id="level-Adaptação" onclick="selectLevel('Adaptação')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
-                        Adaptação <span class="block text-sm font-normal opacity-80">(Saia do sedentarismo)</span>
+                    <button id="level-adaptacao" onclick="selectLevel('adaptacao')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
+                        Adaptação <span class="block text-sm font-normal opacity-80">(Começando do zero)</span>
                     </button>
                     <button id="level-iniciante" onclick="selectLevel('iniciante')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
                         Iniciante <span class="block text-sm font-normal opacity-80">(0 pull ups e 0 push ups)</span>
@@ -420,8 +543,8 @@
                     <button id="level-avancado" onclick="selectLevel('avancado')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
                         Avançado <span class="block text-sm font-normal opacity-80">(10+ barras e 15+ dips)</span>
                     </button>
-                    <button id="level-Sem equipamentos" onclick="selectLevel('Sem equipamentos')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
-                        Sem equipamentos <span class="block text-sm font-normal opacity-80">(Treino em casa)</span>
+                    <button id="level-sem-equipamentos" onclick="selectLevel('sem-equipamentos')" class="w-full font-semibold py-4 px-6 rounded-lg action-button">
+                        Sem Equipamentos <span class="block text-sm font-normal opacity-80">(Treino em casa)</span>
                     </button>
                 </div>
             </div>
@@ -476,10 +599,31 @@
                 </div>
             </div>
         </div>
-
     </div>
 
-    <div id="toastNotification" class="toast fixed bottom-5 left-1/2 -translate-x-1/2 p-3 px-6 rounded-lg z-50 opacity-0">Mensagem!</div>
+    <!-- Modal do Timer de Exercício -->
+    <div id="timerModal" class="force-hidden">
+        <div class="timer-modal-content">
+            <h3 class="text-xl font-bold text-silver">CRONÔMETRO</h3>
+            <div id="timerDisplayContainer">
+                <button id="decreaseTimeBtn" class="timer-adjust-btn action-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14" /></svg>
+                </button>
+                <div id="timerDisplay">00:00</div>
+                <button id="increaseTimeBtn" class="timer-adjust-btn action-button">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                </button>
+            </div>
+            
+            <button id="startPauseTimerBtn" class="timer-button timer-button-primary action-button mb-3">Iniciar</button>
+            
+            <div class="flex justify-center space-x-3">
+                <button id="resetTimerBtn" class="timer-button action-button">Resetar</button>
+                <button id="closeTimerBtn" class="timer-button action-button">Fechar</button>
+            </div>
+        </div>
+    </div>
+
 
     <script>
         const ANIMATION_DURATION = 300; 
@@ -498,6 +642,12 @@
         let totalRestDuration = 0;
         let restTimerRunning = false;
         let workoutStartTime = null;
+
+        // --- Variáveis Globais do Timer ---
+        let exerciseTimerInterval;
+        let exerciseTimerSeconds = 0;
+        let initialDuration = 0;
+        let exerciseTimerRunning = false;
 
         const Screens = {
             LOGIN: 'loginScreen', HOME: 'homeScreen', WORKOUT_LIST: 'workoutListScreen',
@@ -543,6 +693,20 @@
                 resetAppState(false); 
             });
 
+            // Conectar botões do timer
+            const startPauseTimerBtn = document.getElementById('startPauseTimerBtn');
+            const resetTimerBtn = document.getElementById('resetTimerBtn');
+            const closeTimerBtn = document.getElementById('closeTimerBtn');
+            const increaseTimeBtn = document.getElementById('increaseTimeBtn');
+            const decreaseTimeBtn = document.getElementById('decreaseTimeBtn');
+
+            if(startPauseTimerBtn) startPauseTimerBtn.addEventListener('click', startPauseTimer);
+            if(resetTimerBtn) resetTimerBtn.addEventListener('click', resetTimer);
+            if(closeTimerBtn) closeTimerBtn.addEventListener('click', closeTimer);
+            if(increaseTimeBtn) increaseTimeBtn.addEventListener('click', () => adjustTime(5));
+            if(decreaseTimeBtn) decreaseTimeBtn.addEventListener('click', () => adjustTime(-5));
+
+
             // Event delegation for touch animations
             appContainer.addEventListener('touchstart', (e) => {
                 const button = e.target.closest('.action-button');
@@ -568,6 +732,97 @@
             showScreen(Screens.LOGIN); 
             console.warn("IMPORTANTE: A integração com Google Sheets agora está ativa. Verifique se a função doPost no seu script está configurada e implantada para salvar o progresso.");
         });
+
+        // --- Funções de Controle do Timer de Exercício---
+        function isTimeBased(repsString) {
+            if (!repsString) return false;
+            return /['"]/.test(repsString);
+        }
+
+        function parseTime(timeString) {
+            if (!timeString) return 0;
+            const standardizedTimeString = timeString.replace(/''/g, '"');
+
+            const parseValue = (valueStr) => {
+                if (!valueStr) return 0;
+                let seconds = 0;
+                const minMatch = valueStr.match(/(\d+)'/);
+                const secMatch = valueStr.match(/(\d+)"/);
+                if (minMatch) seconds += parseInt(minMatch[1], 10) * 60;
+                if (secMatch) seconds += parseInt(secMatch[1], 10);
+                if (!minMatch && !secMatch && /^\d+$/.test(valueStr.trim())) {
+                    return parseInt(valueStr.trim(), 10);
+                }
+                return seconds;
+            };
+
+            const rangeMatch = standardizedTimeString.match(/([0-9'"]+)\s*-\s*([0-9'"]+)/);
+            if (rangeMatch) {
+                const start = parseValue(rangeMatch[1]);
+                const end = parseValue(rangeMatch[2]);
+                return Math.round((start + end) / 2);
+            }
+
+            return parseValue(standardizedTimeString);
+        }
+
+        function openTimer(timeString) {
+            initialDuration = parseTime(timeString);
+            resetTimer();
+            document.getElementById('timerModal').classList.remove('force-hidden');
+            if (typeof Tone !== 'undefined') Tone.start();
+        }
+
+        function closeTimer() {
+            clearInterval(exerciseTimerInterval);
+            exerciseTimerRunning = false;
+            document.getElementById('timerModal').classList.add('force-hidden');
+        }
+
+        function startPauseTimer() {
+            const startPauseBtn = document.getElementById('startPauseTimerBtn');
+            if (exerciseTimerRunning) {
+                clearInterval(exerciseTimerInterval);
+                startPauseBtn.textContent = 'Retomar';
+                exerciseTimerRunning = false;
+            } else {
+                if (exerciseTimerSeconds <= 0) return;
+                exerciseTimerRunning = true;
+                startPauseBtn.textContent = 'Pausar';
+                exerciseTimerInterval = setInterval(() => {
+                    exerciseTimerSeconds--;
+                    document.getElementById('timerDisplay').textContent = formatTime(exerciseTimerSeconds);
+                    if (exerciseTimerSeconds <= 0) {
+                        clearInterval(exerciseTimerInterval);
+                        exerciseTimerRunning = false;
+                        startPauseBtn.textContent = 'Iniciar';
+                        if (typeof Tone !== 'undefined') {
+                            const synth = new Tone.Synth().toDestination();
+                            synth.triggerAttackRelease("C5", "8n");
+                        }
+                    }
+                }, 1000);
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(exerciseTimerInterval);
+            exerciseTimerRunning = false;
+            exerciseTimerSeconds = initialDuration;
+            document.getElementById('timerDisplay').textContent = formatTime(initialDuration);
+            document.getElementById('startPauseTimerBtn').textContent = 'Iniciar';
+        }
+
+        function adjustTime(amount) {
+            if (exerciseTimerRunning) return;
+            const newTime = exerciseTimerSeconds + amount;
+            if (newTime >= 5) {
+                exerciseTimerSeconds = newTime;
+                initialDuration = newTime;
+                document.getElementById('timerDisplay').textContent = formatTime(exerciseTimerSeconds);
+            }
+        }
+
 
         function showScreen(screenId) {
             const currentScreenElement = document.getElementById(currentScreen); 
@@ -936,6 +1191,16 @@
                 const isHardActive = exercise.currentVariation === 'hard';
                 const anyAlternativeAvailable = easierAvailable || harderAvailable;
 
+                let timerButtonHtml = '';
+                if (isTimeBased(exercise.repsTargetString)) {
+                    const escapedRepsString = exercise.repsTargetString.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                    timerButtonHtml = `
+                        <button class="open-timer-btn action-button" onclick="openTimer('${escapedRepsString}')" title="Abrir cronômetro">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                        </button>
+                    `;
+                }
+
                 html += `
                     <div class="superset-exercise-block">
                         <p class="font-semibold text-xl text-white mb-2 text-center">${exercise.exerciseName}</p>
@@ -944,8 +1209,9 @@
                                <iframe src="${exercise.embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                            </div>
                         </div>
-                        <div class="text-center !my-2">
+                        <div class="text-center !my-2 flex items-center justify-center">
                             <p class="text-base text-gray-200">Alvo: <strong class="font-bold">${exercise.repsTargetString}</strong></p>
+                            ${timerButtonHtml}
                         </div>
                         ${!isWarmup ? `
                         <div class="px-2">
@@ -997,6 +1263,16 @@
             const isEasyActive = exercise.currentVariation === 'easy';
             const isHardActive = exercise.currentVariation === 'hard';
             const anyAlternativeAvailable = easierAvailable || harderAvailable;
+            
+            let timerButtonHtml = '';
+            if (isTimeBased(exercise.repsTargetString)) {
+                const escapedRepsString = exercise.repsTargetString.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                timerButtonHtml = `
+                    <button class="open-timer-btn action-button" onclick="openTimer('${escapedRepsString}')" title="Abrir cronômetro">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" /></svg>
+                    </button>
+                `;
+            }
 
             let html = `<div class="text-center">
                             <h3 class="font-bold text-2xl uppercase text-silver">${exercise.exerciseName}</h3>
@@ -1007,8 +1283,9 @@
                                  <iframe src="${exercise.embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
                              </div>
                          </div>
-                         <div class="text-center !my-2">
-                               <p class="text-base">Alvo: <strong>${exercise.repsTargetString}</strong></p>
+                         <div class="text-center !my-2 flex items-center justify-center">
+                             <p class="text-base">Alvo: <strong>${exercise.repsTargetString}</strong></p>
+                             ${timerButtonHtml}
                          </div>
                          <p id="currentExerciseTotalReps" class="text-center text-gray-300 text-sm mt-1 mb-2 font-semibold"></p>
                          <div id="seriesInputArea" class="px-2">
@@ -1463,21 +1740,9 @@
         }
 
         function parseRestTime(restString) {
-            if (!restString || typeof restString !== 'string') return 60; 
-            restString = restString.trim();
-            const minSecMatch = restString.match(/^(?:(\d+)')?(?:(\d+)"?)?$/);
-            if (minSecMatch) {
-                const minutes = parseInt(minSecMatch[1]) || 0; const seconds = parseInt(minSecMatch[2]) || 0;
-                if (minutes > 0 || seconds > 0) return (minutes * 60) + seconds;
-            }
-            const rangeSecMatch = restString.match(/^(\d+)\s*-\s*(\d+)\s*"?$/);
-            if (rangeSecMatch) {
-                const minS = parseInt(rangeSecMatch[1]); const maxS = parseInt(rangeSecMatch[2]);
-                return Math.round((minS + maxS) / 2);
-            }
-            const simpleSecondsMatch = restString.match(/^(\d+)$/);
-            if (simpleSecondsMatch) return parseInt(simpleSecondsMatch[1]);
-            return 60;
+            if (!restString) return 60;
+            const seconds = parseTime(String(restString));
+            return seconds > 0 ? seconds : 60;
         }
 
         function formatTime(totalSeconds) {
@@ -1485,15 +1750,17 @@
             return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
-        function setProgress(percent) {
-             const progressRing = document.getElementById('progressRing');
-             if (progressRing) {
-                 const radius = progressRing.r.baseVal.value;
-                 const circumference = 2 * Math.PI * radius;
-                 progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
-                 const offset = circumference - (percent / 100) * circumference;
-                 progressRing.style.strokeDashoffset = offset;
-             }
+        function updateRestTimerDisplay() {
+            const textElement = document.getElementById('restTimerText');
+            const ringElement = document.getElementById('restProgressRing');
+            if(!textElement || !ringElement) return;
+
+            textElement.textContent = formatTime(restTimerSeconds);
+            const percent = totalRestDuration > 0 ? (totalRestDuration - restTimerSeconds) / totalRestDuration : 0;
+            const radius = ringElement.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - percent * circumference;
+            ringElement.style.strokeDashoffset = offset;
         }
 
         function startRestTimer(durationInSeconds) {
@@ -1506,54 +1773,58 @@
                 <div class="text-center">
                     <h3 class="font-bold text-2xl uppercase text-silver">DESCANSO</h3>
                 </div>
-                <div class="flex items-center justify-center p-4">
-                    <div class="timer-display-and-controls flex items-center justify-center gap-4">
-                        <button id="skipRestTimerBtn" onclick="skipRest()" class="action-button rounded-full w-20 h-20 flex items-center justify-center">Pular</button>
-                        <div id="circularTimerContainer" class="relative">
-                            <svg class="w-full h-full" viewBox="0 0 100 100">
-                                <circle class="text-gray-700" stroke-width="8" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50"/>
-                                <circle id="progressRing" stroke-width="8" stroke-linecap="round" stroke="currentColor" fill="transparent" r="42" cx="50" cy="50" style="transform: rotate(-90deg); transform-origin: 50% 50%; transition: stroke-dashoffset 0.3s linear;"/>
-                            </svg>
-                            <div id="circularTimerText" class="absolute inset-0 flex items-center justify-center font-bold"></div>
-                        </div>
-                        <button id="pauseRestTimerBtn" onclick="pauseRestTimer()" class="action-button rounded-full w-20 h-20 flex items-center justify-center">Pausar</button>
-                    </div>
+                <div class="rest-timer-display-area flex items-center justify-center">
+                    <svg class="w-full h-full absolute" viewBox="0 0 100 100">
+                        <circle class="rest-progress-ring__background" stroke-width="8" fill="transparent" r="46" cx="50" cy="50"/>
+                        <circle id="restProgressRing" class="rest-progress-ring__progress rest-progress-ring" stroke-width="8" fill="transparent" r="46" cx="50" cy="50"/>
+                    </svg>
+                    <span id="restTimerText" class="rest-timer-text">00:00</span>
+                </div>
+                <div class="flex justify-center space-x-4">
+                    <button id="pauseRestTimerBtn" class="rest-timer-button action-button">Pausar</button>
+                    <button onclick="skipRest()" class="rest-timer-button action-button">Pular</button>
                 </div>`;
             
             exerciseContainerElement.innerHTML = timerHtml;
-            const circularTimerTextElement = document.getElementById('circularTimerText');
-            circularTimerTextElement.textContent = formatTime(restTimerSeconds);
-            setProgress(0); 
+            const ringElement = document.getElementById('restProgressRing');
+            const radius = ringElement.r.baseVal.value;
+            const circumference = 2 * Math.PI * radius;
+            ringElement.style.strokeDasharray = `${circumference} ${circumference}`;
+
+            updateRestTimerDisplay();
 
             restTimerInterval = setInterval(() => {
                 restTimerSeconds--;
-                if (circularTimerTextElement) circularTimerTextElement.textContent = formatTime(restTimerSeconds);
-
-                const percentCompleted = totalRestDuration > 0 ? ((totalRestDuration - restTimerSeconds) / totalRestDuration) * 100 : 0;
-                setProgress(percentCompleted);
-
+                updateRestTimerDisplay();
                 if (restTimerSeconds < 0) {
                     clearRestTimer();
                     showToast("Descanso finalizado!");
                     handleRestFinished();
                 }
             }, 1000);
+
+            document.getElementById('pauseRestTimerBtn').addEventListener('click', pauseRestTimer);
         }
 
         function pauseRestTimer() {
-            const pauseBtn = document.getElementById('pauseRestTimerBtn'); if (!pauseBtn) return;
+            const pauseBtn = document.getElementById('pauseRestTimerBtn'); 
+            if (!pauseBtn) return;
             if (restTimerRunning) {
-                restTimerRunning = false; clearInterval(restTimerInterval); pauseBtn.textContent = 'Retomar';
+                restTimerRunning = false; 
+                clearInterval(restTimerInterval); 
+                pauseBtn.textContent = 'Retomar';
             } else {
                 if (restTimerSeconds >= 0) { 
-                    restTimerRunning = true; pauseBtn.textContent = 'Pausar';
+                    restTimerRunning = true; 
+                    pauseBtn.textContent = 'Pausar';
                     restTimerInterval = setInterval(() => {
                         restTimerSeconds--; 
-                        const circularTimerTextElement = document.getElementById('circularTimerText');
-                        if(circularTimerTextElement) circularTimerTextElement.textContent = formatTime(restTimerSeconds);
-                        const percentCompleted = totalRestDuration > 0 ? ((totalRestDuration - restTimerSeconds) / totalRestDuration) * 100 : 0;
-                        setProgress(percentCompleted);
-                        if (restTimerSeconds < 0) { clearRestTimer(); showToast("Descanso finalizado!"); handleRestFinished(); }
+                        updateRestTimerDisplay();
+                        if (restTimerSeconds < 0) { 
+                            clearRestTimer(); 
+                            showToast("Descanso finalizado!"); 
+                            handleRestFinished(); 
+                        }
                     }, 1000);
                 }
             }
